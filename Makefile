@@ -3,7 +3,7 @@
 all: thesis.pdf
 
 thesis.pdf: FORCE
-	./latexrun --latex-cmd pdflatex thesis.tex
+	./latexrun --latex-cmd lualatex thesis.tex # -Wall
 
 clean: FORCE
 	./latexrun --clean-all

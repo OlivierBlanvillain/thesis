@@ -41,7 +41,7 @@ Here's an example how to cite.~\cite{atc13}
 \chapter{Introduction}
 \lipsum[1]
 
-\chapter{(Ab)Using Implicits for Type-Level Computations}
+\chapter{(Ab)Using Implicits}
 \lipsum[1]
 
 \chapter{A Dependently Typed Extension of Scala Based on Singleton Types}
@@ -49,19 +49,49 @@ Here's an example how to cite.~\cite{atc13}
 
 \chapter{Type-Level Programming With Match Types}
 \lipsum[1]
+\input{proofs/permutation.tex}
+\input{proofs/weakening.tex}
+\input{proofs/strengthening.tex}
+\input{proofs/substitution.tex}
+\input{proofs/disjointness-subtyping-exclusivity.tex}
+\input{proofs/inversion-of-subtyping.tex}
+\input{proofs/canonical-forms.tex}
+\input{proofs/inversion-of-typing.tex}
+\input{proofs/minimum-types.tex}
+\input{proofs/preservation.tex}
+\input{proofs/progress.tex}
 
-\chapter{A Performance-Based Comparison of Type-Level Programming Techniques}
-\lipsum[1]
-
-\chapter{A Soudness Proof for System FM}
+\chapter{Performance-Based Evaluation}
 \lipsum[1]
 
 \chapter{Conclusion}
 \lipsum[1]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%  Bibliography, Curriculum Vitae  %%%%%%%%
+%%%%%%%%%%  Bibliography, Appendix, CV  %%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+\chapter{Type Soudness for System FM}
+\renewenvironment{proof}{{\it Proof: }}{\qed} % Show proofs
+\input{proofs/permutation.tex}
+\input{proofs/weakening.tex}
+\input{proofs/strengthening.tex}
+\input{proofs/substitution.tex}
+\input{proofs/disjointness-subtyping-exclusivity.tex}
+
+\harpoon{Definition of the auxiliary relation $\protect \⇌$, used to state inversion of subtyping.}
+
+\begin{definition*}
+  $\Γ \⊢ \S \⇌ \T$ (defined in \Cref{fig:harpoon}) represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$ with the additional constraint that this evidence was exclusively constructed using pairwise applications of \emph{\SMatch1/2}, \emph{\SMatch3/4}, and \emph{\STrans} in both directions.
+
+\end{definition*}
+\input{proofs/inversion-of-subtyping.tex}
+\input{proofs/canonical-forms.tex}
+\input{proofs/inversion-of-typing.tex}
+\input{proofs/minimum-types.tex}
+\input{proofs/preservation.tex}
+\input{proofs/progress.tex}
 
 \backmatter
 \phantomsection

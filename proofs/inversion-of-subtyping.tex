@@ -1,0 +1,819 @@
+\begin{lemma}[Inversion of subtyping]
+  \lbl{lem:inversion-of-subtyping}~
+  \begin{enumerate}
+    \item % 0
+    If $\Γ \⊢ \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d \⇌ \T$, then either:
+    \begin{enumerate}
+      \item
+        $\Γ \⊢ \S_s \<: \U_n$,
+        $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$
+        and $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \T$,
+      \item
+        $\Γ \⊢ \S_s \<: \U_n$,
+        $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$
+        and $\S_n \= \T$,
+      \item
+        $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$
+        and $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \T$,
+      \item
+        $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$
+        and $\S_d \= \T$.
+    \end{enumerate}
+
+    \item % 1
+    If $\Γ \⊢ \S \<: \X$, or $\Γ \⊢ \S \<: \T$ where $\T$ is a match type with $\Γ \⊢ \T \⇌ \X$, then either
+    \begin{enumerate}
+      \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \Y$, for some $\Y$,
+      \item $\S$ is a type variable.
+    \end{enumerate}
+
+    \item % 2
+    If $\Γ \⊢ \S \<: \T_{1} \→ \T_{2}$, or $\Γ \⊢ \S \<: \T$ where $\T$ is a match type with $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$, then either
+    \begin{enumerate}
+      \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \S_{1} \→ \S_{2}$, for some $\S_{1}$, $\S_{2}$ such that $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$,
+      \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \X$, for some $\X$,
+      \item $\S$ is a type variable,
+      \item $\S$ has the form $\S_{1} \→ \S_{2}$ with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$.
+    \end{enumerate}
+
+    \item % 3
+    If $\Γ \⊢ \S \<: \∀ \X \<: \U_{1}.~ \T_{2}$, or $\Γ \⊢ \S \<: \T$ where $\T$ is a match type with $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, then either
+    \begin{enumerate}
+      \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \S_{2}$, for some $\S_{2}$ such that $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$,
+      \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \X$, for some $\X$,
+      \item $\S$ is a type variable,
+      \item $\S$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$ and $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$.
+    \end{enumerate}
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  \begin{enumerate}
+    \item % 0
+    By induction on a derivation on $\Γ \⊢ \S \⇌ \T$.
+    \begin{itemize}
+      \Case\SMatch1/2:
+      \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
+      \quad $\T \= \S_n$
+      \\\phantom{\textit{Case}~\SMatch1/2:}
+      \quad $\Γ \⊢ \S_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$
+
+      $\S_n \= \T$ and the result follows directly from the premises.
+
+      \Case\SMatch3/4:
+      \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
+      \quad $\T \= \S_d$
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$
+
+      $\S_d \= \T$ and the result follows directly from the premises.
+
+      \Case\STrans:
+      \quad $\Γ \⊢ \S \⇌ \U$
+      \quad $\Γ \⊢ \U \⇌ \T$
+
+      By definition of the $\⇌$ relation, $\Γ \⊢ \U \⇌ \T$ implies that $\U$ is a match type.
+      Using the IH on the left premise we get 4 subcases:
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \S_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$
+          and $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \U$:
+
+        Using \STrans we get $\Γ \⊢ \S_n \⇌ \T$, as requiered.
+
+        \item
+          $\Γ \⊢ \S_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$
+          and $\S_n \= \U$:
+
+        The result is immediate.
+
+        \item
+          $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$
+          and $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \U$:
+
+        Using \STrans we get $\Γ \⊢ \S_d \⇌ \T$, as requiered.
+
+        \item
+          $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$
+          and $\S_d \= \U$:
+
+        The result is immediate.
+      \end{enumerate}
+    \end{itemize}
+
+    \item % 1
+    By induction on a derivation of $\Γ \⊢ \S \<: \T$.
+    \begin{itemize}
+      \Case\SRefl:
+      \quad $\S \= \T$
+
+      If $\T$ is a type variable then so is $\S$ and the result is immediate.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \X$, $\S$ is a match type and $\Γ \⊢ \S \⇌ \Y$, as required.
+
+      \Case\STrans:
+      \quad $\Γ \⊢ \S \<: \U$
+      \quad $\Γ \⊢ \U \<: \T$
+
+      If $\T$ is a type variable we use the IH on the right premise to get that $\U$ is either a match type with $\Γ \⊢ \U \⇌ \X$ or a type variable.
+      In either case, the result follows from using the IH on the left premise.
+
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \X$ we can also use the the IH on the right premise to get to the same result.
+
+      \Case\STvar:
+      \quad $\S \= \Y$
+      \quad $\Y \<: \X \∈ \Γ$
+
+      $\S$ is a type variable and the result is immediate.
+
+      \Case\SMatch1:
+      \quad $\S \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_n$
+      \\\phantom{\textit{Case}~\SMatch1:}
+      \quad $\Γ \⊢ \T_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+
+      If $\T \= \X$, we use \SMatch2 to obtain $\Γ \⊢ \S \⇌ \X$, as required.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \X$, we use \SMatch2 to get $\Γ \⊢ \S \⇌ \T$, and \STrans to obtain $\Γ \⊢ \S \⇌ \X$, as required.
+
+      \Case\SMatch2:
+      \quad $\S \= \T_n$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch2:}
+      \quad $\Γ \⊢ \T_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \X$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \X$, we get 4 subcases:
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \X$:
+
+        $\S \= \T_n$ is a match type and $\Γ \⊢ \S \⇌ \X$, as required.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \X$:
+
+        $\S \= \T_n \= \X$ is a type variable and the result is immediate.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \X$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \X$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+      \end{enumerate}
+
+      \Case\SMatch3:
+      \quad $\S \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_d$
+      \\\phantom{\textit{Case}~\SMatch3:}
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+
+      If $\T \= \X$, we use \SMatch4 to obtain $\Γ \⊢ \S \⇌ \X$, as required.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \X$, we use \SMatch4 to get $\Γ \⊢ \S \⇌ \T$, and \STrans to obtain $\Γ \⊢ \S \⇌ \X$, as required.
+
+      \Case\SMatch4:
+      \quad $\S \= \T_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch3:}
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \X$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \X$, we get 4 subcases:
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \X$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \X$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \X$:
+
+        $\S$ is a match type and $\Γ \⊢ \S \⇌ \X$, as required.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \X$:
+
+        $\S \= \T_d \= \X$ is a type variable and the result is immediate.
+      \end{enumerate}
+
+      \Case\SMatch5:
+      \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch5:}
+      \quad $\Γ \⊢ \S_s \<: \T_s$
+      \quad $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$
+      \quad $\Γ \⊢ \S_d \<: \T_d$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \X$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \X$, we get 4 subcases:
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \X$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we obtain $\Γ \⊢ \S_s \<: \U_n$.
+        Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
+        Since $\Γ \⊢ \S_n \<: \T_n$ and $\Γ \⊢ \T_n \⇌ \X$, we use the IH to get that either $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \Y$, or $\S_n$ is a type variable.
+        If $\S_n$ is a type variable, we already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+        If $\Γ \⊢ \S_n \⇌ \Y$, then using \STrans with $\Γ \⊢ \S \⇌ \S_n$ gives $\Γ \⊢ \S \⇌ \Y$, as required.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \X$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we obtain $\Γ \⊢ \S_s \<: \U_n$.
+        Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
+        Since $\Γ \⊢ \S_n \<: \X$, we use the IH to get that either $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \Y$, or $\S_n$ is a type variable.
+        If $\S_n$ is a type variable, we already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+        If $\Γ \⊢ \S_n \⇌ \Y$, then using \STrans with $\Γ \⊢ \S \⇌ \S_n$ gives $\Γ \⊢ \S \⇌ \Y$, as required.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \X$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        Using \SMatch3/4 we obtain $\Γ \⊢ \S \⇌ \S_d$.
+        Since $\Γ \⊢ \S_d \<: \T_d$ and $\Γ \⊢ \T_d \⇌ \X$, we use the IH to get that either $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \Y$, or $\S_d$ is a type variable.
+        If $\S_d$ is a type variable, we already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+        If $\Γ \⊢ \S_d \⇌ \Y$, then using \STrans with $\Γ \⊢ \S \⇌ \S_d$ gives $\Γ \⊢ \S \⇌ \Y$, as required.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \X$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        Using \SMatch3/4 we obtain $\Γ \⊢ \S \<: \S_d$.
+        Since $\Γ \⊢ \S_d \<: \T_d$ and $\Γ \⊢ \T_d \⇌ \X$, we use the IH to get that either $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \Y$, or $\S_d$ is a type variable.
+        If $\S_d$ is a type variable, we already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+        If $\Γ \⊢ \S_d \⇌ \Y$, then using \STrans with $\Γ \⊢ \S \⇌ \S_d$ gives $\Γ \⊢ \S \⇌ \Y$, as required.
+      \end{enumerate}
+
+      \Case\STop, \SSin, \SArrow, \SAll, \SPsi:
+
+      In those cases, $\T$ is neither a type variable nor a match type and the result is immediate.
+    \end{itemize}
+
+    \item % 2
+    By induction on a derivation of $\Γ \⊢ \S \<: \T$.
+    \begin{itemize}
+      \Case\SRefl:
+      \quad $\T \= \S$
+
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$ and the result follows directly from \SRefl.
+      If $\T \= \T_{1} \→ \T_{2}$, the result also follows directly from \SRefl.
+
+      \Case\STrans:
+      \quad $\Γ \⊢ \S \<: \U$
+      \quad $\Γ \⊢ \U \<: \T$
+
+      Using the IH on the right premise we get 4 subcases:
+      \begin{enumerate}
+        \item $\U$ is a match type with $\Γ \⊢ \U \⇌ \U_{1} \→ \U_{2}$, for some $\U_{1}$, $\U_{2}$ such that $\Γ \⊢ \T_{1} \<: \U_{1}$ and $\Γ \⊢ \U_{2} \<: \T_{2}$:
+
+        The result follows directly from using the IH on the left premise ($\Γ \⊢ \T_{1} \<: \S_{1}$ is obtained using \STrans with $\Γ \⊢ \T_{1} \<: \U_{1}$ and $\Γ \⊢ \U_{1} \<: \S_{1}$, $\Γ \⊢ \S_{2} \<: \T_{2}$ is obtained analogously).
+
+        \item $\U$ is a match type with $\Γ \⊢ \U \⇌ \X$, for some $\X$:
+
+        Using the 2nd part of the lemma on the left premise leads to the desired result.
+
+        \item $\U$ is a type variable:
+
+        The result follows from using the 2nd part of the lemma on the left premise.
+
+        \item $\U$ has the form $\U_{1} \→ \U_{2}$ with $\Γ \⊢ \T_{1} \<: \U_{1}$ and $\Γ \⊢ \U_{2} \<: \T_{2}$:
+
+        The result follows directly from using the IH on the left premise ($\Γ \⊢ \T_{1} \<: \S_{1}$ is obtained using \STrans with $\Γ \⊢ \T_{1} \<: \U_{1}$ and $\Γ \⊢ \U_{1} \<: \S_{1}$, $\Γ \⊢ \S_{2} \<: \T_{2}$ is obtained analogously).
+      \end{enumerate}
+
+      \Case\SMatch1:
+      \quad $\S \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_n$
+      \\\phantom{\textit{Case}~\SMatch1:}
+      \quad $\Γ \⊢ \T_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+
+      If $\T \= \T_{1} \→ \T_{2}$, we use \SMatch2 to obtain $\Γ \⊢ \S \⇌ \T_{1} \→ \T_{2}$, as required.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$, we use \SMatch2 to get $\Γ \⊢ \S \⇌ \T$, and \STrans to obtain $\Γ \⊢ \S \⇌ \T_{1} \→ \T_{2}$, and the result follows from \SRefl.
+
+      \Case\SMatch2:
+      \quad $\S \= \T_n$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch2:}
+      \quad $\Γ \⊢ \T_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \T_{1} \→ \T_{2}$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$, we get 4 subcases:
+
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \T_{1} \→ \T_{2}$:
+
+        $\S \= \T_n$ is a match type and $\Γ \⊢ \S \⇌ \T_{1} \→ \T_{2}$, and the result follows from \SRefl.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \T_{1} \→ \T_{2}$:
+
+        $\S \= \T_{1} \→ \T_{2}$, $\S_{1} \= \T_{1}$, $\S_{2} \= \T_{2}$, and the result follows from \SRefl.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \T_{1} \→ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \T_{1} \→ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+      \end{enumerate}
+
+      \Case\SMatch3:
+      \quad $\S \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_d$
+      \\\phantom{\textit{Case}~\SMatch3:}
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+
+      If $\T \= \T_{1} \→ \T_{2}$, we use \SMatch2 to obtain $\Γ \⊢ \S \⇌ \T_{1} \→ \T_{2}$, and the result follows from \SRefl.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$, we use \SMatch2 to get $\Γ \⊢ \S \⇌ \T$, and \STrans to obtain $\Γ \⊢ \S \⇌ \T_{1} \→ \T_{2}$, and the result follows from \SRefl.
+
+      \Case\SMatch4:
+      \quad $\S \= \T_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch3:}
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \T_{1} \→ \T_{2}$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$, we get 4 subcases:
+
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \T_{1} \→ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \T_{1} \→ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \T_{1} \→ \T_{2}$:
+
+        $\S \= \T_d$ is a match type and $\Γ \⊢ \S \⇌ \T_{1} \→ \T_{2}$, and the result follows from \SRefl.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \T_{1} \→ \T_{2}$:
+
+        $\S \= \T_{1} \→ \T_{2}$, $\S_{1} \= \T_{1}$, $\S_{2} \= \T_{2}$, and the result follows from \SRefl.
+      \end{enumerate}
+
+      \Case\SMatch5:
+      \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch5:}
+      \quad $\Γ \⊢ \S_s \<: \T_s$
+      \quad $\∀ \n.~ \Γ \⊢ \S_n \<: \T_n$
+      \quad $\Γ \⊢ \S_d \<: \T_d$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \T_{1} \→ \T_{2}$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$, we get 4 subcases:
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \T_{1} \→ \T_{2}$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we obtain $\Γ \⊢ \S_s \<: \U_n$.
+        Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
+        Since $\Γ \⊢ \S_n \<: \T_n$ and $\Γ \⊢ \T_n \⇌ \T_{1} \→ \T_{2}$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \S_{1} \→ \S_{2}$ for some $\S_{1}$, $\S_{2}$ such that $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+
+          \item $\S_n$ has the form $\S_{1} \→ \S_{2}$ with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+        \end{enumerate}
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \T_{1} \→ \T_{2}$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we obtain $\Γ \⊢ \S_s \<: \U_n$.
+        Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
+        Since $\Γ \⊢ \S_n \<: \T_n$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \S_{1} \→ \S_{2}$ for some $\S_{1}$, $\S_{2}$ such that $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+
+          \item $\S_n$ has the form $\S_{1} \→ \S_{2}$ with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+        \end{enumerate}
+
+        \item
+          $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \T_{1} \→ \T_{2}$:
+
+        Using \DSub on $\∀ \n.~ \Γ \⊢ \S_n \<: \T_n$ and $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$ we obtain $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$.
+        From \STrans we get $\Γ \⊢ \S_s \<: \C_d$.
+        Using \SMatch3/4 we obtain $\Γ \⊢ \S \⇌ \S_d$.
+        Since $\Γ \⊢ \S_d \<: \T_d$ and $\Γ \⊢ \T_d \⇌ \T_{1} \→ \T_{2}$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \S_{1} \→ \S_{2}$ for some $\S_{1}$, $\S_{2}$ such that $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+
+          \item $\S_d$ has the form $\S_{1} \→ \S_{2}$ with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+        \end{enumerate}
+
+        \item
+          $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+          and $\T_d \= \T_{1} \→ \T_{2}$:
+
+        Using \DSub on $\∀ \n.~ \Γ \⊢ \S_n \<: \T_n$ and $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$ we obtain $\∀ \n.~ \Γ \⊢ \disj(\S_s, \U_n)$.
+        From \STrans we get $\Γ \⊢ \S_s \<: \C_d$.
+        Using \SMatch3/4 we obtain $\Γ \⊢ \S \⇌ \S_d$.
+        Since $\Γ \⊢ \S_d \<: \T_d$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \S_{1} \→ \S_{2}$ for some $\S_{1}$, $\S_{2}$ such that $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+
+          \item $\S_d$ has the form $\S_{1} \→ \S_{2}$ with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+        \end{enumerate}
+      \end{enumerate}
+
+      \Case\STvar:
+      \quad $\S \= \Y$
+      \quad $\Y \<: \T \∈ \Γ$
+
+      $\S$ is a type variable and the result is immediate.
+
+      \Case\SArrow:
+      \quad $\S \= \S_{1} \→ \S_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \\\phantom{\textit{Case}~\SArrow:}
+      \quad $\Γ \⊢ \T_{1} \<: \S_{1}$
+      \quad $\Γ \⊢ \S_{2} \<: \T_{2}$
+
+      $\S$ has the form $\S_{1} \→ \S_{2}$, with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$, as required.
+
+      \Case\STop, \SSin, \SAll, \SPsi:
+
+      In those cases, $\T$ is neither a type variable nor a function type and the result is immediate.
+    \end{itemize}
+
+    \item % 3
+    By induction on a derivation of $\Γ \⊢ \S \<: \T$.
+    \begin{itemize}
+      \Case\SRefl:
+      \quad $\T \= \S$
+
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$ the result follows directly from \SRefl.
+      If $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$, $\S_{2} \= \T_{1}$, and the result also follows from \SRefl.
+
+      \Case\STrans:
+      \quad $\Γ \⊢ \S \<: \U$
+      \quad $\Γ \⊢ \U \<: \T$
+
+      Using the IH on the right premise we get 4 subcases:
+      \begin{enumerate}
+        \item $\U$ is a match type with $\Γ \⊢ \U \⇌ \U_{1} \→ \U_{2}$ for some $\U_{2}$ such that $\Γ, \X \<: \U_{1} \⊢ \U_{2} \<: \T_{2}$:
+
+        The result follows directly from using the IH on the left premise ($\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$ is obtained using \STrans with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \U_{2}$ and $\Γ, \X \<: \U_{1} \⊢ \U_{2} \<: \T_{2}$).
+
+        \item $\U$ is a match type with $\Γ \⊢ \U \⇌ \X$:
+
+        Using the 2nd part of the lemma on the left premise leads to the desired result.
+
+        \item $\U$ is a type variable:
+
+        The result follows from using the 2nd part of the lemma on the left premise.
+
+        \item $\U$ has the form $\∀ \X \<: \U_{1}.~ \U_{2}$ with $\Γ, \X \<: \U_{1} \⊢ \U_{2} \<: \T_{2}$:
+
+        The result follows directly from using the IH on the left premise ($\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$ is obtained using \STrans with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \U_{2}$ and $\Γ, \X \<: \U_{1} \⊢ \U_{2} \<: \T_{2}$).
+      \end{enumerate}
+
+      \Case\SMatch1:
+      \quad $\S \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_n$
+      \\\phantom{\textit{Case}~\SMatch1:}
+      \quad $\Γ \⊢ \T_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+
+      If $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$, we use \SMatch2 to obtain $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, as required, and the result follows from \SRefl.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, we use \SMatch2 to get $\Γ \⊢ \S \⇌ \T$, and \STrans to obtain $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, and the result follows from \SRefl.
+
+      \Case\SMatch2:
+      \quad $\S \= \T_n$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch2:}
+      \quad $\Γ \⊢ \T_s \<: \U_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \(\∀ \X \<: \U_{1}.~ \T_{2})$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, we get 4 subcases:
+
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        $\S \= \T_n$ is a match type and $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, and the result follows from \SRefl.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        $\S \= \∀ \X \<: \U_{1}.~ \T_{2}$, $\S_{2} \= \T_{2}$, and the result follows from \SRefl.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+      \end{enumerate}
+
+      \Case\SMatch3:
+      \quad $\S \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_d$
+      \\\phantom{\textit{Case}~\SMatch3:}
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+
+      If $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$, we use \SMatch2 to obtain $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, and the result follows from \SRefl.
+      If $\T$ is a match type with $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, we use \SMatch2 to get $\Γ \⊢ \S \⇌ \T$, and \STrans to obtain $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, and the result follows from \SRefl.
+
+      \Case\SMatch4:
+      \quad $\S \= \T_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch3:}
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \U_n)$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \(\∀ \X \<: \U_{1}.~ \T_{2})$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, we get 4 subcases:
+
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        This case cannot occur since $\Γ \⊢ \disj(\T_s, \U_n)$ would contradict $\Γ \⊢ \T_s \<: \U_n$, by \Cref{lem:disjointness-subtyping-exclusivity}.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        $\S \= \T_d$ is a match type and $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, and the result follows from \SRefl.
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        $\S \= \∀ \X \<: \U_{1}.~ \T_{2}$, $\S_{2} \= \T_{2}$, and the result follows from \SRefl.
+      \end{enumerate}
+
+      \Case\SMatch5:
+      \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch5:}
+      \quad $\Γ \⊢ \S_s \<: \T_s$
+      \quad $\∀ \n.~ \Γ \⊢ \S_n \<: \T_n$
+      \quad $\Γ \⊢ \S_d \<: \T_d$
+
+      In this case the first premise of the statement ($\Γ \⊢ \S \<: \(\∀ \X \<: \U_{1}.~ \T_{2})$) does not apply since $\T$ is a match type.
+      Using the 1st part of the lemma on $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, we get 4 subcases:
+
+      \begin{enumerate}
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we get $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we get $\Γ \⊢ \S_s \<: \U_n$.
+        Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
+        Since $\Γ \⊢ \S_n \<: \T_n$ and $\Γ \⊢ \T_n \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \∀ \X \<: \U_{1}.~ \S_{2}$ for some $\S_{2}$ such that $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+
+          \item $\S_n$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$ with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+        \end{enumerate}
+
+        \item
+          $\Γ \⊢ \T_s \<: \U_n$,
+          $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_n \= \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we get $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we get $\Γ \⊢ \S_s \<: \U_n$.
+        Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
+        Since $\Γ \⊢ \S_n \<: \T_n$, the IH, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \∀ \X \<: \U_{1}.~ \S_{2}$ for some $\S_{2}$ such that $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a match type with $\Γ \⊢ \S_n \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_n$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+
+          \item $\S_n$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$ with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_n$, as required.
+        \end{enumerate}
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d$ is a match type with $\Γ \⊢ \T_d \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we get $\Γ \⊢ \S_s \<: \C_d$.
+        Using \SMatch3/4 we obtain $\Γ \⊢ \S \⇌ \S_d$.
+        Since $\Γ \⊢ \S_d \<: \T_d$ and $\Γ \⊢ \T_d \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \∀ \X \<: \U_{1}.~ \S_{2}$ for some $\S_{2}$ such that $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$::
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+
+          \item $\S_d$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$ with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+        \end{enumerate}
+
+        \item
+          $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$
+          and $\T_d \= \∀ \X \<: \U_{1}.~ \T_{2}$:
+
+        Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m.~ \Γ \⊢ \disj(\S_s, \U_m)$.
+        From \STrans we get $\Γ \⊢ \S_s \<: \C_d$.
+        Using \SMatch3/4 we obtain $\Γ \⊢ \S \⇌ \S_d$.
+        Since $\Γ \⊢ \S_d \<: \T_d$, the IH gives 4 subsubcases:
+
+        \begin{enumerate}
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \∀ \X \<: \U_{1}.~ \S_{2}$ for some $\S_{2}$ such that $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$::
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a match type with $\Γ \⊢ \S_d \⇌ \X$:
+
+          The result follows directly from \STrans.
+
+          \item $\S_d$ is a type variable:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+
+          \item $\S_d$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$ with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$:
+
+          We already proved $\Γ \⊢ \S \⇌ \S_d$, as required.
+        \end{enumerate}
+      \end{enumerate}
+
+      \Case\STvar:
+      \quad $\S \= \Y$
+      \quad $\Y \<: \T \∈ \Γ$
+
+      $\S$ is a type variable and the result is immediate.
+
+      \Case\SAll:
+      \quad $\S \= \∀ \X \<: \U_{1}.~ \S_{2}$
+      \quad $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$
+      \\\phantom{\textit{Case}~\SArrow:}
+      \quad $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$
+
+      $\S$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$, with $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$, as required.
+
+      \Case\STop, \SSin, \SArrow, \SPsi:
+
+      In those cases, $\T$ is neither a type variable nor a universal type and the result is immediate.
+    \end{itemize}
+  \end{enumerate}
+\end{proof}

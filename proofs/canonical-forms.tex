@@ -1,0 +1,123 @@
+\begin{lemma}[Canonical forms]
+  \lbl{lem:canonical-forms}~
+  \begin{enumerate}
+    \item % 1
+    If $\Γ \⊢ \t \: \T$,
+    where either $\T$ is a type variable,
+    or $\T$ is a match type with $\Γ \⊢ \T \⇌ \X$,
+    then $\t$ is not a closed value.
+
+    \item % 2
+    If $\v$ is a closed value with $\Γ \⊢ \v \: \T$
+    where either $\T \= \T_{1} \→ \T_{2}$,
+    or $\T$ is a match type and $\Γ \⊢ \T \⇌ \T_{1} \→ \T_{2}$,
+    then $\v$ has the form $\λ \x \: \S_{1}.~ \t_{2}$.
+
+    \item % 3
+    If $\v$ is a closed value with $\Γ \⊢ \v \: \T$
+    where either $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$,
+    or $\T$ is a match type and $\Γ \⊢ \T \⇌ \∀ \X \<: \U_{1}.~ \T_{2}$,
+    then $\v$ has the form $\λ \X \<: \U_{1}.~ \t_{2}$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  \begin{enumerate}
+    \item % 1
+    By induction on a derivation of $\Γ \⊢ \t \: \T$
+    \begin{itemize}
+      \Case\TVar, \TTApp, \TApp, \TMatch:
+
+      In those cases, $\t$ is not a value and the result is immediate.
+
+      \Case\TAbs, \TTAbs, \TClass:
+
+      In those cases, $\T$ is neither a match type nor a type variable and the result is immediate.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      By \Cref{lem:inversion-of-subtyping}, either $\S$ is a match type with $\Γ \⊢ \S \⇌ \Y$, or $\S$ is a type variable.
+      In both cases, we use the IH to show that $\t$ is not a closed value, as required.
+    \end{itemize}
+
+    \item % 2
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+
+    \begin{itemize}
+      \Case\TVar, \TTApp, \TApp, \TMatch:
+
+      In those cases, $\t$ is not a value and the result is immediate.
+
+      \Case\TAbs:
+      \quad $\t \= \λ \x \: \T_{1} \t_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \quad $\Γ, \x \: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      $\t \= \λ \x \: \T_{1} \t_{2}$ and the result is immediate.
+
+      \Case\TTAbs, \TClass:
+
+      $\T$ is neither a function type nor a match type and the result is immediate.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using \Cref{lem:inversion-of-subtyping} we get 4 subcases:
+      \begin{enumerate}
+        \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \S_{1} \→ \S_{2}$:\\
+        The result follows from the IH.
+
+        \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \X$:\\
+        This case cannot occure since the 1th part of the lemma would lead to a contradiction on the fact that $\v$ is a closed value.
+
+        \item $\S$ is a type variable:\\
+        Similarly, this case cannot occure since the 1st part of the lemma would lead to a contradiction.
+
+        \item $\S$ has the form $\S_{1} \→ \S_{2}$ with $\Γ \⊢ \T_{1} \<: \S_{1}$ and $\Γ \⊢ \S_{2} \<: \T_{2}$:\\
+        The result follows from the IH.
+      \end{enumerate}
+    \end{itemize}
+
+    \item % 3
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+
+    \begin{itemize}
+      \Case\TVar, \TTApp, \TApp, \TMatch:
+
+      In those cases, $\t$ is not a value and the result is immediate.
+
+      \Case\TAbs, \TClass:
+
+      $\T$ is neither a universal type nor a match type and the result is immediate.
+
+      \Case\TTAbs:
+      \quad $\t \= \λ \Y \<: \T_{1}.~ \t_{2}$
+      \quad $\T \= \∀ \Y \<: \T_{1}.~ \T_{2}$
+      \quad $\Γ, \Y \<: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      $\t \= \λ \Y \<: \T_{1}.~ \t_{2}$ and the result is immediate.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using \Cref{lem:inversion-of-subtyping} we get 4 subcases:
+      \begin{enumerate}
+        \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \∀ \X \<: \U_{1}.~ \S_{2}$,
+        The result follows from the IH.
+
+        \item $\S$ is a match type with $\Γ \⊢ \S \⇌ \X$,
+        This case cannot occure since the 1th part of the lemma would lead to a contradiction on the fact that $\v$ is a closed value.
+
+        \item $\S$ is a type variable,
+        Similarly, this case cannot occure since the 1st part of the lemma would lead to a contradiction.
+
+        \item $\S$ has the form $\∀ \X \<: \U_{1}.~ \S_{2}$ and $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$.
+        The result follows from the IH.
+      \end{enumerate}
+    \end{itemize}
+  \end{enumerate}
+\end{proof}

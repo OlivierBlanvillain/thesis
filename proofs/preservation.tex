@@ -1,0 +1,163 @@
+\begin{theorem}[Preservation]
+  \lbl{thm:preservation}
+  ~\\\indent
+  If $\Γ \⊢ \t \: \T$ and $\t \⟶ \t'$ then $\Γ \⊢ \t' \: \T$.
+\end{theorem}
+
+\begin{proof}
+  By induction on a derivation of $\Γ \⊢ \t \: \T$.
+  \begin{itemize}
+    \Case\TVar, \TAbs, \TTAbs, \TClass:
+
+    These cases cannot arise since we assume $\t \⟶ \t'$ but there are no evaluation rules for variables, abstractions, type abstractions and class instantiations.
+
+    \Case\TApp:
+    \quad $\t \= \t_{1} \t_{2}$
+    \quad $\T \= \T_{12}$
+    \quad $\Γ \⊢ \t_{1} \: \T_{11} \→ \T_{12}$
+    \quad $\Γ \⊢ \t_{2} \: \T_{11}$
+
+    By definition of the evaluation relation, there are 3 subcases:
+    \begin{itemize}
+      \Subcase\EAppA:
+      \quad $\t_{1} \⟶ \t_{1}'$
+      \quad $\t' \= \t_{1}' \t_{2}$
+
+      By the IH and the 1st premise we get $\Γ \⊢ \t_{1}' \: \T_{11} \→ \T_{12}$.
+      We use \TApp with that result and the 2nd premise to obtain $\Γ \⊢ \t_{1}' \t_{2} \: \T_{12}$, as required.
+
+      \Subcase\EAppB:
+      \quad $\t_{2} \⟶ \t_{2}'$
+      \quad $\t_{1} \= \v_{1}$
+      \quad $\t' \= \v_{1} \t_{2}'$
+
+      Analogously, the IH gives $\Γ \⊢ \t_{2}' \: \T_{12}$ and the result follows from \TApp.
+
+      \Subcase\EAppAbs:
+      \quad $\t_{1} \= \λ \x \: \U_{11}.~ \u_{12}$
+      \quad $\t' \= \[\x \↦ \t_{2}] \u_{12}$
+
+      By \Cref{lem:inversion-of-typing} (with $\S_{1} \= \U_{11}$, $\s_{2} \= \u_{12}$, $\U_{1} \= \T_{11}$ and $\U_{2} \= \T_{12}$),
+      there is some $\S_{2}$ such that $\Γ, \x \: \U_{11} \⊢ \u_{12} \: \S_{2}$, $\Γ \⊢ \S_{2} \<: \T_{12}$ and $\Γ \⊢ \T_{11} \<: \U_{11}$.
+      Using \TSub with $\Γ \⊢ \t_{2} \: \T_{11}$ and $\Γ \⊢ \T_{11} \<: \U_{11}$ we obtain $\Γ \⊢ \t_{2} \: \U_{11}$.
+      By \Cref{lem:substitution} we get $\Γ \⊢ \[\x \↦ \t_{2}] \u_{12} \: \S_{2}$.
+      Using \TSub we obtain $\Γ \⊢ \[\x \↦ \t_{2}] \u_{12} \: \T_{12}$, as required.
+    \end{itemize}
+
+    \Case\TTApp:
+    \quad $\t \= \t_{1} \T_{2}$
+    \quad $\T \= \[\X \↦ \T_{2}] \T_{12}$
+    \\\phantom{\textit{Case}~\TTApp:}
+    \quad $\Γ \⊢ \t_{1} \: \(\∀ \X \<: \U_{1}.~ \T_{12})$
+    \quad $\Γ \⊢ \T_{2} \<: \U_{1}$
+
+    The proof for case \TTApp is analogous to the one for \TApp.
+    By definition of the evaluation relation, there are 2 subcases:
+    \begin{itemize}
+      \Subcase\ETApp:
+      \quad $\t_{1} \⟶ \t_{1}'$
+      \quad $\t' \= \t_{1}' \T_{2}$
+
+      By the IH and the 1st premise we get $\Γ \⊢ \t_{1}' \: \(\∀ \X \<: \U_{1}.~ \T_{12})$.
+      We use \TTApp with that result and the 2nd premise to obtain $\Γ \⊢ \t_{1}' \T_{2} \: \[\X \↦ \T_{2}] \T_{12}$, as required.
+
+      \Subcase\ETAppTAbs:
+      \quad $\t_{1} \= \λ \X \<: \U_{11}.~ \u_{12}$
+      \quad $\t' \= \[\X \↦ \T_{2}] \u_{12}$
+
+      By \Cref{lem:inversion-of-typing} (with $\S_{1} \= \U_{11}$, $\s_{2} \= \u_{12}$ and $\U_{2} \= \T_{12}$),
+      there is some $\S_{2}$ such that
+      $\Γ, \X \<: \U_{11} \⊢ \u_{12} \: \S_{2}$,
+      $\U_{1} \= \U_{11}$,
+      and $\Γ, \X \<: \U_{11} \⊢ \S_{2} \<: \T_{12}$.
+      Since $\Γ \⊢ \T_{2} \<: \U_{11}$, we use \Cref{lem:substitution} twice to
+      get $\Γ \⊢ \[\X \↦ \T_{2}] \u_{12} \: \[\X \↦ \T_{2}] \S_{2}$
+      and $\Γ \⊢ \[\X \↦ \T_{2}] \S_{2} \<: \[\X \↦ \T_{2}] \T_{12}$.
+      By \TSub $\Γ \⊢ \[\X \↦ \T_{2}] \u_{12} \: \[\X \↦ \T_{2}] \T_{12}$, as required.
+    \end{itemize}
+
+    \Case\TSub:
+    \quad $\Γ \⊢ \t \: \S$
+    \quad $\Γ \⊢ \S \<: \T$
+
+    By the IH, $\Γ \⊢ \t' \: \S$. The result follows directly from \TSub.
+
+    \Case\TMatch:
+    \quad $\t \= \t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+    \quad $\T \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$
+    \\\phantom{\textit{Case}~\TMatch:}
+    \quad $\Γ \⊢ \t_s \: \T_s$
+    \quad $\Γ, \x_i \: \C_i \⊢ \t_i \: \T_i$
+    \quad $\Γ \⊢ \t_d \: \T_d$
+
+    By definition of the evaluation relation, there are 5 subcases:
+    \begin{itemize}
+      \Subcase\EMatch1:
+      \quad $\t_s \⟶ \t_s'$
+      \quad $\t' \= \t_s' \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+
+      By the IH $\Γ \⊢ \t_s' \: \T_s$. The result follows directly from \TMatch.
+
+      \Subcase\EMatch2:
+      \quad $\t_s \= \new \C$
+      \quad $\(\C, \C_n) \∈ \Ψ$
+      \\\phantom{\textit{Subcase}~\EMatch2:}
+      \quad $\∀ \m<n.~ \(\C, \C_m) \∉ \Ψ$
+      \quad $\t' \= \[\x_n \↦ \new \C] \t_n$
+
+      By \SPsi, \SSin and \STrans, $\Γ \⊢ \{ \new \C \} \<: \C_n$.
+      From \DPsi, we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\{ \new \C \}, \C_m)$.
+      By \Cref{lem:minimum-types}, $\Γ \⊢ \{ \new \C \} \<: \T_s$.
+      Let $\T_{1}$ be $\{ \new \C \} \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$.
+      From \SMatch1, $\Γ \⊢ \T_n \<: \T_{1}$.
+      Using \SMatch5, $\Γ \⊢ \T_{1} \<: \T$.
+      By \STrans, $\Γ \⊢ \T_n \<: \T$.
+
+      Using \TClass, \TSub, \SSin and \SPsi (with $\(\C, \C_n) \∈ \Ψ$) we get $\Γ \⊢ \new \C \: \C_n$.
+      From the case premises, we have $\Γ, \x_n \: \C_n \⊢ \t_n \: \T_n$.
+      By \Cref{lem:substitution}, we get $\Γ \⊢ \[\x_n \↦ \new \C] \t_n \: \T_n$.
+      Finally, using \TSub we get , $\Γ \⊢ \[\x_n \↦ \new \C] \t_n \: \T$, as required.
+
+      \Subcase\EMatch3:
+      \quad $\t_s \= \new \C$
+      \quad $\∀ \n.~ \(\C, \C_n) \∉ \Ψ$
+      \quad $\t' \= \t_d$
+
+      The proof for subcase \EMatch3 is analogous to the one for \EMatch2.
+      From \DPsi, $\∀ \n.~ \Γ \⊢ \disj(\{ \new \C \}, \C_n)$.
+      By \Cref{lem:minimum-types} we get $\Γ \⊢ \{ \new \C \} \<: \T_s$.
+      Let $\T_{1}$ be $\{ \new \C \} \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$.
+      From \SMatch2, $\Γ \⊢ \T_d \<: \T_{1}$.
+      Using \SMatch5, $\Γ \⊢ \T_{1} \<: \T$.
+      By \STrans $\Γ \⊢ \T_d \<: \T$.
+      Using \TSub, $\Γ \⊢ \t_d \: \T$, as required.
+
+      \Subcase\EMatch4:
+      \quad $\t_s \= \λ \x \: \U.~ \u$
+      \quad $\t' \= \t_d$
+
+      By \Cref{lem:minimum-types}, there exists a $\V$ such that
+      $\Γ \⊢ \U \→ \V \<: \T_s$.
+      Using \DArrow, $\∀ \n.~ \Γ \⊢ \disj(\U \→ \V, \C_n)$.
+      Let $\T_{1}$ be $\U \→ \V \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$.
+      From \SMatch2, $\Γ \⊢ \T_d \<: \T_{1}$.
+      Using \SMatch5, $\Γ \⊢ \T_{1} \<: \T$.
+      By \STrans $\Γ \⊢ \T_d \<: \T$.
+      Using \TSub, $\Γ \⊢ \t_d \: \T$, as required.
+
+      \Subcase\EMatch5:
+      \quad $\t_s \= \∀ \X \<: \U.~ \u$
+      \quad $\t' \= \t_d$
+
+      The proof for subcase \EMatch5 is analogous to the one for \EMatch4.
+      By \Cref{lem:minimum-types}, there exists a $\V$ such that
+      $\Γ \⊢ \(\∀ \X \<: \U.~ \V) \<: \T_s$.
+      Using \DArrow, we get $\∀ \n.~ \Γ \⊢ \disj(\∀ \X \<: \U.~ \V, \C_n)$.
+      Let $\T_{1}$ be $\(\∀ \X \<: \U.~ \V) \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$.
+      From \SMatch2, $\Γ \⊢ \T_d \<: \T_{1}$.
+      Using \SMatch5, $\Γ \⊢ \T_{1} \<: \T$.
+      By \STrans $\Γ \⊢ \T_d \<: \T$.
+      Using \TSub, $\Γ \⊢ \t_d \: \T$, as required.
+    \end{itemize}
+  \end{itemize}
+\end{proof}

@@ -1,0 +1,71 @@
+\begin{lemma}[Inversion of typing]
+  \lbl{lem:inversion-of-typing}~
+  \begin{enumerate}
+    \item % 1
+    If $\Γ \⊢ \λ \x \: \S_{1}.~ \s_{2} \: \T$ and $\Γ \⊢ \T \<: \U_{1} \→ \U_{2}$,
+    then $\Γ \⊢ \U_{1} \<: \S_{1}$ and there is some $\S_{2}$ such that
+    $\Γ, \x \: \S_{1} \⊢ \s_{2} \: \S_{2}$ and $\Γ \⊢ \S_{2} \<: \U_{2}$.
+
+    \item % 2
+    If $\Γ \⊢ \λ \X \<: \S_{1}.~ \s_{2} \: \T$ and $\Γ \⊢ \T \<: \(\∀ \X \<: \U_{1}.~ \U_{2})$,
+    then $\U_{1} \= \S_{1}$ and there is some $\S_{2}$ such that
+    $\Γ, \X \<: \S_{1} \⊢ \s_{2} \: \S_{2}$ and $\Γ, \X \<: \S_{1} \⊢ \S_{2} \<: \U_{2}$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  \begin{enumerate}
+    \item % 1
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+
+    \begin{itemize}
+      \Case\TAbs:
+      \quad $\t \= \λ \x \: \S_{1} \s_{2}$
+      \quad $\T \= \S_{1} \→ \T_{2}$
+      \quad $\Γ \, \x \: \S_{1} \⊢ \s_{2} \: \T_{2}$
+
+      Given $\Γ \⊢ \S_{1} \→ \T_{2} \<: \U_{1} \→ \U_{2}$,
+      we use \Cref{lem:inversion-of-subtyping} to obtain
+      $\Γ \⊢ \U_{1} \<: \S_{1}$ and $\Γ \⊢ \T_{2} \<: \U_{2}$.
+      We pick $\S_{2}$ to be $\T_{2}$ to obtain the desired result.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using \STrans with $\Γ \⊢ \S \<: \T$ and $\Γ \⊢ \T \<: \U_{1} \→ \U_{2}$ we get $\Γ \⊢ \S \<: \U_{1} \→ \U_{2}$. The results follows directly from the IH.
+
+      \Case\TVar, \TApp, \TTAbs, \TTApp, \TClass, \TMatch:
+
+      In those cases, $\t$ is not of the form $\λ \x \: \S_{1}.~ \s_{2}$ and the result is immediate.
+    \end{itemize}
+
+    \item % 2
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+
+    \begin{itemize}
+      \Case\TTAbs:
+      \quad $\t \= \λ \X \<: \S_{1}.~ \s_{2}$
+      \quad $\T \= \∀ \X \<: \S_{1}.~ \T_{2}$
+      \quad $\Γ, \X \<: \S_{1} \⊢ \s_{2} \: \T_{2}$
+
+      Given $\Γ \⊢ \(\∀ \X \<: \S_{1}.~ \T_{2}) \<: \(\∀ \X \<: \U_{1}.~ \U_{2})$,
+      we use \Cref{lem:inversion-of-subtyping} to obtain
+      $\U_{1} \= \S_{1}$ and $\Γ, \X \<: \S_{1} \⊢ \T_{2} \<: \U_{2}$.
+      We pick $\S_{2}$ to be $\T_{2}$ to obtain the desired result.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using \STrans with $\Γ \⊢ \S \<: \T$ and $\Γ \⊢ \T \<: \(\∀ \X \<: \U_{1}.~ \U_{2})$
+      we get $\Γ \⊢ \S \<: \(\∀ \X \<: \U_{1}.~ \U_{2})$.
+      The results follows directly from the IH.
+
+      \Case\TVar, \TAbs, \TApp, \TTApp, \TClass, \TMatch:
+
+      In those cases, $\t$ is not of the form $\λ \X \<: \S_{1}.~ \s_{2} \: \T$ and the result is immediate.
+
+    \end{itemize}
+  \end{enumerate}
+\end{proof}

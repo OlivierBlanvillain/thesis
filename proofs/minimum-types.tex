@@ -1,0 +1,83 @@
+\begin{lemma}[Minimum types]
+  \lbl{lem:minimum-types}~
+  \begin{enumerate}
+    \item % 1
+    If $\Γ \⊢ \new \C \: \T$ then $\Γ \⊢ \{ \new \C \} \<: \T$.
+
+    \item % 2
+    If $\Γ \⊢ \λ \x \: \T_{1}.~ \t_{2} \: \T$
+    then there is some $\T_{2}$ such that
+    $\Γ \⊢ \T_{1} \→ \T_{2} \<: \T$.
+
+    \item % 3
+    If $\Γ \⊢ \λ \X \<: \U_{1}.~ \t_{2} \: \T$
+    then there is some $\T_{2}$ such that $\Γ \⊢ \∀ \X \<: \U_{1}.~ \T_{2} \<: \T$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  \begin{enumerate}
+    \item % 1
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+    \begin{itemize}
+      \Case\TVar, \TAbs, \TApp, \TTAbs, \TTApp, \TMatch:
+
+      In those cases, $\t$ is not a constructor call and the result is immediate.
+
+      \Case\TClass:
+      \quad $\t \= \new \C$
+      \quad $\T \= \{ \new \C \}$
+
+      The result follows directly from \SRefl.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      By the IH, $\Γ \⊢ \{ \new \C \} \<: \S$.
+      The result follows from \STrans.
+    \end{itemize}
+
+    \item % 2
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+    \begin{itemize}
+      \Case\TVar, \TApp, \TTAbs, \TTApp, \TClass, \TMatch:
+
+      In those cases, $\t$ is not an abstraction and the result is immediate
+
+      \Case\TAbs:
+      \quad $\T \= \T_{1} \→ \S_{2}$
+      \quad $\Γ, \x \: \T_{1} \⊢ \t_{2} \: \S_{2}$
+
+      $\T_{2} \= \S_{2}$ and the result is immediate using \SRefl.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using the IH, there is some $\T_{2}$ such that $\Γ \⊢ \T_{1} \→ \T_{2} \<: \S$.
+      The result follows from \STrans.
+    \end{itemize}
+
+    \item % 3
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+    \begin{itemize}
+      \Case\TVar, \TAbs, \TApp, \TTApp, \TClass, \TMatch:
+
+      In those cases, $\t$ is not a type abstraction and the result is immediate
+
+      \Case\TTAbs:
+      \quad $\T \= \∀ \X \<: \U_{1}.~ \S_{2}$
+      \quad $\Γ, \X \<: \U_{1} \⊢ \t_{2} \: \S_{2}$
+
+      $\T_{2} \= \S_{2}$ and the result is immediate using \SRefl.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using the IH, there is some $\T_{2}$ such that $\Γ \⊢ \∀ \X \<: \U_{1}.~ \T_{2} \<: \S$.
+      The result follows from \STrans.
+    \end{itemize}
+  \end{enumerate}
+\end{proof}

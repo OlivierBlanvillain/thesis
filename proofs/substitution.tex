@@ -1,0 +1,363 @@
+\begin{lemma}[Substitution]
+  \lbl{lem:substitution}~
+  \begin{enumerate}
+    \item % 0
+    If $\Γ, \X \<: \Q, \Δ \⊢ \disj(\S, \T)$ and $\Γ \⊢ \P \<: \Q$,
+    then $\Γ, \[\X \↦ \P] \Δ \⊢ \disj(\[\X \↦ \P] \S, \[\X \↦ \P] \T)$.
+
+    \item % 1
+    If $\Γ, \X \<: \Q, \Δ \⊢ \S \<: \T$ and $\Γ \⊢ \P \<: \Q$,
+    then $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \S \<: \[\X \↦ \P] \T$.
+
+    \item % 2
+    If $\Γ, \X \<: \Q, \Δ \⊢ \t \: \T$ and $\Γ \⊢ \P \<: \Q$,
+    then $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t \: \[\X \↦ \P] \T$.
+
+    \item % 3
+    If $\Γ, \x \: \Q, \Δ \⊢ \t \: \T$ and $\Γ \⊢ \q \: \Q$,
+    then $\Γ, \Δ \⊢ \[\x \↦ \q] \t \: \T$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  We prove 1. and 2. simultaneously by induction on two derivations of $\Γ, \X \<: \Q, \Δ \⊢ \disj(\V, \W)$ and $\Γ, \X \<: \Q, \Δ \⊢ \S \<: \T$.
+  More precisely, the induction is done on the cumulative depth of both derivation tree.
+  \begin{enumerate}
+    \item % 0
+    $\Γ, \X \<: \Q, \Δ \⊢ \disj(\V, \W)$
+    \begin{itemize}
+      \Case\DXi:
+      \quad $\V \= \C_{1}$
+      \quad $\W \= \C_{2}$
+      \quad $\(\C_{1}, \C_{2}) \∈ \Ξ$
+
+      Since $\[\X \↦ \P] \C_{1} \= \C_{1}$ and $\[\X \↦ \P] \C_{2} \= \C_{2}$, we can use \DXi with context $\Γ, \[\X \↦ \P] \Δ$ to obtain the desired result.
+
+      \Case\DPsi:
+      \quad $\V \= \{ \new \C_{1} \}$
+      \quad $\W \= \C_{2}$
+      \quad $\(\C_{1}, \C_{2}) \∉ \Ψ$
+
+      Since $\[\X \↦ \P] \{ \new \C_{1} \} \= \{ \new \C_{1} \}$ and $\[\X \↦ \P] \C_{2} \= \C_{2}$, we can use \DPsi with context $\Γ, \[\X \↦ \P] \Δ$ to obtain the desired result.
+
+      \Case\DSub:
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \V \<: \U$
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \disj(\U, \W)$
+
+      By the IH we get $\Γ, \[\X \↦ \P] \Δ \⊢ \disj(\[\X \↦ \P] \U, \[\X \↦ \P] \W)$.
+      Using the 2nd part of the lemma we obtain $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \V \<: \[\X \↦ \P] \U$.
+      The result follows from \DSub.
+
+      \Case\DArrow:
+      \quad $\V \= \V_{1} \→ \V_{2}$
+      \quad $\W \= \C$
+
+      Since $\[\X \↦ \P] \(\V_{1} \→ \V_{2}) \= \[\X \↦ \P] \V_{1} \→ \[\X \↦ \P] \V_{2}$ and $\[\X \↦ \P] \C \= \C$,
+      we can use \DArrow with context $\Γ, \[\X \↦ \P] \Δ$ to obtain the desired result.
+
+      \Case\DAll:
+      \quad $\V \= \∀ \Y \<: \V_{1}.~ \V_{2}$
+      \quad $\W \= \C$
+
+      Since $\[\X \↦ \P] \(\∀ \Y \<: \V_{1}.~ \V_{2}) \= \∀ \Y \<: \[\X \↦ \P] \V_{1}.~ \[\X \↦ \P] \V_{2}$ and $\[\X \↦ \P] \C \= \C$,
+      we can use \DAll with context $\Γ, \[\X \↦ \P] \Δ$ to obtain the desired result.
+    \end{itemize}
+
+    \item % 1
+    $\Γ, \X \<: \Q, \Δ \⊢ \S \<: \T$.
+    \begin{itemize}
+      \Case\SRefl:
+      \quad $\T \= \S$
+
+      The result follows directly from \SRefl.
+
+      \Case\STrans:
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \S \<: \U$
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \U \<: \T$
+
+      The result follows directly from the IH and \STrans.
+
+      \Case\STop:
+      \quad $\T \= \Top$
+
+      $\[\X \↦ \P] \Top \= \Top$ and the result follows from \STop.
+
+      \Case\SSin:
+      \quad $\S \= \{ \new \C \}$
+      \quad $\T \= \C$
+
+      $\[\X \↦ \P] \{ \new \C \} \= \{ \new \C \}$,
+      $\[\X \↦ \P] \C \= \C$,
+      and the result follows from \SSin.
+
+      \Case\STvar:
+      \quad $\S \= \Y$
+      \quad $\Y \<: \T \∈ \(\Γ, \X \<: \Q, \Δ)$
+
+      By context well-formedness, $\Y \<: \T \∈ \(\Γ, \X \<: \Q, \Δ)$ can be decomposed into 3 subcases:
+      \begin{itemize}
+        \Subcase $\Y \<: \T \∈ \Γ$:
+
+        By context well-formedness $\X$ does not appear in $\Γ$ consequently is also absent from $\Y$ and $\T$.
+        Hence $\Y \= \[\X \↦ \P] \Y$, $\T \= \[\X \↦ \P] \T$ and $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \(\Γ, \[\X \↦ \P] \Δ)$.
+        The result follows from \STvar.
+
+        \Subcase $\Y \<: \T \∈ \Δ$:
+
+        $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \[\X \↦ \P] \Δ$ and $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \(\Γ, \[\X \↦ \P] \Δ)$. The result follows from \STvar.
+
+        \Subcase $\Y \<: \T \= \X \<: \Q$ (\emph{i.e.} $\Y \= \X$ and $\T \= \Q$):
+
+        By context well-formedness, $\X$ doesn't appear in $\Q$, and $\[\X \↦ \P] \T \= \[\X \↦ \P] \Q \= \Q$.
+        Also $\[\X \↦ \P] \S \= \[\X \↦ \P] \X \= \P$ and $\[\X \↦ \P] \T \= \Q$.
+        As a result, $\Γ \⊢ \P \<: \Q$ implies $\Γ \⊢ \[\X \↦ \P] \S \<: \[\X \↦ \P] \T$.
+        Using \Cref{lem:weakening} we get $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \S \<: \[\X \↦ \P] \T$, as required.
+
+      \end{itemize}
+
+      \Case\SArrow:
+      \quad $\S \= \S_{1} \→ \S_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \\\phantom{\textit{Case}~\SArrow:}
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \T_{1} \<: \S_{1}$
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \S_{2} \<: \T_{2}$
+
+      $\[\X \↦ \P] \(\S_{1} \→ \S_{2}) \= \[\X \↦ \P] \S_{1} \→ \[\X \↦ \P] \S_{2}$,
+      $\[\X \↦ \P] \(\T_{1} \→ \T_{2}) \= \[\X \↦ \P] \T_{1} \→ \[\X \↦ \P] \T_{2}$.
+      The result follows from the IH and \SArrow.
+
+      \Case\SAll:
+      \quad $\S \= \∀ \Y \<: \U_{1}.~ \S_{2}$
+      \quad $\T \= \∀ \Y \<: \U_{1}.~ \T_{2}$
+      \quad $\Γ, \X \<: \Q, \Δ, \Y \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$
+
+      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \Y \<: \U_{1})$ to obtain
+      $\Γ, \[\X \↦ \P] \Δ, \Y \<: \[\X \↦ \P] \U_{1} \⊢ \[\X \↦ \P] \S_{2} \<: \[\X \↦ \P] \T_{2}$.
+      Using \SAll, we get
+      $\Γ, \[\X \↦ \P] \Δ \⊢ \(\∀ \Y \<: \[\X \↦ \P] \U_{1}.~ \[\X \↦ \P] \S_{2}) \<: \(\∀ \Y \<: \[\X \↦ \P] \U_{1}.~ \[\X \↦ \P] \T_{2})$, that is,
+      $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \(\∀ \Y \<: \U_{1}.~ \S_{2}) \<: \[\X \↦ \P] \(\∀ \Y \<: \U_{1}.~ \T_{2})$, as required.
+
+      \Case\SPsi:
+      \quad $\S \= \C_{1}$
+      \quad $\T \= \C_{2}$
+      \quad $\(\C_{1}, \C_{2}) \∈ \Ψ$
+
+      $\[\X \↦ \P] \C_{1} \= \C_{1}$ and $\[\X \↦ \P] \C_{2} \= \C_{2}$. The result follows from \SPsi.
+
+      \Case\SMatch1/2:
+      \quad $\T_{1} \= \T_n$
+      \quad $\T_{2} \= \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch1/2:}
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \T_s \<: \S_n$
+      \quad $\∀ \m<n.~ \Γ, \X \<: \Q, \Δ \⊢ \disj(\T_s, \S_m)$
+
+      Using the 1st part of the lemma we get $\∀ \m< \n.~ \Γ, \[\X \↦ \P] \Δ \⊢ \disj(\[\X \↦ \P] \T_s, \[\X \↦ \P] \S_m)$.
+      By the IH we get $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \T_s \<: \S_n$.
+      $\[\X \↦ \P] \T \= \[\X \↦ \P] \T_s \match \{$ $\[\X \↦ \P] \S_i \⇒ \[\X \↦ \P] \T_i \} \otherwise \[\X \↦ \P] \T_d$,
+      and the result follows from \SMatch1/2.
+
+      \Case\SMatch3/4:
+      \quad $\S \= \T_d$
+      \quad $\T \= \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch1/2:}
+      \quad $\∀ \n.~ \Γ, \X \<: \Q, \Δ \⊢ \disj(\T_s, \S_n)$
+
+      By the 1st part of the lemma we get $\∀ \n.~ \Γ, \[\X \↦ \P] \Δ \⊢ \disj(\[\X \↦ \P] \T_s, \[\X \↦ \P] \S_n)$ and the result follows from \SMatch3/4.
+
+      \Case\SMatch5:
+      \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
+      \quad $\T \= \T_s \match \{ \U_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch5:}
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \S_s \<: \T_s$
+      \quad $\∀ \n.~ \Γ, \X \<: \Q, \Δ \⊢ \S_n \<: \T_n$
+      \\\phantom{\textit{Case}~\SMatch5:}
+      \quad $\Γ, \X \<: \Q, \Δ \⊢ \S_d \<: \T_d$
+
+      The result follows directly from the IH.
+    \end{itemize}
+
+    % 2
+    \item By induction on a derivation of $\Γ, \X \<: \Q, \Δ \⊢ \t \: \T$.
+    \begin{itemize}
+        \Case\TVar:
+        \quad $\t \= \x$
+        \quad $\x \: \T \∈ \Γ, \X \<: \Q, \Δ$
+
+        $\[\X \↦ \P] \x \= \x$. \TVar's premise can be divided in two subcases:
+        \begin{itemize}
+          \Subcase $\x \: \T \∈ \Γ$:
+
+          Context well-formedness impiles that there is no occurence of $\X$ in $\T$ and $\[\X \↦ \P] \T \= \T$.
+          Also, $\x \: \T \∈ \Γ, \[\X \↦ \P] \Δ$ and the result follows from \TVar.
+
+          \Subcase $\x \: \T \∈ \Δ$:
+
+          Context well-formedness impiles that there is a unique occurence of $\x \: \T$ in $\Δ$, that is,
+          there exists $\Δ_1$, $\Δ_2$ such that $\Δ \= \Δ_1, \x \: \T, \Δ_2$, $\x \not \in \Δ_1$ and $\x \not \in \Δ_2$.
+          As a result, $\[\X \↦ \P] \Δ$ = $\[\X \↦ \P] \Δ_1, \x \: \[\X \↦ \P] \T, \[\X \↦ \P] \Δ_2$
+          and $\x \: \[\X \↦ \P] \T \∈ \Γ, \[\X \↦ \P] \Δ$.
+          The result follows from \TVar.
+        \end{itemize}
+
+        \Case\TAbs:
+        \quad $\t \= \λ \x \: \T_{1} \t_{2}$
+        \quad $\T \= \T_{1} \→ \T_{2}$
+        \quad $\Γ, \X \<: \Q, \Δ, \x \: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+        $\[\X \↦ \P] \(\λ \x \: \T_{1} \t_{2}) \= \λ \x \: \[\X \↦ \P] \T_{1} \[\X \↦ \P] \t_{2}$ and
+        $\[\X \↦ \P] \(\T_{1} \→ \T_{2}) \= \[\X \↦ \P] \T_{1} \→ \[\X \↦ \P] \T_{2}$.
+        We instantiate the IH with $\Δ_{IH} \= \(\Δ, \x \: \T_{1})$ to obtain\\
+        $\Γ, \[\X \↦ \P] \Δ, \x \: \[\X \↦ \P] \T_{1} \⊢ \[\X \↦ \P] \t_{2} \: \[\X \↦ \P] \T_{2}$.
+        The result follows from \TAbs.
+
+        \Case\TApp:
+        \quad $\t \= \t_{1} \t_{2}$
+        \quad $\T \= \T_{12}$
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \t_{1} \: \T_{11} \→ \T_{12}$
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \t_{2} \: \T_{11}$
+
+        $\[\X \↦ \P] \(\t_{1} \t_{2}) \= \[\X \↦ \P] \t_{1} \[\X \↦ \P] \t_{2}$,
+        $\[\X \↦ \P] \T_{11} \→ \T_{12} \= \[\X \↦ \P] \T_{11} \→ \[\X \↦ \P] \T_{12}$.
+        The result follows directly from the IH and \TApp.
+
+        \Case\TTAbs:
+        \quad $\t \= \λ \Y \<: \T_{1}.~ \t_{2}$
+        \quad $\T \= \∀ \Y \<: \T_{1}.~ \T_{2}$
+        \quad $\Γ, \X \<: \Q, \Δ, \Y \<: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+        $\[\X \↦ \P] \(\λ \Y \<: \T_{1}.~ \t_{2}) \= \λ \Y \<: \[\X \↦ \P] \T_{1}.~ \[\X \↦ \P] \t_{2}$ and
+        $\[\X \↦ \P] \(\∀ \Y \<: \T_{1}.~ \T_{2}) \= \∀ \Y \<: \[\X \↦ \P] \T_{1}.~ \[\X \↦ \P] \T_{2}$.
+        We instantiate the IH with $\Δ_{IH} \= \(\Δ, \Y \<: \T_{1})$ to obtain
+        $\Γ, \[\X \↦ \P] \Δ, \Y \<: \[\X \↦ \P] \T_{1} \⊢ \[\X \↦ \P] \t_{2} \: \[\X \↦ \P] \T_{2}$.
+        The result follows from \TTAbs.
+
+        \Case\TTApp:
+        \quad $\t \= \t_{1} \T_{2}$
+        \quad $\T \= \[\Y \↦ \T_{2}] \T_{12}$
+        \\\phantom{\textit{Case}~\TTApp:}
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \t_{1} \: \(\∀ \Y \<: \T_{11}.~ \T_{12})$
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \T_{2} \<: \T_{11}$
+
+        By the IH,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \: \[\X \↦ \P] \(\∀ \Y \<: \T_{11}.~ \T_{12})$, i.e.,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \: \∀ \Y \<: \[\X \↦ \P] \T_{11}.~ \[\X \↦ \P] \T_{12}$.
+        Using the second part of the lemma we get,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \T_{2} \<: \[\X \↦ \P] \T_{11}$.
+        By \TTApp we get,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \[\X \↦ \P] \T_{2} \: \[\Y \↦ \[\X \↦ \P] \T_{2}] \[\X \↦ \P] \T_{12}$, i.e.,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \(\t_{1} \T_{2}) \: \[\X \↦ \P](\[\Y \↦ \T_{2}] \T_{12})$, as required.
+
+        \Case\TSub:
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \t \: \S$
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \S \<: \T$
+
+        By the IH, $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t \: \[\X \↦ \P] \S$.
+        Using the second part of the lemma we get,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \S \<: \[\X \↦ \P] \T$.
+        The result follows from \TSub.
+
+        \Case\TClass:
+        \quad $\t \= \new \C$
+        \quad $\T \= \{ \new \C \}$
+
+        $\[\X \↦ \P] \new \C \= \new \C$ and using \TClass with context $\Γ, \[\X \↦ \P] \Δ$ directly leads to the desired result.
+
+        \Case\TMatch:
+        \quad $\t \= \t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+        \quad $\T \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$
+        \\\phantom{\textit{Case}~\TMatch:}
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \t_s \: \T_s$
+        \quad $\Γ, \X \<: \Q, \Δ, \x_i \: \C_i \⊢ \t_i \: \T_i$
+        \\\phantom{\textit{Case}~\TMatch:}
+        \quad $\Γ, \X \<: \Q, \Δ \⊢ \t_d \: \T_d$
+
+        $\[\X \↦ \P] \(\t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d) \= \[\X \↦ \P] \t_s \match \{ \x_i \: \C_i \⇒ \[\X \↦ \P] \t_i \} \otherwise \[\X \↦ \P] \t_d$.
+
+        $\[\X \↦ \P] \(\T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d) \= \[\X \↦ \P] \T_s \match \{ \C_i \⇒ \[\X \↦ \P] \T_i \} \otherwise \[\X \↦ \P] \T_d$.
+
+        The result follows directly from the IH and \TApp.
+    \end{itemize}
+
+    \item % 3
+    By induction on a derivation of $\Γ, \x \: \Q, \Δ \⊢ \t \: \T$.
+    \begin{itemize}
+      \Case\TVar:
+      \quad $\t \= \y$
+      \quad $\y \: \T \∈ \Γ, \x \: \Q, \Δ$
+
+      By context well-formedness, the premise can be decomposed into 3 subcases:
+
+      \begin{itemize}
+        \Subcase $\y \: \T \∈ \Γ$:
+
+        $\[\x \↦ \q] \y \= \y$ and $\y \: \T \∈ \Γ, \Δ$. The result follows from \TVar.
+
+        \Subcase $\y \: \T \∈ \Δ$:
+
+        Ditto.
+
+        \Subcase $\y \: \T \= \x \: \Q$ (i.e. $\y \= \x$ and $\T \= \Q$):
+
+        Using $\Γ \⊢ \q \: \Q$ and \Cref{lem:weakening} we get $\Γ, \Δ \⊢ \q \: \Q$. Since $\[\x \↦ \q] \y \= \q$ and $\T \= \Q$, $\Γ, \Δ \⊢ \[\x \↦ \q] \y \: \T$, as required.
+
+      \end{itemize}
+
+      \Case\TAbs:
+      \quad $\t \= \λ \y \: \T_{1} \t_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \quad $\Γ, \x \: \Q, \Δ, \y \: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \y \: \T_{1})$ to obtain $\Γ, \Δ, \y \: \T_{1} \⊢ \[\x \↦ \q] \t_{2} \: \T_{2}$.
+      $\[\x \↦ \q] \(\λ \y \: \T_{1} \t_{2}) \= \λ \y \: \T_{1} \[\x \↦ \q] \t_{2}$ and the result follows from \TAbs.
+
+      \Case\TApp:
+      \quad $\t \= \t_{1} \t_{2}$
+      \quad $\T \= \T_{12}$
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \t_{1} \: \T_{11} \→ \T_{12}$
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \t_{2} \: \T_{11}$
+
+      $\[\x \↦ \q] \(\t_{1} \t_{2}) \= \(\[\x \↦ \q] \t_{1}) \(\[\x \↦ \q] \t_{2})$ and the result follows from the IH and \TApp.
+
+      \Case\TTAbs:
+      \quad $\t \= \λ \X \<: \U_{1}.~ \t_{2}$
+      \quad $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$
+      \quad $\Γ, \x \: \Q, \Δ, \X \<: \U_{1} \⊢ \t_{2} \: \T_{2}$
+
+      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \X \<: \U_{1})$ to obtain $\Γ, \Δ, \X \<: \U_{1} \⊢ \[\x \↦ \q] \t_{2} \: \T_{2}$.
+      $\[\x \↦ \q] \(\λ \X \<: \U_{1}.~ \t_{2}) \= \λ \X \<: \U_{1}.~ \[\x \↦ \q] \t_{2}$ and the result follows from \TTAbs.
+
+      \Case\TTApp:
+      \quad $\t \= \t_{1} \T_{2}$
+      \quad $\T \= \[\X \↦ \T_{2}] \T_{12}$
+      \\\phantom{\textit{Case}~\TTApp:}
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \t_{1} \: \(\∀ \X \<: \U_{1}.~ \T_{12})$
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \T_{2} \<: \U_{1}$
+
+      By \Cref{lem:strengthening}, $\Γ, \Δ \⊢ \T_{2} \<: \U_{1}$.
+      From the IH we get $\Γ, \Δ \⊢ \[\x \↦ \q] \t_{1} \: \(\∀ \X \<: \U_{1}.~ \T_{12})$.
+      $\[\x \↦ \q] \(\t_{1} \T_{2}) \= \[\x \↦ \q] \t_{1} \T_{2}$ and the result follows from \TTApp.
+
+      \Case\TSub:
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \t \: \S$
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \S \<: \T$
+
+      By \Cref{lem:strengthening}, $\Γ, \Δ \⊢ \S \<: \T$. The result follows from the IH and \TSub.
+
+      \Case\TClass:
+      \quad $\t \= \new \C$
+      \quad $\T \= \{ \new \C \}$
+
+      Since $\[\x \↦ \q] \new \C \= \new \C$, using \TClass with context $\Γ, \Δ$ directly leads to the desired result.
+
+      \Case\TMatch:
+      \quad $\t \= \t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+      \quad $\T \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\TMatch:}
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \t_s \: \T_s$
+      \quad $\Γ, \x \: \Q, \Δ, \x_i \: \C_i \⊢ \t_i \: \T_i$
+      \quad $\Γ, \x \: \Q, \Δ \⊢ \t_d \: \T_d$
+
+      $\[\x \↦ \q] \(\t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d) \= \[\x \↦ \q] \t_s \match \{ \x_i \: \C_i \⇒ \[\x \↦ \q] \t_i \} \otherwise \[\x \↦ \q] \t_d$, and the result follows from the IH and \TMatch.
+    \end{itemize}
+  \end{enumerate}
+\end{proof}

@@ -1,0 +1,299 @@
+\begin{lemma}[Weakening]
+  \lbl{lem:weakening}~
+  \begin{enumerate}
+    \item % 0
+    If $\Γ \⊢ \disj(\S, \T)$ and $\Γ, \X \<: \U$ is well formed,
+    then $\Γ, \X \<: \U \⊢ \disj(\S, \T)$.
+
+    \item % 1
+    If $\Γ \⊢ \S \<: \T$ and $\Γ, \X \<: \U$ is well formed,
+    then $\Γ, \X \<: \U \⊢ \S \<: \T$.
+
+    \item % 2
+    If $\Γ \⊢ \S \<: \T$ and $\Γ, \x \: \U$ is well formed,
+    then $\Γ, \x \: \U \⊢ \S \<: \T$.
+
+    \item % 3
+    If $\Γ \⊢ \t \: \T$ and $\Γ, \x \: \U$ is well formed,
+    then $\Γ, \x \: \U \⊢ \t \: \T$.
+
+    \item % 4
+    If $\Γ \⊢ \t \: \T$ and $\Γ, \X \<: \U$ is well formed,
+    then $\Γ, \X \<: \U \⊢ \t \: \T$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  We prove 1. and 2. simultaneously by induction on two derivations of $\Γ \⊢ \disj(\V, \W)$ and $\Γ \⊢ \S \<: \T$.
+  More precisely, the induction is done on the cumulative depth of both derivation tree.
+  \begin{enumerate}
+    \item % 0
+    $\Γ \⊢ \disj(\V, \W)$
+    \begin{itemize}
+      \Case\DXi:
+      \quad $\V \= \C_{1}$
+      \quad $\W \= \C_{2}$
+      \quad $\(\C_{1}, \C_{2}) \∈ \Ξ$
+
+      Using \DXi with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\DPsi:
+      \quad $\V \= \{ \new \C_{1} \}$
+      \quad $\W \= \C_{2}$
+      \quad $\(\C_{1}, \C_{2}) \∉ \Ψ$
+
+      Using \DPsi with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\DSub:
+      \quad $\Γ \⊢ \V \<: \U$
+      \quad $\Γ \⊢ \disj(\U, \W)$
+
+      By the IH we get $\Γ \⊢ \disj(\U, \W)$.
+      Using the 2nd part of the lemma we obtain $\Γ, \X \<: \U \⊢ \V \<: \U$.
+      The result follows from \DSub.
+
+      \Case\DArrow:
+      \quad $\V \= \V_{1} \→ \V_{2}$
+      \quad $\W \= \C$
+
+      Using \DArrow with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\DAll:
+      \quad $\V \= \∀ \X \<: \V_{1}.~ \V_{2}$
+      \quad $\W \= \C$
+
+      Using \DAll with context $\Γ, \X \<: \U$ directly leads to the desired result.
+    \end{itemize}
+
+    \item % 1
+    $\Γ \⊢ \S \<: \T$.
+    \begin{itemize}
+      \Case\SRefl:
+      \quad $\T \= \S$
+
+      Using \SRefl with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\STrans:
+      \quad $\Γ \⊢ \S \<: \U$
+      \quad $\Γ \⊢ \U \<: \T$
+
+      The result follows from the IH and \STrans.
+
+      \Case\STop:
+      \quad $\T \= \Top$
+
+      Using \STop with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\SSin:
+      \quad $\S \= \{ \new \C \}$
+      \quad $\T \= \C$
+
+      Using \SSin with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\STvar:
+      \quad $\S \= \Y$
+      \quad $\Y \<: \T \∈ \Γ$
+
+      If $\Y \<: \T \∈ \Γ$, then $\Y \<: \T \∈ \Γ, \X \<: \U$ and the result follows from \STvar.
+
+      \Case\SArrow:
+      \quad $\S \= \S_{1} \→ \S_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \\\phantom{\textit{Case}~\SArrow:}
+      \quad $\Γ \⊢ \T_{1} \<: \S_{1}$
+      \quad $\Γ \⊢ \S_{2} \<: \T_{2}$
+
+      The result follows from the IH and \SArrow.
+
+      \Case\SAll:
+      \quad $\S \= \∀ \Y \<: \U_{1}.~ \S_{2}$
+      \quad $\T \= \∀ \Y \<: \U_{1}.~ \T_{2}$
+      \quad $\Γ, \Y \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$
+
+      Using the IH with context $\Γ_{IH} \= \Γ, \Y \<: \U_{1}$, we get $\Γ, \Y \<: \U_{1}, \X \<: \U \⊢ \S_{2} \<: \T_{2}$.
+      From \Cref{lem:permutation}, $\Γ, \X \<: \U, \Y \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$
+      The result follows from \SAll.
+
+      \Case\SPsi:
+      \quad $\S \= \C_{1}$
+      \quad $\T \= \C_{2}$
+      \quad $\(\C_{1}, \C_{2}) \∈ \Ψ$
+
+      Using \SPsi with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\SMatch1/2:
+      \quad $\T_{1} \= \T_n$
+      \quad $\T_{2} \= \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\SMatch1/2:}
+      \quad $\Γ \⊢ \T_s \<: \S_n$
+      \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \S_m)$
+
+      From the IH we get $\Γ, \X \<: \U \⊢ \T_s \<: \S_n$.
+      Using the 1st part of the lemma we obtain $\∀ \m< \n.~\ \Γ, \X \<: \U \⊢ \disj(\T_s, \S_m)$.
+      The result follows from \SMatch1/2.
+
+      \Case\SMatch3/4:
+      \quad $\T_{1} \= \T_d$
+      \quad $\T_{2} \= \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \S_n)$
+
+      Using the 1st part of the lemma we get $\∀ \n.~\ \Γ, \X \<: \U \⊢ \disj(\T_s, \S_n)$.
+      The result follows from \SMatch3/4.
+
+      \Case\SMatch5:
+      \quad $\S \= \S_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d$
+      \quad $\T \= \T_s \match \{ \S_i \⇒ \U_i \} \otherwise \U_d$
+      \\\phantom{\textit{Case}~\SMatch5:}
+      \quad $\Γ \⊢ \S_s \<: \T_s$
+      \quad $\∀ \n.~ \Γ \⊢ \T_n \<: \U_n$
+      \quad $\Γ \⊢ \T_d \<: \U_d$
+
+      We use the IH on each premise and the result follows directly from \SMatch5.
+    \end{itemize}
+
+    \item % 2
+    By inspection of the subtyping rules, it is clear that typing assumbtions play no role in subtyping derivations.
+
+    \item % 3
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+    \begin{itemize}
+      \Case\TVar:
+      \quad $\t \= \y$
+      \quad $\y \: \T \∈ \Γ$
+
+      If $\y \: \T \∈ \Γ$ then $\y \: \T \∈ \Γ, \x \: \U$ and the result follows from \TVar.
+
+      \Case\TAbs:
+      \quad $\t \= \λ \y \: \T_{1} \t_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \quad $\Γ, \y \: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      Using the IH with $\Γ_{IH} \= \Γ, \y \: \T_{1}$ we get $\Γ, \y \: \T_{1}, \x \: \U \⊢ \t_{2} \: \T_{2}$.
+      From \Cref{lem:permutation}, $\Γ, \x \: \U, \y \: \T_{1} \⊢ \t_{2} \: \T_{2}$.
+      The result follows from \TAbs.
+
+      \Case\TApp:
+      \quad $\t \= \t_{1} \t_{2}$
+      \quad $\T \= \T_{12}$
+      \quad $\Γ \⊢ \t_{1} \: \T_{11} \→ \T_{12}$
+      \quad $\Γ \⊢ \t_{2} \: \T_{12}$
+
+      We use the IH on each premise and the result follows from \TApp.
+
+      \Case\TTAbs:
+      \quad $\t \= \λ \X \<: \T_{1}.~ \t_{2}$
+      \quad $\T \= \∀ \X \<: \T_{1}.~ \T_{2}$
+      \quad $\Γ, \X \<: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      Using the IH with $\Γ_{IH} \= \Γ, \X \<: \T_{1}$ we get $\Γ, \X \<: \T_{1}, \x \: \U \⊢ \t_{2} \: \T_{2}$.
+      From \Cref{lem:permutation}, $\Γ, \x \: \U, \X \<: \T_{1} \⊢ \t_{2} \: \T_{2}$
+      The result follows from \TTAbs.
+
+      \Case\TTApp:
+      \quad $\t \= \t_{1} \T_{2}$
+      \quad $\T \= \[\X \↦ \T_{2}] \T_{12}$
+      \\\phantom{\textit{Case}~\TTApp:}
+      \quad $\Γ \⊢ \t_{1} \: \(\∀ \X \<: \T_{11}.~ \T_{12})$
+      \quad $\Γ \⊢ \T_{2} \<: \T_{11}$
+
+      Using the IH on the left premise we get $\Γ, \x \: \U \⊢ \t_{1} \: \(\∀ \X \<: \T_{11}.~ \T_{12})$.
+      Using the 3rd part of the lemma on the right premise we obtain $\Γ, \x \: \U \⊢ \T_{2} \<: \T_{11}$.
+      The result follows from \TTApp.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using the IH on the left premise we get $\Γ, \x \: \U \⊢ \t \: \S$.
+      Using the 3rd part of the lemma on the right premise we obtain $\Γ, \x \: \U \⊢ \S \<: \T$.
+      The result follows from \TSub.
+
+      \Case\TClass:
+      \quad $\t \= \new \C$
+      \quad $\T \= \{ \new \C \}$
+
+      Using \TClass with context $\Γ, \x \: \U$ directly leads to the desired result.
+
+      \Case\TMatch:
+      \quad $\t \= \t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+      \quad $\T \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\TMatch:}
+      \quad $\Γ \⊢ \t_s \: \T_s$
+      \quad $\Γ, \x_i \: \C_i \⊢ \t_i \: \T_i$
+      \quad $\Γ \⊢ \t_d \: \T_d$
+
+      We use the IH on each premise and the result follows directly from \Cref{lem:permutation} and \TMatch.
+    \end{itemize}
+
+    \item % 4
+    By induction on a derivation of $\Γ \⊢ \t \: \T$.
+    \begin{itemize}
+      \Case\TVar:
+      \quad $\t \= \x$
+      \quad $\x \: \T \∈ \Γ$
+
+      If $\y \: \T \∈ \Γ$ then $\y \: \T \∈ \Γ, \X \<: \U$ and the result follows from \TVar.
+
+      \Case\TAbs:
+      \quad $\t \= \λ \x \: \T_{1} \t_{2}$
+      \quad $\T \= \T_{1} \→ \T_{2}$
+      \quad $\Γ, \x \: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      Using the IH with $\Γ_{IH} \= \Γ, \x \: \T_{1}$ we get $\Γ, \x \: \T_{1}, \X \<: \U \⊢ \t_{2} \: \T_{2}$.
+      From \Cref{lem:permutation}, $\Γ, \X \<: \U, \x \: \T_{1} \⊢ \t_{2} \: \T_{2}$.
+      The result follows from \TAbs.
+
+      \Case\TApp:
+      \quad $\t \= \t_{1} \t_{2}$
+      \quad $\T \= \T_{12}$
+      \quad $\Γ \⊢ \t_{1} \: \T_{11} \→ \T_{12}$
+      \quad $\Γ \⊢ \t_{2} \: \T_{12}$
+
+      We use the IH on each premise and the result follows from \TApp.
+
+      \Case\TTAbs:
+      \quad $\t \= \λ \Y \<: \T_{1}.~ \t_{2}$
+      \quad $\T \= \∀ \Y \<: \T_{1}.~ \T_{2}$
+      \quad $\Γ, \Y \<: \T_{1} \⊢ \t_{2} \: \T_{2}$
+
+      Using the IH with $\Γ_{IH} \= \Γ, \Y \<: \T_{1}$ we get $\Γ, \Y \<: \T_{1}, \X \<: \U \⊢ \t_{2} \: \T_{2}$.
+      From \Cref{lem:permutation}, $\Γ, \X \<: \U, \Y \<: \T_{1}, \⊢ \t_{2} \: \T_{2}$.
+      The result follows from \TTAbs.
+
+      \Case\TTApp:
+      \quad $\t \= \t_{1} \T_{2}$
+      \quad $\T \= \[\Y \↦ \T_{2}] \T_{12}$
+      \\\phantom{\textit{Case}~\TTApp:}
+      \quad $\Γ \⊢ \t_{1} \: \(\∀ \Y \<: \T_{11}.~ \T_{12})$
+      \quad $\Γ \⊢ \T_{2} \<: \T_{11}$
+
+      Using the IH on the left premise we get $\Γ, \X \<: \U \⊢ \t_{1} \: \(\∀ \X \<: \T_{11}.~ \T_{12})$.
+      Using the 2nd part of the lemma on the right premise we obtain $\Γ, \X \<: \U \⊢ \T_{2} \<: \T_{11}$.
+      The result follows from \TTApp.
+
+      \Case\TSub:
+      \quad $\Γ \⊢ \t \: \S$
+      \quad $\Γ \⊢ \S \<: \T$
+
+      Using the IH on the left premise we get $\Γ, \S \<: \U \⊢ \t \: \S$.
+      Using the 2nd part of the lemma on the right premise we obtain $\Γ, \X \<: \U \⊢ \S \<: \T$.
+      The result follows from \TSub.
+
+      \Case\TClass:
+      \quad $\t \= \new \C$
+      \quad $\T \= \{ \new \C \}$
+
+      Using \TClass with context $\Γ, \X \<: \U$ directly leads to the desired result.
+
+      \Case\TMatch:
+      \quad $\t \= \t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+      \quad $\T \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$
+      \\\phantom{\textit{Case}~\TMatch:}
+      \quad $\Γ \⊢ \t_s \: \T_s$
+      \quad $\Γ, \x_i \: \C_i \⊢ \t_i \: \T_i$
+      \quad $\Γ \⊢ \t_d \: \T_d$
+
+      We use the IH on each premise and the result follows directly from \Cref{lem:permutation} and \TMatch.
+    \end{itemize}
+  \end{enumerate}
+\end{proof}

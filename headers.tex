@@ -1,67 +1,28 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%   Thesis Settings
-%
-%   EDOC Template
-%   2011
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[a4paper,11pt]{book}
 
+\usepackage{silence}
+\WarningFilter{fourier}{Please consider}
+% \WarningFilter{latexfont}{Font shape}
+% \WarningFilter{latexfont}{Some font shapes}
+% \WarningFilter{latex}{Label(s) may have changed}
+% \WarningFilter{remreset}{The remreset package}
+
 \usepackage[T1]{fontenc}
-% % Uncomment for bibliography
-% % Bibliography using Biblatex
-%\usepackage{doi}
-%\usepackage[autostyle]{csquotes}
-% \usepackage[
-%     backend=biber,
-%     style=authoryear,
-%     natbib=true,
-%     firstinits=true,
-%     sortlocale=en_US,
-%     url=false,
-%     doi=true,
-%     eprint=false,
-%     isbn=false
-% ]{biblatex}
-%\addbibresource{tail/bibliography.bib}
-% % OR Bibliography management for Bibtex
-% Load natbib before babel
-\usepackage[round]{natbib}
+\usepackage[french,english]{babel}
+\usepackage{lmodern}
 
-
-\usepackage[french,german,english]{babel}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% EDOC THESIS TEMPLATE: Variant 1.0 -> Latin modern, large text width&height
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{lmodern} % use this to fix blurry typewriter text font
-%\usepackage[a4paper,top=22mm,bottom=28mm,inner=35mm,outer=25mm]{geometry}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% EDOC THESIS TEMPLATE: Variant 2.0 -> Utopia, Gabarrit A (lighter pages)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{fourier} % Utopia font-typesetting including mathematical formula compatible with newer TeX-Distributions (>2010)
-%\usepackage{utopia} % on older systems -> use this package instead of fourier in combination with mathdesign for better looking results
-%\usepackage[adobe-utopia]{mathdesign}
-\setlength{\textwidth}{146.8mm} % = 210mm - 37mm - 26.2mm
-\setlength{\oddsidemargin}{11.6mm} % 37mm - 1in (from hoffset)
-\setlength{\evensidemargin}{0.8mm} % = 26.2mm - 1in (from hoffset)
-\setlength{\topmargin}{-2.2mm} % = 0mm -1in + 23.2mm
-\setlength{\textheight}{221.9mm} % = 297mm -29.5mm -31.6mm - 14mm (12 to accomodate footline with pagenumber)
+\usepackage{fourier}
+\setlength{\textwidth}{146.8mm}
+\setlength{\oddsidemargin}{11.6mm}
+\setlength{\evensidemargin}{0.8mm}
+\setlength{\topmargin}{-2.2mm}
+\setlength{\textheight}{221.9mm}
 \setlength{\headheight}{14pt}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\usepackage{setspace} % increase interline spacing slightly
+\usepackage{setspace}
 \setstretch{1.1}
-
 \makeatletter
-\setlength{\@fptop}{0pt}  % for aligning all floating figures/tables etc... to the top margin
+\setlength{\@fptop}{0pt}
 \makeatother
-
 
 \usepackage{graphicx,xcolor}
 \graphicspath{{images/}}
@@ -103,15 +64,7 @@
   citecolor=black,
   urlcolor=black}
 \urlstyle{same}
-\ifpdf
 \usepackage[final]{pdfpages}
-\else
-\usepackage{calc}
-\usepackage{breakurl}
-\usepackage[nlwarning=false]{hypdvips}
-\usepackage{backref}
-\renewcommand*{\backref}[1]{}
-\fi
 \usepackage{bookmark}
 
 \makeatletter
@@ -127,16 +80,14 @@
 \makeatother \clearpage{\pagestyle{plain}\cleardoublepage}
 
 
-%%%%% CHAPTER HEADER %%%%
 \usepackage{color}
 \usepackage{tikz}
 \usepackage[explicit]{titlesec}
 \newcommand*\chapterlabel{}
-%\renewcommand{\thechapter}{\Roman{chapter}}
-\titleformat{\chapter}[display]  % type (section,chapter,etc...) to vary,  shape (eg display-type)
-  {\normalfont\bfseries\Huge} % format of the chapter
-  {\gdef\chapterlabel{\thechapter\ }}     % the label
-  {0pt} % separation between label and chapter-title
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\Huge}
+  {\gdef\chapterlabel{\thechapter\ }}
+  {0pt}
     {\begin{tikzpicture}[remember picture,overlay]
     \node[yshift=-8cm] at (current page.north west)
       {\begin{tikzpicture}[remember picture, overlay]
@@ -184,6 +135,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{xstring}
 % Fix the problem with delimiter size caused by fourier and amsmath packages.
 \makeatletter
 \def\resetMathstrut@{%
@@ -195,3 +147,244 @@
   \ht\Mathstrutbox@1.2\ht\z@ \dp\Mathstrutbox@1.2\dp\z@
 }
 \makeatother
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% Match Type paper headers %%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{amsthm}
+\usepackage{cleveref}
+\usepackage{listings}
+\usepackage{bcprules}
+\usepackage{proof}
+\usepackage{framed}
+\usepackage{xspace}
+\usepackage{mdframed}
+
+\crefname{subsection}{subsection}{subsections}
+
+% Label examples as Example A, B, C, ...
+% https://tex.stackexchange.com/a/195979/31377
+% https://tex.stackexchange.com/a/118285/31377
+\newcounter{example}[section]
+\newenvironment{example}[1][]{\refstepcounter{example}\par\medskip%
+\textbf{Example~\symbol{\numexpr64+\theexample}. #1} \rmfamily}{\medskip}
+\creflabelformat{example}{#2\symbol{\numexpr64+#1}#3}
+
+\lstdefinelanguage{scala}{
+  alsoletter={@,=,>},
+  morekeywords={
+    abstract, case, class, def, else, extends, false, free, if, implicit,
+    match, object, true, val, var, while, sealed, for, dependent, null, type,
+    with, try, catch, finally, import, final, return, new, override, this,
+    trait, private, public, protected, package, throw, enum,
+    newtype % laziness at it's best
+  },
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]"
+}
+\lstset{
+  language=scala,
+  basicstyle=\ttfamily\small,
+  keepspaces=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  escapeinside={(*}{*)},
+  belowskip=0.5em,aboveskip=0.5em,
+  xleftmargin=0pt,
+  xrightmargin=0pt
+}
+
+\lstdefinestyle{py}{language=Python, otherkeywords={as}}
+\lstdefinestyle{scala}{language=scala}
+\lstdefinestyle{typescript}{language=scala, otherkeywords={function}}
+
+\newcommand{\dotty}[1]{{\lstinline[breaklines]{#1}}}
+\newcommand{\python}[1]{{\lstinline[breaklines,style=py]{#1}}}
+\newcommand{\typescript}[1]{{\lstinline{#1}}}
+\newcommand{\haskell}[1]{{\lstinline{#1}}}
+
+\usepackage[autostyle=false, style=english]{csquotes}
+\MakeOuterQuote{"}
+
+% Hide proofs
+\usepackage{environ}
+\NewEnviron{killcontents}{}
+\let\proof\killcontents
+\let\endproof\endkillcontents
+
+\newcommand\lbl[1]{\ifcsname c@#1\endcsname\else\newcounter{#1}\label{#1}\fi}
+\newcommand{\mathkw}[1]{\text{\itshape#1}}
+
+\def\({(}
+\def\+{+}
+\def\-{-}
+\def\3{3}
+\def\4{4}
+\def\:{\operatorname{:}\allowbreak}
+\def\<:{\allowbreak\operatorname{\normalfont\text{<}:}\allowbreak}
+\def\={=\allowbreak}
+\def\[{[}
+\def\andalso{\;\quad}
+\def\Any{\normalfont\text{Any}}
+\def\A{\normalfont\text{A}}
+\def\a{\normalfont\text{a}}
+\def\bind{\normalfont\text{bind}}
+\def\Bur{\normalfont\text{Bar}}
+\def\bur{\normalfont\text{bar}}
+\def\Buzz{\normalfont\text{Buzz}}
+\def\buzz{\normalfont\text{buzz}}
+\def\B{\normalfont\text{B}}
+\def\b{\normalfont\text{b}}
+\def\Case{\item\textit{Case~}}
+\def\case{\mathkw{case}}
+\def\c{\normalfont\text{c}}
+\def\C{\normalfont\text{C}}
+\def\DXi{\textsc{D-Xi}\xspace}
+\def\DPsi{\textsc{D-Psi}\xspace}
+\def\DAll{\textsc{D-All}\xspace}
+\def\DArrow{\textsc{D-Arrow}\xspace}
+\def\disj{\normalfont\text{disj}}
+\def\DSub{\textsc{D-Sub}\xspace}
+\def\d{\normalfont\text{d}}
+\def\EAppAbs{\textsc{E-AppAbs}\xspace}
+\def\EAppA{\textsc{E-App1}\xspace}
+\def\EAppB{\textsc{E-App2}\xspace}
+\def\EMatch#1{\textsc{E-Match#1}\xspace}
+\def\BEMatch#1{\textsc{BE-Match#1}\xspace}
+\def\ETAppTAbs{\textsc{E-TAppTAbs}\xspace}
+\def\ETApp{\textsc{E-TApp}\xspace}
+\def\e{\normalfont\text{e}}
+\def\E{\normalfont\text{E}}
+\def\false{\normalfont\text{false}}
+\def\Fm{\normalfont{FM}\xspace}
+\def\FmB{\normalfont{FMB}\xspace}
+\def\Foo{\normalfont\text{Foo}}
+\def\foo{\normalfont\text{foo}}
+\def\Fsub{\normalfont{F}\ensuremath{_{\<:}}\xspace}
+\def\f{\normalfont\text{f}}
+\def\F{\normalfont\text{F}}
+\def\G{\normalfont\text{G}}
+\def\iff{\normalfont\text{iff}}
+\def\k{\normalfont\text{k}}
+\def\match{~\mathkw{match}}
+\def\Match{~\normalfont\text{Match}}
+\def\M{\normalfont\text{M}}
+\def\m{m}
+\def\new{\mathkw{new}~}
+\def\Nothing{\normalfont\text{Nothing}}
+\def\n{n}
+\def\otherwise{\mathkw{or}~}
+\def\P{\normalfont\text{P}}
+\def\q{\normalfont\text{q}}
+\def\Q{\normalfont\text{Q}}
+\def\SAll{\textsc{S-All}\xspace}
+\def\SCons{\texttt{\#:}\xspace}
+\def\SArrow{\textsc{S-Arrow}\xspace}
+\def\Shape{\texttt{Shape}\xspace}
+\def\SPsi{\textsc{S-Psi}\xspace}
+\def\SMatch#1{\textsc{S-Match#1}\xspace}
+\def\BSMatch#1{\textsc{BS-Match#1}\xspace}
+\def\SNil{\texttt{SNil}\xspace}
+\def\SRefl{\textsc{S-Refl}\xspace}
+\def\STop{\textsc{S-Top}\xspace}
+\def\STrans{\textsc{S-Trans}\xspace}
+\def\SSin{\textsc{S-Sin}\xspace}
+\def\STvar{\textsc{S-TVar}\xspace}
+\def\Subcase{\item\textit{Subcase~}}
+\def\Subsubcase{\item\textit{Subsubcase~}}
+\def\SystemFm{System~\Fm}
+\def\SystemFmB{System~\FmB}
+\def\SystemFsub{System~\Fsub}
+\def\s{\normalfont\text{s}}
+\def\S{\normalfont\text{S}}
+\def\TAbs{\textsc{T-Abs}\xspace}
+\def\TApp{\textsc{T-App}\xspace}
+\def\TClass{\textsc{T-Class}\xspace}
+\def\TMatch{\textsc{T-Match}\xspace}
+\def\BTMatch{\textsc{BT-Match}\xspace}
+\def\Top{\normalfont\text{Top}}
+\def\true{\normalfont\text{true}}
+\def\TSub{\textsc{T-Sub}\xspace}
+\def\TTAbs{\textsc{T-TAbs}\xspace}
+\def\TTApp{\textsc{T-TApp}\xspace}
+\def\TVar{\textsc{T-Var}\xspace}
+\def\T{\normalfont\text{T}}
+\def\t{\normalfont\text{t}}
+\def\U{\normalfont\text{U}}
+\def\u{\normalfont\text{u}}
+\def\V{\normalfont\text{V}}
+\def\v{\normalfont\text{v}}
+\def\W{\normalfont\text{W}}
+\def\x{\normalfont\text{x}}
+\def\xs{\normalfont\text{xs}}
+\def\X{\normalfont\text{X}}
+\def\y{\normalfont\text{y}}
+\def\Y{\normalfont\text{Y}}
+\def\·{\cdot}
+\def\×{\times}
+\def\Γ{\Gamma}
+\def\Δ{\Delta}
+\def\Λ{\Lambda}
+\def\λ{\lambda}
+\def\Ψ{\Psi}
+\def\ℕ{\mathbb{N}}
+\def\Ξ{\Xi}
+\def\→{\operatorname{\rightarrow}\allowbreak}
+\def\↦{\operatorname{\mapsto}\allowbreak}
+\def\⇌{\operatorname{\rightleftharpoons}\allowbreak}
+\def\⇒{\operatorname{\Rightarrow}\allowbreak}
+\def\∀{\forall}
+\def\∃{\exists}
+\def\∄{\nexists}
+\def\∅{\O}
+\def\∈{\operatorname{\in}\allowbreak}
+\def\∉{\operatorname{\notin}\allowbreak}
+\def\∩{\operatorname{\cap}\allowbreak}
+\def\∪{\operatorname{\cup}\allowbreak}
+\def\≠{\operatorname{\neq}\allowbreak}
+\def\≡{\allowbreak\operatorname{\normalfont\text{=}:\!\normalfont\text{=}}\allowbreak}
+\def\⊂{\operatorname{\subset}\allowbreak}
+\def\⊢{\allowbreak\operatorname{\vdash}\allowbreak}
+\def\⟦{\llbracket}
+\def\⟧{\rrbracket}
+\def\|{|}
+\def\⟶{\operatorname{\longrightarrow}\allowbreak}
+\def\Ø{\text{\emptyset}}
+\def\Char{\normalfont\text{Char}}
+\def\List{\normalfont\text{List}}
+\def\Seq{\normalfont\text{Seq}}
+\def\String{\normalfont\text{String}}
+\def\W{\normalfont\text{W}}
+\def\D{\normalfont\text{D}}
+\def\R{\normalfont\text{R}}
+\def\H{\normalfont\text{H}}
+\def\Z{\normalfont\text{Z}}
+\def\List{\normalfont\text{List}}
+\def\Int{\normalfont\text{Int}}
+\def\Id{\normalfont\text{Id}}
+
+\crefname{lem}{lemma}{lemmas}
+\Crefname{lem}{Lemma}{Lemmas}
+\crefname{thm}{theorem}{theorems}
+\Crefname{thm}{Theorem}{Theorems}
+
+\newtheoremstyle{plain}
+  {\topsep}    % ABOVESPACE
+  {\topsep}    % BELOWSPACE
+  {\itshape}   % BODYFONT
+  {}           % INDENT
+  {\bfseries}  % HEADFONT
+  {.}          % HEADPUNCT
+  {5pt plus 1pt minus 1pt} % HEADSPACE
+  {\thmname{#1}\thmnumber{ \StrSubstitute{#2}{A}{4}}\thmnote{ \normalfont(#3)}}
+\theoremstyle{plain}
+
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem*{definition*}{Definition}
+
+\input{figures.tex}

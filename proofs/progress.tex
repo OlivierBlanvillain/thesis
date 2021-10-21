@@ -1,0 +1,81 @@
+\begin{theorem}[Progress]
+  \lbl{thm:progress}
+  ~\\\indent
+  If $\t$ is a closed, well-typed term,
+  then either $\t$ is a value
+  or there is some $\t'$ such that $\t \⟶ \t'$.
+\end{theorem}
+
+\begin{proof}
+  By induction on a derivation of $\Γ \⊢ \t \: \T$.
+  \begin{itemize}
+    \Case\TVar:
+    \quad $\t \= \x$
+    \quad $\x \: \T \∈ \Γ$
+
+    This case cannot occure because $\t$ is closed.
+
+    \Case\TAbs, \TTAbs, \TClass:
+
+    In those cases, $\t$ is a value and the result is immediate.
+
+    \Case\TApp:
+    \quad $\t \= \t_{1} \t_{2}$
+    \quad $\T \= \T_{12}$
+    \quad $\Γ \⊢ \t_{1} \: \T_{11} \→ \T_{12}$
+    \quad $\Γ \⊢ \t_{2} \: \T_{11}$
+
+    By the IH, either $\t_{1}$ is a value or $\t_{1}$ can take a step
+    (there is some $\t_{1}'$ such that $\t_{1} \⟶ \t_{1}'$).
+    If $\t_{1}$ can take a step, then \EAppA applies to $\t$.
+    If $\t_{1}$ is a value, we use \Cref{lem:canonical-forms}
+    to get that $\t_{1}$ has the form $\λ \x \: \S_{1}.~ \t_{2}$.
+    Therefore, \EAppAbs applies to $\t$, as required.
+
+    \Case\TTApp:
+    \quad $\t \= \t_{1} \T_{2}$
+    \quad $\T \= \[\X \↦ \T_{2}] \T_{12}$
+    \\\phantom{\textit{Case}~\TTApp:}
+    \quad $\Γ \⊢ \t_{1} \: \(\∀ \X \<: \U_{1}.~ \T_{12})$
+    \quad $\Γ \⊢ \T_{2} \<: \U_{1}$
+
+    The proof for case \TTApp is analogous to the one for \TApp.
+
+    By the IH, either $\t_{1}$ is a value or $\t_{1}$ can take a step.
+    If $\t_{1}$ can take a step, then \ETApp applies to $\t$.
+    If $\t_{1}$ is a value, we use \Cref{lem:canonical-forms}
+    to get that $\t_{1}$ has the form $\λ \X \<: \T_{1}.~ \t_{2}$.
+    Therefore, \ETAppTAbs applies to $\t$, as required.
+
+    \Case\TSub:
+    \quad $\Γ \⊢ \t \: \S$
+    \quad $\Γ \⊢ \S \<: \T$
+
+    The result follows directly from the IH.
+
+    \Case\TMatch:
+    \quad $\t \= \t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$
+    \quad $\T \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$
+    \\\phantom{\textit{Case}~\TMatch:}
+    \quad $\Γ \⊢ \t_s \: \T_s$
+    \quad $\Γ, \x_i \: \C_i \⊢ \t_i \: \T_i$
+    \quad $\Γ \⊢ \t_d \: \T_d$
+
+    By the IH, either $\t_s$ is a value or $\t_s$ can take a step.
+    If $\t_s$ can take a step, then \EMatch1 applies to $\t$, as required.
+    If $\t_s$ is a value, $\t_s$ can take 3 different forms:
+    \begin{itemize}
+      \Subcase $\t_s$ is of the form $\new \C$:\\
+      If $\∀m.~ \(\C, \C_m) \∉ \Ψ$, then \EMatch3 applies to $\t$.
+      Otherwise, let $\C_k$ be the first class such that $\(\C, \C_k) \∈ \Ψ$.
+      By construction we know that $\∀m<k.~ \(\C, \C_k) \∉ \Ψ$.
+      Therefore \EMatch2 applies to $\t$, as required.
+
+      \Subcase $\t_s$ is of the form $\λ \x \: \T_{1} \t_{2}$:\\
+      \EMatch4 applies to $\t$ and the result is immediate.
+
+      \Subcase $\t_s$ is of the form $\∀ \X \<: \U_{1}.~ \T_{2}$:\\
+      \EMatch5 applies to $\t$ and the result is immediate.
+    \end{itemize}
+  \end{itemize}
+\end{proof}

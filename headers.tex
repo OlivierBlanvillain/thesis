@@ -10,7 +10,6 @@
 \usepackage[T1]{fontenc}
 \usepackage[french,english]{babel}
 \usepackage{lmodern}
-
 \usepackage{fourier}
 \setlength{\textwidth}{146.8mm}
 \setlength{\oddsidemargin}{11.6mm}
@@ -26,7 +25,6 @@
 
 \usepackage{graphicx,xcolor}
 \graphicspath{{images/}}
-
 \usepackage{subfig}
 \usepackage{booktabs}
 \usepackage{lipsum}
@@ -54,9 +52,6 @@
   \fancyfoot[RO,LE]{\thepage}
 }
 
-\usepackage{listings}
-\lstset{language=[LaTeX]Tex,tabsize=4, basicstyle=\scriptsize\ttfamily, showstringspaces=false, numbers=left, numberstyle=\tiny, numbersep=10pt, breaklines=true, breakautoindent=true, breakindent=10pt}
-
 \usepackage{hyperref}
 \hypersetup{pdfborder={0 0 0},
   colorlinks=true,
@@ -78,7 +73,6 @@
     \newpage
     \if@twocolumn\hbox{}\newpage\fi\fi\fi}
 \makeatother \clearpage{\pagestyle{plain}\cleardoublepage}
-
 
 \usepackage{color}
 \usepackage{tikz}
@@ -161,6 +155,7 @@
 \usepackage{framed}
 \usepackage{xspace}
 \usepackage{mdframed}
+\usepackage{natbib}
 
 \crefname{subsection}{subsection}{subsections}
 
@@ -371,6 +366,10 @@
 \Crefname{lem}{Lemma}{Lemmas}
 \crefname{thm}{theorem}{theorems}
 \Crefname{thm}{Theorem}{Theorems}
+\newcommand\prelemma[1]{%
+  \stepcounter{theorem}
+  \textsc{\thmname{Lemma}\thmnumber{~\thetheorem}\thmnote{ (#1)}}%
+}
 
 \newtheoremstyle{plain}
   {\topsep}    % ABOVESPACE

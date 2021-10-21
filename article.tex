@@ -1,0 +1,884 @@
+Type-level programming is becoming more and more popular in the realm of functional programming.
+However, the combination of type-level programming and subtyping remains largely unexplored in practical programming languages.
+This paper presents \emph{match types}, a type-level equivalent of pattern matching.
+Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
+We formalize the feature of match types in a calculus based on \SystemFsub and prove its soundness.
+We practically evaluate our system by implementing match types in the Scala 3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
+
+\section{Introduction}
+\label{sec:introduction}
+
+There is a growing interest in using \emph{type-level computation} to increase the expressivity of type systems, express additional constraints on the type level, and thereby improve the safety of general-purpose software.
+What used to be an exclusive feature of dependently typed languages is slowly becoming accessible to everyday programmers.
+GHC Haskell has been at the forefront of making this a reality and already provides several extensions to support type-level programming.
+While Haskell is certainly not the only language moving towards dependent types, the trend seems to be limited to pure functional programming languages.
+
+We believe that type-level programming is not necessarily incompatible with other programming paradigms and that the current division exists mainly due to a lack of attention from the research community.
+Unfortunately, most of the existing research conducted in this domain is not directly applicable to languages with \emph{subtyping}.
+Although the combination of subtyping and type-level programming has been studied extensively on the theoretical side, through the means of dependently typed systems~\cite{aspinall1994singleton, zwanenburg1999pure, stone2000deciding, courant2003strong, hutchins2010pure, yang2017unifying}, the practical side remains largely unexplored.
+
+One notable exception is the TypeScript language, which recently introduced a new feature called \emph{conditional type}, a type-level ternary operator based on subtyping.
+A conditional type, written \typescript{S extends T ? Tt : Tf}, reduces to \typescript{Tt} when \typescript{S} is a subtype of \typescript{T}, to \typescript{Tf} when \typescript{S} is not a subtype of \typescript{T}, and is left unreduced when types variables do not allow to draw a conclusion. Unfortunately, the algorithm used to reduce such conditional types is both \emph{unsound} and \emph{incomplete}.
+Despite the unsoundness (discussed in \Cref{subsec:conditional-types-in-typescript}), the addition of conditional types to TypeScript illustrates the practical need and timeliness of this feature.
+
+This paper presents an alternative construct for type-level programming based on subtyping, which we call \emph{match types}.
+As the name suggests, match types allow programmers to express types that perform pattern matching on types:
+%
+\begin{lstlisting}
+type Elem[X] = X match {
+  case String => Char
+  case List[t] => Elem[t]
+  case Any => X
+}
+\end{lstlisting}
+%
+The example, which we explain in detail in \Cref{sec:overview}, defines the type \dotty{Elem} by matching on the type parameter \dotty{X}.
+%
+We have implemented match types in the latest version of Scala, an industry-grade, production-ready compiler.
+Match types have received a great interest from the Scala community, and are already in active use.
+
+In this paper, we explore the theoretical foundations of match types through the lens of a type system which extends \SystemFsub with pattern matching at the term and type level.
+%
+Our formalization serves two purposes: first, it gives a clear view on \emph{how} we integrated match types in Scala's type system and precisely describes the changes needed on the subtyping relation to make this integration possible. Second, thanks to a type safety proof based on the standard progress and preservation theorems, it gives confidence that the design of match types is sensible and our implementation is sound.
+
+Conditional types provide \emph{concrete evidence} that our results are valuable beyond the context of Scala.
+Our results are directly applicable to TypeScript's type system and provide a clear path to fixing the unsoundness introduced by conditional types.
+Furthermore, we hope that match types can be useful as a reference for future designs of type-level programming features for languages with subtyping.
+
+In summary, this paper makes the following contributions:
+%
+\begin{itemize}
+  \item We introduce programming with match types in Scala by means of an example and highlight the interaction of type-level programming and subtyping (\Cref{sec:overview}).
+
+  \item We formalize match types in the self-contained calculus \SystemFm and prove it sound, providing a theoretical basis of our implementation (\Cref{sec:formalization}). The paper is accompanied by a mechanization of \SystemFm, including proofs of progress and preservation.
+
+  \item We describe our implementation of match types in the Scala compiler, discuss challenges, and relate the implementation to our formalization (\Cref{sec:implementation}).
+
+  \item We evaluate match types in a case study, presenting a type-safe version of the NumPy library (\Cref{sec:evaluation}).
+
+  \item We motivate the design of our formalization relative to prior work, we review the extensive related work on type families in Haskell, and discuss the unsoundness of conditional types in TypeScript (\Cref{sec:related-work}).
+\end{itemize}
+
+\section{Overview}
+\label{sec:overview}
+
+In this section, we offer a brief introduction of match types in Scala by inspecting the example from the previous section in more detail:
+%
+\begin{lstlisting}
+type Elem[X] = X match {
+  case String => Char
+  case List[t] => Elem[t]
+  case Any => X
+}
+\end{lstlisting}
+%
+This example defines a type \dotty{Elem} parametrized by one type parameter \dotty{X}. The right-hand side is defined in terms of a match on the type parameter -- a \emph{match type}.
+A match type reduces to one of its right-hand sides, depending on the type of its scrutinee.
+For example, the above type reduces as follows:
+%
+\begin{lstlisting}
+Elem[String] =:= Char
+Elem[Int] =:= Int
+Elem[List[Int]] =:= Int
+\end{lstlisting}
+%
+Here we use \dotty{S =:= T} to denote type equality between the two types \dotty{S} and \dotty{T}, witnessed by mutual subtyping.
+To reduce a match type, the scrutinee is compared to each pattern, one after the other, using \emph{subtyping}.
+For example, although \dotty{String} is a subtype of both \dotty{String} and \dotty{Any} (the top of Scala's subtyping lattice), \dotty{Elem[String]} reduces to \dotty{Char} because the corresponding case appears first.
+
+When the scrutinee type is a \dotty{List}, the match type \dotty{Elem} is defined recursively on the element type of the list.
+Hence, in our example \dotty{Elem[List[Int]]} first reduces to the type \dotty{Elem[Int]}, and eventually to the type \dotty{Int}.
+
+\subsection{A Lightweight Form of Dependent Typing}
+Match types enable a lightweight form of dependent typing, since a term-level pattern matching expression can be typed accordingly at the type level as a match type.
+Consider the following function definition:
+%
+\begin{lstlisting}
+def elem[X](x: X): Elem[X] = x match {
+  case x: String => x.charAt(0)
+  case x: List[t] => elem(x.head)
+  case x: Any => x
+}
+\end{lstlisting}
+%
+This definition is well-typed because the match expression in \dotty{elem}'s body has the exact same scrutinee and pattern types as \dotty{Elem[X]} (the function's return type).
+
+Thanks to Scala's type inference, a call to the \dotty{elem} function can have a result type that \emph{depends} on a term-level parameter.
+For instance, in the expression \dotty{elem(1)}, the Scala compiler infers the singleton type \dotty{X = 1} for \dotty{elem}'s type parameter.
+This expression thus has type \dotty{Elem[1]}, which reduces to \dotty{Int} (via \dotty{Elem}'s third case).
+Similarly, in \dotty{elem(x)}, the compiler infers the singleton type \dotty{X = x.type} and the expression has type \dotty{Elem[x.type]}, which might reduce further at the callsite depending on \dotty{x}'s type.
+
+In both examples, singleton types create a dependency between a type parameter and a term, which, by transitivity, results in a lightweight form of dependent typing, that is, a dependency between a term parameter and a function's result type.
+
+\subsection{Disjointness}
+Our design of match types induces an additional constraint on match type reduction: the scrutinee type must be known to be \emph{disjoint} with all type patterns preceding the matching case. Informally, disjointness means that two types have no shared inhabitants.
+
+The necessity for disjointness is best illustrated with an example. Consider \dotty{Seq[Int]}, the type of integer sequences. \dotty{Elem[Seq[Int]]} does not reduce:
+\begin{enumerate}
+  \item \dotty{Elem}'s first case does not apply because \dotty{Seq[Int]} is not a subtype of \dotty{String}.
+  \item \dotty{Elem}'s second case does not apply because \dotty{Seq[Int]} is not a subtype of \dotty{List[Int]} (lists are sequences, but not the other way around).
+  \item \dotty{Elem}'s third case is \emph{not considered} because \dotty{Seq[Int]} and \dotty{List[Int]} are not disjoint.
+\end{enumerate}
+Therefore, the reduction algorithm gets stuck on the second case and the overall type is irreducible.
+Without disjointness, \dotty{Elem[Seq[Int]]} would reduce to \dotty{Seq[Int]} (via \dotty{Elem}'s third case), which would be unsound. For example, the expression \dotty{elem[Seq[Int]](List(1,2,3))} would have type \dotty{Seq[Int]}, but evaluates to the integer \dotty{1}.
+
+\Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
+
+\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
+
+\FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
+
+\clearpage
+\section{Formalization}
+\label{sec:formalization}
+
+In this section, we formally present \SystemFm, an extension of \SystemFsub~\cite{cardelli1994extension} with pattern matching, opaque classes, and match types.
+\Cref{fig:FMSyntaxEvaluation} defines \Fm's syntax and evaluation relation. \Cref{fig:FMTypingRules} defines \Fm's type system, composed of three relations: typing, subtyping, and type disjointness.
+We discuss differences to \SystemFsub in the following subsections (\Cref{subsec:classes} and \ref{subsec:matches}).
+In \Cref{subsec:type-safety}, we outline a proof of type safety for \SystemFm.
+In \Cref{subsec:type-binding-extension}, we present an extension of \SystemFm with support for binding pattern variables in type patterns.
+
+\subsection{Classes}
+\label{subsec:classes}
+
+\SystemFm is parametrized by a set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$.
+The class inheritance forms a partial order on $\C$, that is, it is reflexive, antisymmetric and transitive.
+The class disjointness is symmetric relation over $\C$.
+Inheritance and disjointness must be consistent in the sense that $\(\A, \B) \∈ \Ξ$ implies that there is no class $\C$ such that $\(\C, \A) \∈ \Ψ$ and $\(\C, \B) \∈ \Ψ$.
+
+Each class in $\C$ gives rise to a constructor (written $\new \C$), a type (written $\C$), and a constructor singleton type (written $\{ \new \C \})$.
+The type $\C$ denotes all values that inherit $\C$, while the constructor singleton type $\{ \new \C \}$ denotes a single value: $\C$'s constructor call.
+Subtyping between classes is dictated by $\Ψ$ via the \SPsi rule.
+
+This parametric approach allows us to model class inheritance as found in object-oriented languages without the need for dedicated syntax for classes and data type definitions.
+Although our approach might appear simplistic, it can easily model advanced object-oriented features such as multiple inheritance.
+We discuss the encoding of Scala's types into \SystemFm in \Cref{subsec:disjointness-in-scala}.
+
+Our type system refers to classes by names and therefore mixes structural and nominal types.
+Names are useful to give a direct correspondence between runtime tags and compile-time types.
+As we will see, runtime tags are essential to runtime type testing and play a central role in the evaluation of pattern matching.
+
+\subsection{Matches}
+\label{subsec:matches}
+
+\SystemFm supports both pattern matching on the term level (\emph{match expressions}) as well as on the type-level (\emph{match types}).
+Matches, both on terms and on types, are composed of a scrutinee, a list of cases and a default expression/type.
+Each case consists of a \emph{type test} and a corresponding expression/type.
+At the term level, a type test consists of an inheritance check against a particular class (this is also known as a typecase \cite{abadi1991dynamic}).
+At the type level, a type test corresponds to a subtyping test with a particular type.
+This disparity reflects the difference between runtime, where type tests are implemented using class tables, and compile time, where types are compared using the type system in its full extent.
+We discuss the representation of Scala types at runtime in \Cref{subsec:types-at-runtime}.
+
+Throughout this paper, we use the abbreviated syntax $\t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$ to denote an arbitrary number of cases, that is, $\∃ \n \∈ \ℕ.~ \t_s \match \{ \x_{1} \: \C_{1} \⇒ \t_{1}; \dots; \x_n \: \C_n \⇒ \t_n \} \otherwise \t_d$.
+
+Match expressions and match types are related by the \TMatch typing rule.
+This rule operates by typing each component of a match expression to then assemble the corresponding match type.
+
+\begin{example}
+\label{ex:simplereduction}
+For example, given two disjoint classes $\A$ and $\B$, and an empty class inheritance ($\Ψ \= \Id, \Ξ \= \{ \(\A, \B), \(\B, \A) \}$); the following function:
+\\\indent $\f \= \λ \X \<: \Top.~ \λ \x \: \X.~ \x \match \{ \a \: \A \⇒ \foo; \b \: \B \⇒ \bur \} \otherwise \buzz$
+\\\noindent
+can be typed precisely as
+\\\indent $\f \hspace{4pt} \: \hspace{2.5pt} \∀ \X \<: \Top.~ \X \→ \X \match \{ \A \⇒ \Foo; \B \⇒ \Bur \} \otherwise \Buzz$
+\\\noindent
+where $\foo$, $\bur$ and $\buzz$ are expressions with types $\Foo$, $\Bur$ and $\Buzz$, respectively.
+\end{example}
+
+The cases of a match expression are evaluated \emph{sequentially}: the scrutinee is checked using the type test of each case, one after the other.
+The overall expression reduces to the expression that corresponds to the first successful type test (\EMatch2).
+When no type test succeeds, the match evaluates to its default expression (\EMatch3/4/5).
+For instance, given the function $\f$ defined in \Cref{ex:simplereduction}, the expression $\(\f~\A~\(\new \A))$ evaluates to $\foo$ and $\(\f~\B~\(\new \B))$ to $\bur$.
+
+% Even though \Fm is limited to type test patterns, more elaborate patterns can be expressed using type tests.
+% For example, consider the following data type deconstruction pattern (left-hand side):
+
+% list match {
+%   case x :: xs => print(x)
+%   case Nil => ()
+% }
+
+% list match {
+%   case l : ::[Any] => print(l.head)
+%   case Nil => ()
+% }
+
+% \noindent
+% This pattern could alternatively be written as type test pattern (right-hand side), were \dotty{::[Any]} is the type of Scala's cons node.
+
+\subsubsection*{Match Type Reduction}
+The subtyping relation contains five rules for match type reduction, \SMatch1/2/3/4/5.
+These rules are defined in pairs using the $\≡$ shorthand notation, where $\S \≡ \T$ means that $\S$ and $\T$ are in a mutual subtyping relation.
+More precisely, \SMatch1/2 in \Cref{fig:FMTypingRules} corresponds to two typing rules with identical premises and symmetrical conclusion, and the same goes for \SMatch3/4.
+
+The typing rules for match type reduction are best explained as generalizations of the evaluation relation.
+Given a match type $\M \= \T_s \match \{ \C_i \⇒ \T_i \} \otherwise \T_d$, $\M$ reduces to $\T_i$ if and only if, for every value $\t_s$ in $\T_s$, the term level expression $\t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$ evaluates to $\t_i$.
+
+The \SMatch1/2 rules correspond to the evaluation of a match expression to its $\n$th case (\EMatch2):
+
+\SMatchAinline
+
+The first premise ensures that the $\n$th case type test will succeed for every possible value in the scrutinee type $\T_s$.
+Conversely, the second premise is a disjointness judgment, which ensures that no value in the scrutinee type would result in a successful type test for cases prior to the $\n$th case.
+The \SMatch3/4 rules correspond to an evaluation to the default case (\EMatch2), and require disjointness between the scrutinee type and each type test type:
+
+\SMatchBinline
+
+Disjointness between two classes can be concluded directly using the \DXi rule which uses the class disjointness $\Ξ$.
+Likewise, disjointness between a constructor singleton type and a class can be concluded directly by inspecting the class inheritance $\Ψ$ (\DPsi).
+Function types and universal types are disjoint from classes as they are inhabited by different values (\DArrow, \DAll) and thus will never match.
+The last disjointness rule, \DSub, states that if $\U$ and $\T$ are disjoint, then all subtypes of $\U$ are also disjoint with $\T$.
+
+\begin{example}
+We continue developing \Cref{ex:simplereduction} by showing how match type reduction rules can be used to conclude that $\(\f~\B~\(\new \B))$ has type $\Bur$.
+Using \TTApp and \TApp, the expression can be typed as follows:
+\\\indent
+$\f~\B~\(\new \B) \hspace{2pt} \: \hspace{3pt} \B \match \{ \A \⇒ \Foo; \B \⇒ \Bur \} \otherwise \Buzz$
+\\\noindent
+Since our example assumes an empty class inheritance and $\(\A, \B) \∈ \Ξ$, the \SMatch1 rule gives:
+\\\indent
+$\Ø \⊢ \B \match \{ \A \⇒ \Foo; \B \⇒ \Bur \} \otherwise \Buzz \<: \Bur$
+\\\noindent
+Finally, using \TSub we get $\(\f~\B~\(\new \B)) \: \Bur$.
+% This example also illustrates how \SystemFm enables simple forms of dependent typing.
+% Indeed, the type of this function application \emph{depends} on its arguments; the function $\f$ is dependently typed.
+\end{example}
+
+\subsubsection*{Subtyping and Disjointness}\hspace{-1pt}
+\label{subsub:subtyping-and-disjointness}
+One might wonder what happens if we simplify the match type reduction rules by replacing premises of the form $\Γ \⊢ \disj(\T, \C)$ by seemingly equivalent premises of the form $\(\T, \C) \∉ \Ψ$.
+Unfortunately, the resulting system would be unsound, which can be demonstrated with a counterexample.
+Let us assume the function~$\f$ defined in \Cref{ex:simplereduction}, adding a new class $\E$ with $\Ψ \= \{ \(\E, \A), \(\E, \B) \}$ and $\Ξ \= \{ \}$.
+Now, consider the term $\(\f~\B~\(\new \E))$. Since we have $\Ø \⊢ \E \<: \B$, this function application is well-typed and, given that $\(\E, \A) \∈ \Ψ$, evaluates to $\foo$. The term-level and type-level reductions are inconsistent!
+The unsoundness arises when using $\(\B, \A) \∉ \Ψ$ with the modified \SMatch1 rule to wrongly conclude that $\(\f~\B~\(\new \E))$ has type $\Bur$. This would result in an inconsistency between types $\(\e \: \Bur)$ and evaluation $\(\e \⟶ \foo)$, and violate type soundness.
+In \SystemFm, the match type obtained when typing $\(\f~\B~\(\new \E))$ does not reduce since the scrutinee type $\B$ is neither disjoint with, nor a subtype of the first pattern type test $\A$.
+In this case, the match type is \emph{stuck}, and is assigned as is.
+Stuck types can appear as the result of programming error, but can also be due to the local irreducibility of a match type.
+For instance, the body of~$\f$ is typed with a stuck type, as shown in \Cref{ex:simplereduction}, but that type can later become reducible depending on type variable instantiations.
+
+\subsection{Type Safety}
+\label{subsec:type-safety}
+
+We show the type safety of \SystemFm through the usual progress and preservation theorems.
+This section provides an overview of the proof structure and states the involved lemmas and theorems.
+Detailed proofs are available in the supplementary material of this paper in two different versions.
+The first version is a pen-and-paper proof where \SystemFm is exactly as presented in \Cref{fig:FMTypingRules}.
+The second version is a mechanization of the proof in Coq,
+using the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings.
+Our mechanization uses a simplified representation of match types with exactly one case per match.
+Matches with multiple cases can be expressed by nesting match types in default cases.
+
+\structure{Structure of the type safety proof. Arrows represent implications between lemmas and theorems.}
+
+% There is nothing special about this, omitted since it is standard.
+% An important technical detail that we omitted in \Cref{fig:FMTypingRules} concerns the well-formedness of types on contexts.
+% A type $\T$ is well-formed in $\Γ$ when all the free variables in $\T$ are bound in $\Γ$.
+% A context $\Γ$ is well-formed if each name is bound at most once and if each binding is to a well-formed type in the context preceding its binding.
+% To improve presentation, we have omitted all well-formedness premises from our typing rules.
+
+\Cref{fig:structure} gives an overview of the proof structure by showing implications between the various lemmas and theorems.
+The basic structure resembles that of \SystemFsub's standard safety proof from~\cite{pierce2002types}.
+We continue our presentation by introducing the lemmas and theorems used in our type safety proof.
+
+\subsubsection*{Preliminary Lemmas}
+Our proof begins with preliminary technical lemmas: \prelemma{Permutation}, \prelemma{Weakening}, \prelemma{Strengthening}, \prelemma{Substitution}.
+We omit stating these lemmas as they are entirely standard yet relatively lengthy given that they span the three relations of our system: typing, subtyping, and disjointness.
+As usual, their proofs follow by mutual inductions on derivations.
+
+\subsubsection*{Disjointness / Subtyping Exclusivity}
+The following non-standard lemma is necessary to prevent overlap between the \SMatch1/2 and \SMatch3/4 rules.
+%
+\input{proofs/disjointness-subtyping-exclusivity.tex}
+%
+If such overlap would be allowed, match types could reduce in several different ways, resulting in an unsound system.
+We prove \Cref{lem:disjointness-subtyping-exclusivity} by contradiction.
+Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P$.
+We show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness in $\P$.
+This set-theoretical view lets us conclude the desired result directly.
+In our Coq mechanization, we axiomatize this lemma and delegate to the pen-and-paper proof.
+
+\subsubsection*{Inversion of Subtyping}
+\harpoon{Definition of the auxiliary relation $\⇌$, used to state inversion of subtyping (\Cref{lem:inversion-of-subtyping}).}
+
+The following \Cref{lem:inversion-of-subtyping} allows us to perform inversion on the subtyping relation,
+which is important to show canonical forms (\Cref{lem:canonical-forms}) and inversion of typing (\Cref{lem:inversion-of-typing}).
+Stating the lemma requires the definition of a new relation denoted $\Γ \⊢ \S \⇌ \T$, defined in \Cref{fig:harpoon}.
+It represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$ with the additional constraint that this evidence was exclusively constructed using pairwise applications of \SMatch1/2, \SMatch3/4, and \STrans in both directions.
+Intuitively, $\Γ \⊢ \S \⇌ \T$ is handier than two independent derivations of $\Γ \⊢ \S \<: \T$ and $\Γ \⊢ \T \<: \S$ because it allows simultaneous induction on both subtyping directions.
+%
+\input{proofs/inversion-of-subtyping.tex}
+%
+The first point of \Cref{lem:inversion-of-subtyping} uses the structure of the $\⇌$ to provide a form of inversion, which we use to prove each of the subsequent points.
+In comparison with the corresponding inversion lemma in \Fsub's safety proof, the statement and the proof of \Cref{lem:inversion-of-subtyping} are longer and more intricate.
+This difference is inevitable, given that match type reduction rules allow match expressions to be typed as the result of their reduction, which complexifies the inversion.
+
+Similarly to inversion of subtyping, our canonical forms lemma is non-standard in that it uses a disjunction in its premise to account for match types.
+
+\input{proofs/canonical-forms.tex}
+
+\subsubsection*{Proof of Soundness}
+The remaining proof of soundness is mostly standard.
+\Cref{lem:inversion-of-typing} and \labelcref{lem:minimum-types} are simple inversions of typing rules.
+\Cref{lem:minimum-types} is needed in the proof of preservation to recover subtyping bounds from typing judgments.
+The proofs proceed by routine induction on derivations.
+%
+\input{proofs/inversion-of-typing.tex}
+\input{proofs/minimum-types.tex}
+%
+With these lemmas in place, the proofs of progress and preservation are straightforward.
+%
+\input{proofs/progress.tex}
+\input{proofs/preservation.tex}
+
+\subsection{Type Binding Extension}
+\label{subsec:type-binding-extension}
+
+\FMExtension{\SystemFmB syntax, evaluation and typing rules for a given set of ground classes $\A$, set of parametric classes $\B$, class inheritance $\Ψ$, and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to changes made to \SystemFm.}
+
+In this section, we present \SystemFmB, an extension of \SystemFm with support for binding pattern variables in type patterns.
+\FmB is parametrized by two sets of classes, $\A$ and $\B$, representing non-parametric and parametric classes, respectively.
+A parametric class, written $\B~\T$, takes exactly one type parameter\footnotemark.
+This approach allows us to reuse most of \Fm's definitions.
+Indeed, our formal development treats $\C$, $\Ψ$, and $\Ξ$ as mathematical objects, and is compatible with \FmB's new definition of classes.
+
+\footnotetext{
+The restriction to a single type parameter is for presentation purposes.
+Both \SystemFmB's type system and type-safety proof can easily be adapted to support a variable number of binding variables.
+}
+
+In \Cref{fig:FMExtension}, we define \SystemFmB syntax and rules, where changes to \SystemFm are highlighted in gray.
+\FmB's new syntax for match expressions and match types adds a \emph{pattern variable} to each construct.
+In $\t_s \match \[\X] \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$, the pattern variable $\X$ is available to bind type parameters in $\C_i$ patterns.
+
+The definitions of \SMatch3/4, \SMatch5, and \TMatch require minor adjustments to account for the pattern variable in typing contexts.
+Note that pattern variables appear in contexts unconditionally, regardless of whether or not those variables are used in the corresponding patterns.
+
+In the new subtyping rule for non-default match reduction, \BSMatch1/2, the first premise instantiates the pattern variable $\X$ to some type $\U$ such that the scrutinee type is a subtype of the $\n$th pattern:
+\BSMatchInline
+Here $\U$ is completely unconstrained: any instantiation of $\X$ such that $\T_s \<: \S_n$ would be admissible.
+The disjointness judgments use a weaker upper bound for $\X$ than the subtyping judgment ($\X \<: \Top$ instead of $\X \<: \U$).
+This is because the scrutinee type must be shown disjoint with non-matching pattern types for every possible instantiation of $\X$.
+In an algorithmic system, $\U$ would be computed during type inference by constraint solving.
+
+The new evaluation rule for non-default match reduction uses a similar mechanism: it looks for the \emph{first case} where the pattern variable can be instantiated such that the scrutinee inherits the corresponding pattern:
+
+\BEMatchInline
+
+The second premise rules out non-matching cases with a universal quantifier ranging over all types.
+A concrete implementation would certainly opt for a more efficient approach, for instance by implementing $\Ψ$ as a lookup table.
+
+\begin{example}
+\label{ex:binding}
+Consider the following class hierarchy with two ground classes: $\Char$ and $\String$, and a single parametric class $\List$, such that $\String$ extends $\List~\Char$:
+%
+\begin{flalign*}%
+\indent
+  \A &= \{ \Char, \String \}
+& \B &= \{ \List \}
+\hspace{200pt}\\\indent
+  \Ψ &= \{ (\String, \List~\Char) \} ∪ \Id
+& \Ξ &= \{ \}
+\hspace{200pt}\\\indent
+  \f &= \λ \x \: \Top.~\x \match [\X] \{ \xs \: \List~\X \⇒ \foo \} \otherwise \bur
+\hspace{-100pt}
+\end{flalign*}%
+%
+The function $\f$ matches its arguments against the $\List~\X$ pattern, where $\X$ is a pattern variable.
+We examine the evaluation of two applications of $\f$:
+
+\begin{enumerate}
+  \item $\f \(\new \String)$ matches against $\List~\X$ with $\X \= \Char$ and evaluates to $\[\X \↦ \Char][\x \↦ \new \String] \foo$ via \BEMatch2 (since $\(\String, \List~\Char) \∈ \Ψ$).
+  \item $\f \(\new \List~\Top)$ also matches $\List~\X$, this time with $\X \= \Top$, and evaluates to $\[\X \↦ \Top][\x \↦ \new \List~\Top] \foo$ via \BEMatch2. Here $\(\List~\Top, \List~\Top) \∈ \Ψ$ follows from $\Ψ$'s reflexivity.
+\end{enumerate}
+\end{example}
+
+We established the type safety of \SystemFmB by adapting \SystemFm's pen-and-paper proof.
+The required changes are lengthy, but relatively uninteresting; it boils down to additional bookkeeping of pattern variables in contexts.
+The main takeaway from \FmB's type safety is that the proof does not require additional constraints on type $\U$ in \BSMatch1/2.
+As a result, algorithmic implementations are free to use any mechanism to come up with instantiations of pattern variables.
+
+\section{Implementation}
+\label{sec:implementation}
+
+Match types are implemented in Dotty, the reference compiler for Scala 3.
+This section explains how our implementation relates to the formalization presented in \Cref{sec:formalization}.
+
+In the compiler, match-type reduction happens during subtyping, just like in \SystemFm.
+In order for subtyping to remain algorithmic, match type reduction rules are never used to introduce new match types, but only to simplify the ones present in the original program.
+The reduction algorithm closely follows the typing rules of \Cref{sec:formalization}.
+The scrutinee type is compared with each pattern sequentially.
+If the scrutinee is a subtype of the first pattern type, the match type reduces.
+Otherwise, if the scrutinee can be shown to be disjoint with the first pattern type, the algorithm proceeds to the next pattern.
+If the algorithm reaches a pattern where neither subtyping nor disjointness can be concluded, the reduction is aborted and the match type remains unreduced.
+
+\subsection{Disjointness in Scala}
+\label{subsec:disjointness-in-scala}
+
+Separate compilation is the biggest obstacle to concluding that two types are disjoint.
+Indeed, in Scala, all traits and classes are extensible by default.
+Because Scala programs are compiled with an open-world assumption, it is common for types to be effectively disjoint in the current compilation unit, but due to potential extensions in future compilations, the compiler must stay conservative.
+
+Separate compilation is the reason why our formalization requires two different parameters to describe its class hierarchy.
+One particular instantiation of \SystemFm can be thought of as a model of Scala's type system for a particular compilation unit, where $\C$ represents the set of classes declared \emph{so far}.
+The class inheritance, $\Ψ$, remains valid for all subsequent compilation units: new class definitions do not alter the inheritance between previously defined classes.
+However, the inheritance parameter ($\Ψ$) is, on its own, not sufficient to conclude that two classes are disjoint: new class definitions can introduce new overlaps between existing classes.
+For this reason, our formalization uses a separate parameter to describe class disjointness ($\Ξ$).
+To account for separate compilation, $\Ξ$ should only contain pairs of classes which would remain disjoint despite potential additions to the current set of classes.
+
+Thankfully, Scala provides several ways to restrict extensibility.
+The \emph{sealed} and \emph{final} annotations on traits and classes directly restrict the extensibility of annotated types: sealed types can only be extended in the same file as its declaration, thereby providing a way to enumerate all the children of a type.
+Thus, disjointness of sealed traits and classes can be computed recursively by iterating over all the possible subtypes of that type.
+The main distinction between traits and classes is that a class can extend at most one superclass.
+This property allows the compiler to assert that classes are disjoint with a simple check: given two classes $\A$ and $\B$, if neither $\A \<: \B$ nor $\B \<: \A$, then no class could possibly extend both $\A$ and $\B$, and those two types are disjoint.
+
+As an example, consider the following Scala definitions (left-hand side), and the corresponding instantiation of \SystemFm (right-hand side):
+
+\vspace{-10pt}\noindent%
+\begin{minipage}[t]{.475\linewidth}%
+\begin{lstlisting}
+sealed trait Part
+final class Wheel extends Part
+final class DiscBrake extends Part
+\end{lstlisting}%
+\vspace{-3pt}%
+\begin{lstlisting}
+trait Vehicle
+class Bicycle extends Vehicle
+class RoadBike extends Bicycle
+\end{lstlisting}%
+\vspace{-3pt}%
+\begin{lstlisting}
+class Helmet
+\end{lstlisting}%
+\end{minipage}%
+%
+\begin{minipage}[t]{.52\linewidth}%
+\hfuzz=3pt
+\begin{flalign*}%
+       \C = \{ & \P, \W, \D, \V, \B, \R, \H \}\\[3pt]
+\Ψ = \{ & (\W, \P), (\D, \P), (\B, \V), (\R, \B), (\R, \V) \}\\[3pt]
+\Ξ = \{ & (\P, \V), (\P, \B), (\P, \R), (\P, \H),
+\\      & (\W, \V), (\W, \B), (\W, \R), (\W, \H),
+\\      & (\D, \V), (\D, \B), (\D, \R), (\D, \H),
+\\      & (\W, \D), (\B, \H), (\R, \H) \}
+\end{flalign*}%
+\hfuzz=0pt
+\end{minipage}
+
+\noindent
+The classes and inheritance relation are practically isomorphic between the two representation: Scala classes have a one-to-one correspondence to their \Fm counterparts (abbreviated with initials) and the inheritance only contains an additional entry for $\R$ and $\V$, obtained by transitivity ($\Ψ$'s reflexivity and $\Ξ$'s symmetry are omitted for brevity).
+
+$\P$ is declared sealed, meaning that no additional parts can be defined outside of this compilation unit.
+As a result, we can enumerate all parts to conclude that none are vehicles and $\(\P, \V) \∈ \Ξ$.
+Note that this would not be the case if either $\W$ or $\D$ was declared non-final, since extending those classes would indirectly create new parts.
+$\B$ and $\H$ are both classes that do not inherit each other, which implies that $\(\B, \H) \∈ \Ξ$ given that Scala classes can extend at most one class.
+$\V$ and $\H$, however, cannot be concluded disjoint in those definitions.
+If that turns out to be a desirable property, disjointness could easily be obtained by sealing $\V$ or finalizing $\H$.
+
+\subsection{Empty Types}
+\label{subsec:empty-types}
+
+An important limitation of \SystemFm compared to Scala's type system is that it does not support empty types.
+The bottom of Scala's subtyping lattice, called \dotty{Nothing}, provides a direct way to refer to empty sets of values.
+Intersection types also provide a way to construct uninhabited types given that Scala does not forbid intersecting two disjoint types.
+Empty types are problematic for the match type reduction algorithm as they break the fundamental assumption that two types cannot be both disjoint and subtypes (\Cref{lem:disjointness-subtyping-exclusivity}).
+To account for this, our implementation uses an additional \emph{inhabitance check} on scrutinee types before attempting any reduction.
+
+To show why empty types are problematic, we can construct an example where, in the absence of an inhabitance check, the same match type could be reduced differently in two different contexts:
+%
+\begin{lstlisting}
+type M[X] = X match {
+  case Int => String
+  case String => Int
+}
+class C {
+  type X
+  def f(bad: M[X & String]): Int = bad
+}
+class D extends C {
+  type X = Int
+}
+\end{lstlisting}
+%
+In this example, the definition of \dotty{f} in \dotty{C} type-checks because \dotty{X & String} and \dotty{Int} are disjoint (since \dotty{String} and \dotty{Int} are disjoint) and \dotty{M[X & String]} reduces to \dotty{Int} (\dotty{M}'s second case applies).
+Class \dotty{D} refines the definition of \dotty{C} by giving concrete definition of \dotty{X}.
+The unsoundness manifests itself in the body of class \dotty{D}, where \dotty{X & String} is a subtype of \dotty{Int} and \dotty{M[X & String]} reduces to \dotty{String} (\dotty{M}'s first case applies).
+There, it is possible to call the function~\dotty{f} with a string argument, which would result in a runtime error.
+Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent \dotty{M[Int & String]} from reducing given that \dotty{Int & String} is not inhabited.
+
+\subsection{Null Values}
+\label{subsec:null-values}
+
+In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \dotty{A | Null} \cite{nieto2020scala}.
+Our implementation of subtyping and disjointness handles union types and therefore needs no particular treatment of null values.
+
+% To allow easy migration from older versions, the strict treatment of nulls is still optional in Scala 3.0, enabled by the command line option \dotty{-Yexplicit-nulls}. The plan is to make strict null checking the default in the future.
+
+\subsection{Variance}
+
+Scala supports variance annotations on type parameters of higher-kinded types.
+These annotations allow programmers to specify how the subtyping of annotated parameters influences the subtyping of the higher-kinded type.
+For instance, \dotty{type F[+T]} defines a type \dotty{F} that is covariant in its first type parameter, meaning that \dotty{T1 <: T2} implies \dotty{F[T1] <: F[T2]}.
+Contravariance, written \dotty{type G[-T]}, has the opposite meaning: \dotty{T1 <: T2} implies \dotty{G[T2] <: G[T1]}.
+
+It would appear that co- and contravariant types are always overlapping, given that, for all types \dotty{X}, \dotty{F[Nothing] <:} \dotty{F[X]} and \dotty{G[Any] <: G[X]} (where \dotty{Nothing} and \dotty{Any} are Scala's bottom and top types).
+However, in the case of covariant parameters, an exception can be made when the said type parameter corresponds to a field or a constructor parameter: the \dotty{Nothing} instantiation can be ruled out because no runtime program can produce a value of that type.
+
+Scala tuples, for example, fall into this category.
+\dotty{Tuple2}, the class for pairs, is defined as follows:
+%
+\begin{lstlisting}
+case class Tuple2[+T1, +T2](_1: T1, _2: T2)
+\end{lstlisting}
+%
+Given two instantiations of this this type, \dotty{Tuple2[Int,} \dotty{X]} and \dotty{Tuple2[String,X]}, although \dotty{Tuple2[Nothing,X]} is a subtype of both, there is no runtime value of type \dotty{Tuple2[} \dotty{Nothing,X]} (since \dotty{Nothing} is uninhabited), and, as a result, those two types are disjoint.
+Our disjointness algorithm implements this kind of reasoning to conclude disjointness in the presence of covariant type parameters.
+
+\subsection{Pattern Matching Exhaustivity}
+\label{subsec:pattern-matching-exhaustivity}
+
+The Scala compiler checks for pattern matching exhaustivity to prevent runtime exceptions caused by missing cases.
+Exhaustivity checking uses static knowledge about the class hierarchy (such as the sealed and final annotations) to check that every value in the scrutinee type is covered by the pattern clauses \cite{fengyun2016generic}.
+Non-exhaustive patterns are compiled with an additional "catch-all" case which throws a runtime exception.
+\SystemFm uses default cases as a replacement for systematic exhaustivity checks or runtime exceptions.
+
+\subsection{Types at Runtime}
+\label{subsec:types-at-runtime}
+
+% \olivier{
+% Type erasure is the process by which type arguments of generic types (type constructors) are removed from programs during compilation.
+% Scala's erasure affects pattern matching because it prevents certain patterns from being checked at runtime.
+% For instance, both `List[String]` and `List[Int]` erase to `List[Object]`, which makes them indistinguishable at runtime.
+% This limitation is intrinsic to the JVM and affects Scala's pattern matching in general.
+% Match types reduce during type checking (before erasure) and are not affected by this limitation.
+% Erasure thus creates an expressivity gap between pattern matching at the term and at the type level.
+% }
+
+Scala's primary platform is the Java virtual machine (JVM).
+On the JVM, Scala is compiled using \emph{partial erasures}, where parts of types are preserved and translated to the JVM's type systems, and other parts are erased \cite{schinz2005compiling}.
+For instance, ground classes are compiled directly to JVM classes, but type parameters and type variables are erased and replaced by their bounds.
+
+Erasure directly affects the type tests that can be performed at runtime.
+For example, while \dotty{case xs: List[Int] =>} is a syntactically valid pattern, it will lead to a compiler warning since the \dotty{Int} type parameter is eliminated by erasure and cannot be checked at runtime.
+
+This restriction is reflected in our formalism by the difference between the evaluation rules for match expressions and the reduction rules for match types: evaluation is limited to inheritance checks on statically defined classes ($\(\C, \C_n) \∈ \Ψ$ in \EMatch2/3), as opposed to the match type reduction rules which are defined using the subtyping and type disjointness relations ($\Γ \⊢ \T_s \<: \S_n$ and $\Γ \⊢ \disj(\T_s, \S_m)$ in \SMatch1/2/3/4).
+
+In \SystemFmB (\Cref{subsec:type-binding-extension}), match expressions support two sorts of parametric patterns: they can be either instantiated (\!\!$\match \{ \xs \: \List~\Int \}$, where $\Int \∈ \A$), or use a binding pattern variable (\!\!$\match \[\X] \{ \xs \: \List~\X \}$, where $\X$ is a pattern variable).
+In this sense, \SystemFmB is \emph{more expressive} than Scala, where instantiated patterns are not available at the term level due to type erasure.
+
+\subsection{Non-Termination}
+\label{subsec:non-termination}
+
+Unlike our calculus, the Scala implementation also allows match types to be defined recursively.
+Recursive match types can cause subtyping checks to loop indefinitely.
+Our implementation does not check match types for termination, as any such check would necessarily limit expressiveness or convenience.
+Instead, we detect divergence during match type reduction using a fuel mechanism.
+The compiler is given an initial amount of fuel, which is consumed one unit at a time on every reduction step.
+If the compiler runs out of fuel, the reduction is aborted with a "recursion limit exceeded" error.
+The current implementation uses a fixed amount of initial fuel.
+Although this seems to be sufficient for most practical purposes, we plan on making it configurable.
+This mechanism is completely standard and already used in other programing languages with unbounded recursion at the type level \cite{eisenberg2014closed, vilhelm2015dependently, eisenberg2016dependent}.
+
+\subsection{Inference}
+
+\SystemFm's type rules enable any match expression to be typed as a match type, but the situation is different in the full Scala language.
+Pattern matching in Scala supports many sorts of patterns~\cite{emir2007matching}, most of which do not have a match type counterpart.
+Furthermore, typing match expressions as match types is not enabled by default in order to preserve backward compatibility.
+Instead, explicit type annotations must be provided.
+
+\subsection{Caching}
+
+Scala's type-checking algorithm makes heavy use of caching to improve its performance.
+Special care must be taken when caching the result of match type reduction, given that the subtyping and disjointness checks are context-dependent.
+Our implementation uses a context-aware cache for match types that automatically invalidates reduction results when match types are reduced in new contexts.
+An example where naive caching would be incorrect can be found in \Cref{subsec:roles-in-haskell}.
+
+\subsection{Size of the Implementation}
+
+In terms of lines of code, our match type implementation is a relatively modest addition to the Scala compiler: the overall changes amount to around 1500 lines (excluding tests and documentation).
+
+% Roughly speaking, it's probably less given the diff overlap...
+% https://github.com/lampepfl/dotty/pull/4964 +822
+% https://github.com/lampepfl/dotty/pull/5996 +364
+% https://github.com/lampepfl/dotty/pull/6050 +144
+% I don't count this one as I'm sure all these lines were touched afterwards:
+% https://github.com/lampepfl/dotty/pull/6319
+% https://github.com/lampepfl/dotty/pull/7364 +73
+% https://github.com/lampepfl/dotty/pull/7364 +80
+% https://github.com/lampepfl/dotty/pull/8024 +87
+
+\section{Case Study: Shape-Safe NumPy}
+\label{sec:evaluation}
+
+In this section, we present a case study to show how match types can be used to express complex type constraints, which in turn can prevent certain programming errors at compile time.
+To this end, we outline the type-level implementation of a library for multidimensional arrays which mimics the NumPy API~\cite{harris2020numpy}.
+The goal of our library is to provide a \emph{shape}-safe interface for manipulating $\n$-dimensional arrays (abbreviated ndarrays), where array shapes and indices are checked for errors at compile-time rather than at runtime.
+Shape and indexing errors in ndarrays is a widely acknowledged problem~\cite{barham2019stuck, rush2019namedtensor}, and several solutions have already been proposed, notably in the form of libraries that rely on type-level programming~\cite{chen2017typesafe, huang2017hasktorch}.
+Our library uses match types to provide a shape-safe NumPy-like interface.
+We believe that the approach presented in this case study is an improvement over the status quo because it does not use metaprogramming or any sort of convoluted encoding to express type-level operations.
+
+% \subsection{Related Work}
+% Shape and indexing errors in ndarrays is a widely acknowledged problem~\cite{barham2019stuck, rush2019namedtensor}, and several solutions have been suggested.
+% The Dex language~\cite{maclaurin2019dex} introduces an experimental language with a Hindley--Milner-based type system with types for index sets, but cannot express variable-rank ndarrays and lacks the type-level arithmetic needed for typing reshapes.
+% Nexus~\cite{chen2017typesafe} represents variable-rank ndarrays as HLists of dimension labels, and uses Scala's implicit resolution to express type-level transformations on shapes.
+% However, it only guards against rank errors, and not ndarray size errors.
+
+% Match types offer an abstraction that can be used to express what these solutions cannot. They allow us to program shape transformations and type constraints, in order to  achieve shape-safety for variable ranks.
+% The implementation in this case study is inspired by the HaskTorch Haskell library~\cite{huang2017hasktorch}, which also represents shapes using HLists, and makes direct use of type-level computation to compute shape transformations.
+
+\subsection{Shape Errors in Python}
+In the example Python code below, the \python{img_batch} ndarray is a batch of 25 randomly generated RGB images of size 256$\×$256.
+The code aims to compute a vector of length 25 containing the average grayscale color of each image in the batch, and then create a square 5$\×$5 image of the average grayscale colors.
+However, this code contains a shape error and will throw an error at runtime.
+%
+\badreducecodesection
+%
+The error is in the call to \python{np.mean}, which takes as argument a list of axes to reduce along.
+Unfortunately, the arguments to \python{np.mean} are off-by-one and result in a vector of length 3 (\python{img_batch}'s last dimension) instead of the intended length of 25 (\python{img_batch}'s first dimension); \python{avg_color} thus contains the average RGB color of the batch instead of the average grayscale color for each image.
+The reshape operation will then fail at runtime, as it cannot reshape a 3-element vector into a 25-element matrix.
+This error can be difficult to spot, given that NumPy's interface for reducing along multiple axes is index-based.
+Runtime errors like this one can be particularly frustrating when they occur late in a long-running computation.
+
+In the remainder of this section, we show how match types can be used to prevent this class of error.
+After a preliminary introduction of singleton types (\Cref{subsec:singleton-types}), we introduce ndarray shapes at the type level using HLists (\Cref{subsec:array-shape}).
+In \Cref{subsec:shape-match-types}, we show type-level implementations of the \python{np.mean} and \python{np.reshape} operations using match types.
+Finally, we show how this newly defined API can detect and report the error from our original Python example.
+
+\subsection{Singleton Types}
+\label{subsec:singleton-types}
+
+Scala supports singleton types, which are types inhabited by a single value~\cite{leontiev2014sip}.
+For instance, the singleton type \dotty{1} denotes the type containing the integer value \dotty{1}.
+The Scala standard library contains several predefined match types to perform arithmetic operations at the type level.
+For instance, \dotty{type +[A <: Int,}\dotty{B <: Int]} represents the addition of integer singleton types.
+Internally, the compiler is special-cased to implement these arithmetic operations using constant folding.
+Representing numbers with singleton types is desirable for practical purposes, but not absolutely necessary for this case study (for instance, Peano numerals could be used instead).
+
+\subsection{Type-Level Array Shape}
+\label{subsec:array-shape}
+
+The shape of an ndarray is a list of dimension lengths; we say that the shape $\(\a_{1}, \a_{2}, \dots, \a_n)$ has $\n$ dimensions.
+For instance, a three-by-four matrix is a two-dimensional ndarray of shape $\(\3, \4)$.
+We represent the shape of an ndarray at the type level using a heterogeneous type list, or HList for short~\cite{kiselyov2004strongly}.
+We define an HList called \dotty{Shape} as an ADT with two constructors\footnotemark, \dotty{#:} and \dotty{Ø}.
+\footnotetext{%
+In the interest of clarity, our presentation omits type bounds that are necessary to guide type inference, for example in the definition of the \dotty{Shape} data type.}
+%
+\shapecodesection
+%
+This data type definition allows us to write lists of dimension sizes, both at the term level as \dotty{#:(3, #:(4, Ø))}, and at the type level as \dotty{#:[3, #:[4, Ø]]}.
+The HList type can equivalently be written with \dotty{#:} in infix notation, as \dotty{3 #: 4 #: Ø}.
+
+To represent ndarrays, we define the \dotty{NDArray} type. This type is indexed by the ndarray element type (\dotty{T}), and by the ndarray shape (\dotty{S}), represented as an HList:
+%
+\ndarraycodesection
+
+The goal of our presentation is to define type-safe operations on \dotty{NDArrays}.
+Since our focus is on the type-level, we do not include value-level counterparts to \dotty{T} and \dotty{S} in the definition of \dotty{NDArray}, but this would be necessary in a complete implementation.
+
+To construct ndarrays, we define \dotty{random_normal}, which creates an ndarray of a given shape, where all elements are random \dotty{Float}s:\footnotemark
+\footnotetext{%
+This snippet uses the triple question mark operator, Scala's standard notation for missing or omitted implementations.
+}
+%
+\randomnormalcodesection
+
+\subsection{Computation on Shapes with Match Types}
+\label{subsec:shape-match-types}
+
+Encoding the types and shapes of ndarrays in the types allows us to readily provide type- and shape-safety for simple ndarray operations.
+For instance, the element-wise Hadamard product, written as \python{np.multiply(x, y)}, requires the \python{x} and \python{y} ndarrays to have the same shape and element types.
+This constraint does not require any match types, but can simply be expressed as:
+%
+\multiplycodesection
+%
+However, we will need the additional expressiveness of match types to implement more complex constraints on array shapes, such as for reshapes (\ref{subsubsec:reshape}) and reductions (\ref{subsubsec:reduction}).
+
+\subsubsection{Reshape}
+\label{subsubsec:reshape}
+
+An operation commonly used in NumPy is \python{np.reshape}, which changes the shape of an ndarray, but does not change its values.
+A restriction imposed by the NumPy API is that the output shape must have the same number of elements as the input shape. The number of elements of a shape is the product of the sizes of its dimensions; an ndarray of shape\hspace{4pt}\dotty{2 #: 3 #: 4 #: Ø}\hspace{4pt}has \begin{math}2\times3\times4 = 24\end{math} elements.
+Note that an ndarray of shape \dotty{Ø} is a scalar, and thus has a single element.
+This can be naturally expressed with a match type:
+%
+\numelementscodesection
+
+To restrict reshaping to be applicable only on valid shapes, the type system must support encoding type equality constraints.
+For this, we make use of Scala's implicit parameters, and of the \dotty{=:=} type equality constraint that is a part of Scala's standard library.
+%
+\reshapecodesection
+%
+With this definition of \dotty{reshape}, the compiler will only accept a usage of \dotty{reshape} if it is able to prove that the number of elements in the old shape is the same as in the new shape.
+This example illustrates how match types can be used in concert with existing features like singleton types and implicit resolution to express powerful constraints.
+
+\subsubsection{Reduction}
+\label{subsubsec:reduction}
+
+The NumPy API provides a variety of functions to reduce along a set of axes of an ndarray, such as \python{np.mean(ndarray, axes)} or \python{np.var(ndarray, axes)}.
+The \python{axes} parameter is a list of indices of dimensions, listing exactly those dimensions that will no longer be present in the output ndarray.
+The dimension indices can be unordered and repeated, and out-of-bounds indices result in an error.
+In the Python API, passing the \python{None} value instead of a list of axes reduces along all axes, meaning that the operation returns a scalar.
+Note that this is the opposite of passing \dotty{Ø}, which means that we reduce over no axes (effectively a no-op).
+
+This behavior is more complex than the previous examples, but can still be described accurately by a match type.
+We use a match type called \dotty{Reduce} to compute the return shape of the operation.
+
+\npmeancodesection
+
+We implement reductions along a given list of indices with logic similar to two nested loops.
+The outer loop, \dotty{Loop}, traverses the shape and counts the current index.
+The inner loops are implemented using \dotty{Contains} and \dotty{Remove}, standard operations on HLists (omitted).
+When \dotty{Loop} reaches the end of the list, if there are still axes to remove, these are out of bounds for the initial shape: the match type intentionally gets stuck in such cases.
+%
+\reducecodesection
+
+\subsection{Shape safety}
+\label{sec:shape-safety}
+
+Having defined \dotty{random_normal}, \dotty{reshape} and \dotty{mean}, we can rewrite our original Python example in Scala:
+%
+\badreducescalacodesection
+%
+As expected, the call to \dotty{mean} returns a tensor of shape \dotty{3 #: Ø}.
+Therefore, the call to \dotty{reshape} does not type-check since the input shape has 3 elements instead of 25.
+If we fix the off by one error to reduce along the correct indices, \dotty{1 #: 2 #:} \dotty{3 #: Ø}, the call to \dotty{reshape} type-checks and \dotty{avg_color} has shape \dotty{25 #: Ø}, as expected.
+
+% \goodreducescalacodesection
+
+\section{Related work}
+\label{sec:related-work}
+
+In this section, we provide a review of existing work and relate match types to dependently typed calculi with subtyping, intensional type analysis, type families and roles in Haskell, and conditional types in TypeScript.
+
+\subsection{Dependently Typed Calculi with Subtyping}
+\label{subsec:dependently-typed-calculi-with-subtyping}
+
+There is a vast amount of literature on type systems combining subtyping with dependent types, justifying a full survey to relate it appropriately.
+Instead, we offer a condensed summary of our reading journey and explain what led us to decide on using \SystemFsub as a foundation for our formalization.
+
+Dependently typed calculi typically use the same language to describe terms and types.
+This unification is also commonly used in the presence of subtyping~\cite{zwanenburg1999pure, hutchins2010pure, yang2017unifying}.
+For systems with a complete term/type symmetry, this is a natural design, as it is concise and simplifies the meta-theory.
+Unfortunately, the lack of distinction between term and type level renders these systems impractical for our purpose, given that our research takes place in the context of an existing language with a clear term/type separation.
+
+Singleton types provide an interesting middle ground between unified and separate syntax and have also been studied in conjunction with dependent types and subtyping~\cite{aspinall1994singleton, stone2000deciding, courant2003strong}.
+Singleton types give a mechanism to refer to terms \emph{in} types, usually by means of a set-like syntax.
+This mechanism is appealing because it allows type system designers to cherry-pick the term constructs that should be allowed in types.
+When multiple constructs are shared between terms and types, singleton types provide a clear economy of concepts.
+In our study of match types, a minimal use of singleton types would result in sharing a single constructor between the term and the type languages: the constructor for matches. It is unclear if the benefits in doing so would outweigh the additional complexity.
+
+Dependent Object Types (DOT) are, to this day, the most significant effort in formalizing Scala's type system~\cite{essence2016amin}.
+DOT does not directly support any form of type-level computation.
+We considered using DOT as a starting point for our work, however, despite the recent effort to simplify DOT's soundness proof~\cite{rapoport2017simple, giarrusso2020soundness}, extending DOT remains too big of a challenge to concisely describe language extensions.
+
+After several attempts at formalizing match types within existing systems, we decided to pursue a simpler route of adding new constructs to a system without dependent types.
+After all, the primary purpose of \SystemFm is to serve as a medium to concisely \emph{explain} our type-checking algorithm for match types.
+For this reason, we built our work on top of \SystemFsub, which we believe should be the simplest, most familiar calculus among the systems cited in this section.
+
+\subsection{Intensional Type Analysis}
+\label{subsec:intensional-type-analysis}
+
+In their work on intensional type analysis~\cite{harper1995compiling}, Harper and Morrisett introduce the $\λ^{ML}_i$ calculus that supports structural analysis of types.
+In $\λ^{ML}_i$, types are represented as expressions that can be inspected by case analysis using a "typecase" construct, available both at the term and at the type level.
+Match types can be seen as an extension of intensional type analysis to work with object-oriented class hierarchies and subtyping.
+Whereas patterns in $\λ^{ML}_i$ are limited to a fixed set of disjoint types, match types need to deal with open class hierarchies, of which not all members are known at compile-time.
+This means pattern types can overlap, and we need to perform an analysis of disjointness between the scrutinee type and each pattern type.
+Disjointness allows for sound reduction in the presence of overlapping patterns and abstract scrutinee types, while retaining the natural sequential evaluation order of pattern matching.
+
+\subsection{Type Families in Haskell}
+\label{subsec:type-families-in-haskell}
+
+Haskell's type families allow programmers to define type-level functions using pattern matching~\cite{chakravarty2005associated, schrijvers2008open}.
+By default, type families are open, which means that a definition can spread across multiple files and compilations.
+This flexibility induces a substantial restriction on type family definitions: patterns must not overlap.
+One benefit of this restriction is that it prevents any ambiguity in the reduction of type families (patterns are pairwise disjoint), which is required given the distributed nature of definitions.
+Open type families are well-suited to be used in conjunction with type classes, since both constructs have open-ended definitions with non-overlapping constraints.
+
+Closed type families (CTFs), as introduced by~\citet{eisenberg2014closed}, allow for overlapping cases in type family definitions.
+Unlike the open variant, CTF reduction is performed sequentially, based on unification and apartness checks.
+In this regard, CTFs are closely related to match types.
+In fact, if we replace unification checks with subtyping and apartness checks with disjointness, their reduction algorithm is practically identical to ours, from a high-level perspective.
+
+By default, Haskell checks for termination of recursive type families, but this check can be disabled to increase type families' expressiveness.
+Although the formalization presented in~\cite{eisenberg2014closed} does not cover non-terminating families, the paper discusses a soundness problem caused by non-termination.
+The problem only occurs in the presence of repeated type bindings in patterns.
+In Scala, match types (and pattern matching in general) do not allow repeated bindings and are therefore not affected by this problem.
+
+% A significant difference between type-checking type families and match types is that type families are entirely handled during type inference, while match types reduce during subtyping.
+% Influencing Haskell's global type inference is notoriously difficult, which can, unfortunately, hinder the usability of type families.
+% For instance, in a functional pearl on typed matrices~\cite{santos2020match}, the authors report that their first (simpler) attempt was deemed inconclusive due to limitations of the Haskell type inference when combining type families with pattern matching.
+
+\subsection{Roles in Haskell}
+\label{subsec:roles-in-haskell}
+
+Haskell's roles were introduced by~\citet{weirich2011generative} to fix a long-standing unsoundness caused by the interaction of open type families and the \haskell{newtype} construct.
+We understand roles as type annotations which specify whether a given type can safely be nominally compared to other types, or if \emph{representational equality} (RE) should be used instead.
+The word representation in RE refers to the runtime representation of a type.
+In particular, RE dealiases \haskell{newtype} constructs.
+
+In their introductory example,~\citeauthor{weirich2011generative} show how type family reduction can lead to unsoundness in the absence of role annotations.
+Their presentation also includes a hypothetical translation of their example to Standard ML, which translates directly to Scala as follows:
+%
+\begin{lstlisting}
+trait AgeClass {
+  type Age
+  def addAge(a: Age, i: Int): Int
+}
+object AgeObject extends AgeClass {
+  type Age = Int
+  def addAge(a: Age, i: Int): Int = a + i
+}
+\end{lstlisting}
+%
+In this example, type \dotty{Age} is abstract in \dotty{AgeClass} and concrete in \dotty{AgeObject}.
+In the pre-role Haskell equivalent of this example, the unsoundness comes when the above definitions are combined with a type family that discriminates \dotty{Age} and \dotty{Int}.
+Such type family would reduce differently in \dotty{AgeClass}, where the types are different, and in \dotty{AgeObject}, where those two types are synonyms, which can easily be exploited to obtain a runtime error.
+
+Luckily, our design of match types is not affected by this issue.
+The reason comes from the use of subtyping (and disjointness), which shields our implementation from incorrectly discriminating \dotty{Age} from \dotty{Int} when \dotty{Age} is abstract.
+Consider the following match type definition (directly translated from the Haskell example):
+%
+\begin{lstlisting}
+type M[X] = X match {
+  case Age => Char
+  case Int => Bool
+}
+\end{lstlisting}
+%
+Our algorithm would not reduce \dotty{M[Int]} to \dotty{Bool} in \dotty{AgeClass} as this reduction would require evidence that \dotty{Age} and \dotty{Int} are disjoint, which cannot be constructed when \dotty{Age} is an unbounded abstract type.
+
+\subsection{Conditional Types in TypeScript}
+\label{subsec:conditional-types-in-typescript}
+
+TypeScript's conditional types, briefly mentioned in the introduction, are a type-level ternary operator based on subtyping.
+Conditional types can be nested into a sequence of patterns that evaluate in order, making them similar to match types.
+
+The TypeScript language specification briefly describes the algorithm used to reduce conditional types in the presence of type variables~\cite{microsoft2020typescript}.
+Given a type \typescript{S extends T ? Tt : Tf}, the TypeScript compiler first replaces all the type parameters in \typescript{S} and \typescript{T} by \typescript{any} (the top of TypeScript's subtyping lattice).
+If the resulting types (after substitution) are not subtypes, the overall condition is reduced to \typescript{Tf}.
+Unfortunately, this algorithm is both \emph{unsound} and \emph{incomplete}.
+
+The unsoundness is caused by the incorrect widening of type parameters in contravariant position.
+Although TypeScript does not have syntax for variance annotations, function types are covariant in their return type and contravariant in their arguments.
+The conditional type unification algorithm wrongly approximates \typescript{X => string} to \typescript{any => string} and unifies the former with latter, which can lead to a runtime errors.
+
+The incompleteness comes from the fact that type parameter approximation does not account for type parameter bounds.
+Consider the following example:
+%
+\begin{lstlisting}[style=typescript]
+type M<X> = X extends string ? A : B
+function f<X extends string>: M<X> = new A
+\end{lstlisting}
+%
+Here, TypeScript's reduction algorithm fails to recognize that \typescript{new A} can be typed as \typescript{M<X>}, even though \typescript{X} is clearly a subtype of \typescript{string} in \typescript{f}'s body.
+
+Although the situation is concerning, it might not be as bad as it seems given that soundness is a non-goal of TypeScript's type system~\cite{bierman2014typescript}.
+Nevertheless, we believe that the results of this paper are directly applicable to conditional types and could be used to improve TypeScript's type checker.
+
+\section{Conclusion}
+In this paper, we introduced \emph{match types}, a lightweight mechanism for type-level programming that integrates seamlessly in subtyping-based programming languages.
+We formalized match types in \SystemFm, a calculus based on \SystemFsub, and proved it sound.
+Furthermore, we implemented match types in the Scala 3 compiler, making them readily available to a large audience of programmers.
+A key insight for sound match types is the notion of disjointness, which complements subtyping in the match type reduction algorithm.
+In the future, we plan to investigate inference of match types to avoid code duplication in programs that operate both at the term and the type level.

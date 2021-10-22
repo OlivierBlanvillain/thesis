@@ -3,5 +3,5 @@ lazy val root = project
   .settings(
     name := "match-type-paper",
     version := "0.1.0",
-    scalaVersion := "3.0.2"
+    scalaVersion := "3.1.0"
   )

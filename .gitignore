@@ -15,6 +15,6 @@
 code-sections.tex
 project/
 target/
-.bsp/
 *.lof
 *.toc
+*.bsp/

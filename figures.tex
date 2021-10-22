@@ -135,7 +135,9 @@
 }
 
 \newcommand\FMTypingRules[1]{
+  \newpage\thispagestyle{empty}
   \begin{figure*}%
+  \vspace{-25pt}%
   \begin{framed}%
   \begin{minipage}[t]{\linewidth}%
     \textit{Subtyping} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -277,6 +279,7 @@
   \end{framed}%
   \captionsetup{justification=centering}%
   \caption{#1}%
+  \vspace{-32pt}%
   \label{fig:FMTypingRules}%
   \end{figure*}%
 }
@@ -395,15 +398,37 @@
         { Γ \⊢ \S \⇌ \T }
     \end{minipage}
   \caption{#1}%
-  \lbl{fig:harpoon}%
+  \label{fig:harpoon}%
+  \end{figure}
+}
+\newcommand\harpoonx[1]{
+  \begin{figure}%
+    \begin{minipage}[t]{0.32\columnwidth}
+      \infrule[]
+        { \infer[(\SMatch1/2)]{Γ \⊢ \S \≡ \T}{\vdots} }
+        { Γ \⊢ \S \⇌ \T }
+    \end{minipage}
+    \begin{minipage}[t]{0.32\columnwidth}
+      \infrule[]
+        { \infer[(\SMatch3/4)]{Γ \⊢ \S \≡ \T}{\vdots} }
+        { Γ \⊢ \S \⇌ \T }
+    \end{minipage}
+    \begin{minipage}[t]{0.32\columnwidth}
+      \infrule[]
+        { Γ \⊢ \S \⇌ \U  \andalso  Γ \⊢ \U \⇌ \T }
+        { Γ \⊢ \S \⇌ \T }
+    \end{minipage}
+  \caption{#1}%
   \end{figure}
 }
 
 \newcommand\structure[1]{
   \begin{figure}%
-    \includegraphics[width=.6\columnwidth]{paper-proofs/structure.pdf}%
-    \caption{#1}%
-    \label{fig:structure}%
+    \begin{center}%
+      \includegraphics[width=.7\columnwidth]{proofs/structure.pdf}%
+      \caption{#1}%
+      \label{fig:structure}%
+    \end{center}%
   \end{figure}
 }
 

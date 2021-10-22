@@ -8,7 +8,7 @@
 
 \chapter{Acknowledgements}
 \lipsum[1-2]
-Here's an example how to cite.~\cite{atc13}
+Here's an example how to cite.
 
 \bigskip
 \noindent\textit{Lausanne, \today}
@@ -44,10 +44,10 @@ Here's an example how to cite.~\cite{atc13}
 \chapter{(Ab)Using Implicits}
 \lipsum[1]
 
-\chapter{A Dependently Typed Extension of Scala Based on Singleton Types}
+\chapter{Extending Scala with Dependent Types}
 \lipsum[1]
 
-\chapter{Type-Level Programming With Match Types}
+\chapter{Match Types}
 \input{article.tex}
 
 \chapter{Performance-Based Evaluation}
@@ -69,12 +69,12 @@ Here's an example how to cite.~\cite{atc13}
 \input{proofs/substitution.tex}
 \input{proofs/disjointness-subtyping-exclusivity.tex}
 
-\harpoon{Definition of the auxiliary relation $\protect \⇌$, used to state inversion of subtyping.}
+\harpoonx{Definition of the auxiliary relation $\protect \⇌$, used to state inversion of subtyping.}
 
 \begin{definition*}
   $\Γ \⊢ \S \⇌ \T$ (defined in \Cref{fig:harpoon}) represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$ with the additional constraint that this evidence was exclusively constructed using pairwise applications of \emph{\SMatch1/2}, \emph{\SMatch3/4}, and \emph{\STrans} in both directions.
-
 \end{definition*}
+
 \input{proofs/inversion-of-subtyping.tex}
 \input{proofs/canonical-forms.tex}
 \input{proofs/inversion-of-typing.tex}

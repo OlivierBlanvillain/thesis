@@ -1,0 +1,29 @@
+digraph mygraph {
+  node [shape = plaintext];
+  node [fontname = "linux libertine"; fontsize = 27];
+  margin = 0
+  "Disjointness/\nsubtyping\nexclusivity (4.5)"
+  "Inversion of\ntyping (4.8)"
+  "Canonical\nforms (4.7)"
+  "Inversion of\nsubtyping (4.6)"
+  "Substitution (4.4)"
+  "Progress (4.10)"
+  "Preservation (4.11)"
+  "Strengthening (4.3)"
+  "Permutation (4.1)"
+  "Weakening (4.2)"
+  "Minimum\ntypes (4.9)"
+  "Type safety"
+  "Disjointness/\nsubtyping\nexclusivity (4.5)" -> "Inversion of\nsubtyping (4.6)"
+  "Weakening (4.2)" -> "Substitution (4.4)"
+  "Strengthening (4.3)" -> "Substitution (4.4)"
+  "Inversion of\nsubtyping (4.6)" -> "Inversion of\ntyping (4.8)"
+  "Minimum\ntypes (4.9)" -> "Preservation (4.11)"
+  "Substitution (4.4)" -> "Preservation (4.11)"
+  "Inversion of\ntyping (4.8)" -> "Preservation (4.11)"
+  "Inversion of\nsubtyping (4.6)" -> "Canonical\nforms (4.7)"
+  "Canonical\nforms (4.7)" -> "Progress (4.10)"
+  "Progress (4.10)" -> "Type safety"
+  "Preservation (4.11)" -> "Type safety"
+  "Permutation (4.1)" -> "Weakening (4.2)"
+}

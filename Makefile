@@ -2,7 +2,7 @@
 .PHONY: FORCE
 all: thesis.pdf
 
-thesis.pdf: FORCE
+thesis.pdf: FORCE proofs/structure.pdf
 	./latexrun --latex-cmd lualatex thesis.tex
 
 clean: FORCE
@@ -17,3 +17,11 @@ publish: FORCE
 	- cp thesis.pdf docs
 	- git add -f docs/thesis.pdf
 	- git commit -m "Publish snapshot to GitHub pages"
+
+code-sections-dep := $(shell git ls | grep .scala$)
+code-sections.tex: generate-code-sections.py $(code-sections-dep)
+	python3 generate-code-sections.py $(code-sections-dep)
+
+%.pdf: %.dot
+	- dot -Tpdf $< -o $@.pdf # dot from the graphviz package
+	- gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dBATCH -sOutputFile=$@ $@.pdf

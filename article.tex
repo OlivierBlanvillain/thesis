@@ -124,7 +124,7 @@ Without disjointness, \dotty{Elem[Seq[Int]]} would reduce to \dotty{Seq[Int]} (v
 
 \Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
 
-\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
+\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
 
 \FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
 
@@ -631,7 +631,12 @@ In the example Python code below, the \python{img_batch} ndarray is a batch of 2
 The code aims to compute a vector of length 25 containing the average grayscale color of each image in the batch, and then create a square 5$\×$5 image of the average grayscale colors.
 However, this code contains a shape error and will throw an error at runtime.
 %
-\badreducecodesection
+\begin{lstlisting}[style=py]
+import numpy as np
+img_batch = np.random.normal(size=(25, 256, 256, 3))
+avg_colors = np.mean(img_batch, (0, 1, 2))
+avg_color_square = np.reshape(avg_colors, (5, 5))
+\end{lstlisting}
 %
 The error is in the call to \python{np.mean}, which takes as argument a list of axes to reduce along.
 Unfortunately, the arguments to \python{np.mean} are off-by-one and result in a vector of length 3 (\python{img_batch}'s last dimension) instead of the intended length of 25 (\python{img_batch}'s first dimension); \python{avg_color} thus contains the average RGB color of the batch instead of the average grayscale color for each image.

@@ -2,6 +2,7 @@
 
 \usepackage{silence}
 \WarningFilter{fourier}{Please consider}
+\WarningFilter{hyperref}{Token not allowed in a PDF string}
 % \WarningFilter{latexfont}{Font shape}
 % \WarningFilter{latexfont}{Some font shapes}
 % \WarningFilter{latex}{Label(s) may have changed}
@@ -211,7 +212,12 @@
 \let\proof\killcontents
 \let\endproof\endkillcontents
 
-\newcommand\lbl[1]{\ifcsname c@#1\endcsname\else\newcounter{#1}\label{#1}\fi}
+\newcommand\lbl[1]{%
+  \ifcsname c@#1\endcsname%
+  \addcontentsline{toc}{section}{\Cref*{#1}:~\nameref{#1}}%
+  \else\newcounter{#1}\label{#1}%
+  \fi%
+}
 \newcommand{\mathkw}[1]{\text{\itshape#1}}
 
 \def\({(}
@@ -368,7 +374,7 @@
 \Crefname{thm}{Theorem}{Theorems}
 \newcommand\prelemma[1]{%
   \stepcounter{theorem}
-  \textsc{\thmname{Lemma}\thmnumber{~\thetheorem}\thmnote{ (#1)}}%
+  \textbf{\thmname{Lemma}\thmnumber{~\thetheorem}}\thmnote{ (#1)}%
 }
 
 \newtheoremstyle{plain}
@@ -387,3 +393,4 @@
 \newtheorem*{definition*}{Definition}
 
 \input{figures.tex}
+\input{code-sections.tex}

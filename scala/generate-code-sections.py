@@ -9,7 +9,7 @@ if (len(input_files) == 0):
     print("Usages: ./generate-code-sections.py <...files>")
     sys.exit(1)
 
-output_file = "code-sections.tex"
+output_file = "scala/code-sections.tex"
 listing_options = "breaklines"
 
 start_section = re.compile(r'\s*(?://|#)\s+start\s+section\s+(\w+)\s*')

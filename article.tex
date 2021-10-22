@@ -1,6 +1,6 @@
 Type-level programming is becoming more and more popular in the realm of functional programming.
 However, the combination of type-level programming and subtyping remains largely unexplored in practical programming languages.
-This paper presents \emph{match types}, a type-level equivalent of pattern matching.
+This chapter presents \emph{match types}, a type-level equivalent of pattern matching.
 Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
 We formalize the feature of match types in a calculus based on \SystemFsub and prove its soundness.
 We practically evaluate our system by implementing match types in the Scala 3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
@@ -21,7 +21,7 @@ One notable exception is the TypeScript language, which recently introduced a ne
 A conditional type, written \typescript{S extends T ? Tt : Tf}, reduces to \typescript{Tt} when \typescript{S} is a subtype of \typescript{T}, to \typescript{Tf} when \typescript{S} is not a subtype of \typescript{T}, and is left unreduced when types variables do not allow to draw a conclusion. Unfortunately, the algorithm used to reduce such conditional types is both \emph{unsound} and \emph{incomplete}.
 Despite the unsoundness (discussed in \Cref{subsec:conditional-types-in-typescript}), the addition of conditional types to TypeScript illustrates the practical need and timeliness of this feature.
 
-This paper presents an alternative construct for type-level programming based on subtyping, which we call \emph{match types}.
+This chapter presents an alternative construct for type-level programming based on subtyping, which we call \emph{match types}.
 As the name suggests, match types allow programmers to express types that perform pattern matching on types:
 %
 \begin{lstlisting}
@@ -37,7 +37,7 @@ The example, which we explain in detail in \Cref{sec:overview}, defines the type
 We have implemented match types in the latest version of Scala, an industry-grade, production-ready compiler.
 Match types have received a great interest from the Scala community, and are already in active use.
 
-In this paper, we explore the theoretical foundations of match types through the lens of a type system which extends \SystemFsub with pattern matching at the term and type level.
+In this chapter, we explore the theoretical foundations of match types through the lens of a type system which extends \SystemFsub with pattern matching at the term and type level.
 %
 Our formalization serves two purposes: first, it gives a clear view on \emph{how} we integrated match types in Scala's type system and precisely describes the changes needed on the subtyping relation to make this integration possible. Second, thanks to a type safety proof based on the standard progress and preservation theorems, it gives confidence that the design of match types is sensible and our implementation is sound.
 
@@ -45,12 +45,12 @@ Conditional types provide \emph{concrete evidence} that our results are valuable
 Our results are directly applicable to TypeScript's type system and provide a clear path to fixing the unsoundness introduced by conditional types.
 Furthermore, we hope that match types can be useful as a reference for future designs of type-level programming features for languages with subtyping.
 
-In summary, this paper makes the following contributions:
+In summary, this chapter makes the following contributions:
 %
 \begin{itemize}
   \item We introduce programming with match types in Scala by means of an example and highlight the interaction of type-level programming and subtyping (\Cref{sec:overview}).
 
-  \item We formalize match types in the self-contained calculus \SystemFm and prove it sound, providing a theoretical basis of our implementation (\Cref{sec:formalization}). The paper is accompanied by a mechanization of \SystemFm, including proofs of progress and preservation.
+  \item We formalize match types in the self-contained calculus \SystemFm and prove it sound, providing a theoretical basis of our implementation (\Cref{sec:formalization}). The chapter is accompanied by a mechanization of \SystemFm, including proofs of progress and preservation.
 
   \item We describe our implementation of match types in the Scala compiler, discuss challenges, and relate the implementation to our formalization (\Cref{sec:implementation}).
 
@@ -169,7 +169,7 @@ At the type level, a type test corresponds to a subtyping test with a particular
 This disparity reflects the difference between runtime, where type tests are implemented using class tables, and compile time, where types are compared using the type system in its full extent.
 We discuss the representation of Scala types at runtime in \Cref{subsec:types-at-runtime}.
 
-Throughout this paper, we use the abbreviated syntax $\t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$ to denote an arbitrary number of cases, that is, $\∃ \n \∈ \ℕ.~ \t_s \match \{ \x_{1} \: \C_{1} \⇒ \t_{1}; \dots; \x_n \: \C_n \⇒ \t_n \} \otherwise \t_d$.
+Throughout this chapter, we use the abbreviated syntax $\t_s \match \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$ to denote an arbitrary number of cases, that is, $\∃ \n \∈ \ℕ.~ \t_s \match \{ \x_{1} \: \C_{1} \⇒ \t_{1}; \dots; \x_n \: \C_n \⇒ \t_n \} \otherwise \t_d$.
 
 Match expressions and match types are related by the \TMatch typing rule.
 This rule operates by typing each component of a match expression to then assemble the corresponding match type.
@@ -261,11 +261,9 @@ For instance, the body of~$\f$ is typed with a stuck type, as shown in \Cref{ex:
 
 We show the type safety of \SystemFm through the usual progress and preservation theorems.
 This section provides an overview of the proof structure and states the involved lemmas and theorems.
-Detailed proofs are available in the supplementary material of this paper in two different versions.
-The first version is a pen-and-paper proof where \SystemFm is exactly as presented in \Cref{fig:FMTypingRules}.
-The second version is a mechanization of the proof in Coq,
-using the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings.
-Our mechanization uses a simplified representation of match types with exactly one case per match.
+Detailed pen-and-paper proofs is available in the appendix of this thesis.
+A Coq mechanization of our proofs is available online\footnote{\url{https://zenodo.org/record/5568850}}.
+Our mechanization uses the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings, and a simplified representation of match types with exactly one case per match.
 Matches with multiple cases can be expressed by nesting match types in default cases.
 
 \structure{Structure of the type safety proof. Arrows represent implications between lemmas and theorems.}
@@ -882,7 +880,7 @@ Although the situation is concerning, it might not be as bad as it seems given t
 Nevertheless, we believe that the results of this paper are directly applicable to conditional types and could be used to improve TypeScript's type checker.
 
 \section{Conclusion}
-In this paper, we introduced \emph{match types}, a lightweight mechanism for type-level programming that integrates seamlessly in subtyping-based programming languages.
+In this chapter, we introduced \emph{match types}, a lightweight mechanism for type-level programming that integrates seamlessly in subtyping-based programming languages.
 We formalized match types in \SystemFm, a calculus based on \SystemFsub, and proved it sound.
 Furthermore, we implemented match types in the Scala 3 compiler, making them readily available to a large audience of programmers.
 A key insight for sound match types is the notion of disjointness, which complements subtyping in the match type reduction algorithm.

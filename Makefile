@@ -25,3 +25,4 @@ code-sections.tex: generate-code-sections.py $(code-sections-dep)
 %.pdf: %.dot
 	- dot -Tpdf $< -o $@.pdf # dot from the graphviz package
 	- gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dNOPAUSE -dBATCH -sOutputFile=$@ $@.pdf
+	- mv $@.pdf $@

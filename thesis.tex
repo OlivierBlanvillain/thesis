@@ -46,16 +46,50 @@ Denys Shabalin, who was working on Scala Native \cite{shabalin2020just} at the t
 The discussion revolved around the following question: could a Rust-like ownership system be viable for Scala?
 Denys' answer was clear: ownership is fundamentally at odds with the way Scala handles references, and without making deep changes to Scala's type system, the task was simply impossible.
 
-The next day, I showed Denys
+The next day, I showed Denys the following proof of concept, which I quickly hacked together overnight:
+
+\memImplicitMainCodeSection
+% // Context & other definitions hidden to avoid scaring the reader away!
+% def main(ctx: Context[HNil]): Context[HNil] = {
+%   ctx.malloc(32, "mem")
+%      .malloc(1, "bool")
+%      .call(f)
+%      .deref("mem") { (m: Array[Byte]) =>
+%        println(new String(m))
+%      }
+%      .free("mem")
+%      .free("bool")
+% }
+
+% 2. Identify the Research Gap
+I was delighted! Unfortunetly, Denys didn't like my solution. In retrospect, ...
+
+% 3. State the Background Information
+TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunetly, many of the techniques developed in the context of Haskell are not directly applicable to other programing languages. In particular, subtying ...
+
+Dependently typed languages unify the term and type language, and are thus naturally able to express TLP. Unfortunetly...
+
+% 5. Mention the Hypothesis
+
+
+% 6. Provide Significance of Your Research
+
+% 8. State Research Objectives
+
+% 9. Create an Outline
+
 \lipsum[1]
 
 \chapter{(Ab)Using Implicits}
+% \subsection*{Attribution}
 \lipsum[1]
 
 \chapter{Extending Scala with Dependent Types}
+% \subsection*{Attribution}
 \lipsum[1]
 
 \chapter{Match Types}
+% \subsection*{Attribution}
 \input{article.tex}
 
 \chapter{Performance-Based Evaluation}

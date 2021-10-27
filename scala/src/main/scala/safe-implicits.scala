@@ -57,7 +57,7 @@ def f[Ps <: HList](ctx: Context["bool" :: Ps]): Context["bool" :: Ps] =
 // end section memImplicitFunction
 
 // start section memImplicitMain
-def main(ctx: Context[HNil]): Context[HNil] = {
+def main(ctx: Context[HNil]): Context[HNil] =
   ctx.malloc(32, "mem")
      .malloc(1, "bool")
      .call(f)
@@ -66,5 +66,4 @@ def main(ctx: Context[HNil]): Context[HNil] = {
      }
      .free("mem")
      .free("bool")
-}
 // end section memImplicitMain

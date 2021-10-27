@@ -35,7 +35,7 @@ def f[Ps <: HList](ctx: Context["bool" :: Ps]): Context["bool" :: Ps] =
   }
 
 // start section memMatchtypeMain
-def main(ctx: Context[HNil]): Context[HNil] = {
+def main(ctx: Context[HNil]): Context[HNil] =
   ctx.malloc(32, "mem")
      .malloc(1, "bool")
      .call(f)
@@ -44,5 +44,4 @@ def main(ctx: Context[HNil]): Context[HNil] = {
      }
      .free("mem")
      .free("bool")
-}
 // end section memMatchtypeMain

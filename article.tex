@@ -15,7 +15,7 @@ While Haskell is certainly not the only language moving towards dependent types,
 
 We believe that type-level programming is not necessarily incompatible with other programming paradigms and that the current division exists mainly due to a lack of attention from the research community.
 Unfortunately, most of the existing research conducted in this domain is not directly applicable to languages with \emph{subtyping}.
-Although the combination of subtyping and type-level programming has been studied extensively on the theoretical side, through the means of dependently typed systems~\cite{aspinall1994singleton, zwanenburg1999pure, stone2000deciding, courant2003strong, hutchins2010pure, yang2017unifying}, the practical side remains largely unexplored.
+Although the combination of subtyping and type-level programming has been studied extensively on the theoretical side, through the means of dependently typed systems~\citep{aspinall1994singleton, zwanenburg1999pure, stone2000deciding, courant2003strong, hutchins2010pure, yang2017unifying}, the practical side remains largely unexplored.
 
 One notable exception is the TypeScript language, which recently introduced a new feature called \emph{conditional type}, a type-level ternary operator based on subtyping.
 A conditional type, written \typescript{S extends T ? Tt : Tf}, reduces to \typescript{Tt} when \typescript{S} is a subtype of \typescript{T}, to \typescript{Tf} when \typescript{S} is not a subtype of \typescript{T}, and is left unreduced when types variables do not allow to draw a conclusion. Unfortunately, the algorithm used to reduce such conditional types is both \emph{unsound} and \emph{incomplete}.
@@ -132,7 +132,7 @@ Without disjointness, \dotty{Elem[Seq[Int]]} would reduce to \dotty{Seq[Int]} (v
 \section{Formalization}
 \label{sec:formalization}
 
-In this section, we formally present \SystemFm, an extension of \SystemFsub~\cite{cardelli1994extension} with pattern matching, opaque classes, and match types.
+In this section, we formally present \SystemFm, an extension of \SystemFsub~\citep{cardelli1994extension} with pattern matching, opaque classes, and match types.
 \Cref{fig:FMSyntaxEvaluation} defines \Fm's syntax and evaluation relation. \Cref{fig:FMTypingRules} defines \Fm's type system, composed of three relations: typing, subtyping, and type disjointness.
 We discuss differences to \SystemFsub in the following subsections (\Cref{subsec:classes} and \ref{subsec:matches}).
 In \Cref{subsec:type-safety}, we outline a proof of type safety for \SystemFm.
@@ -164,7 +164,7 @@ As we will see, runtime tags are essential to runtime type testing and play a ce
 \SystemFm supports both pattern matching on the term level (\emph{match expressions}) as well as on the type-level (\emph{match types}).
 Matches, both on terms and on types, are composed of a scrutinee, a list of cases and a default expression/type.
 Each case consists of a \emph{type test} and a corresponding expression/type.
-At the term level, a type test consists of an inheritance check against a particular class (this is also known as a typecase \cite{abadi1991dynamic}).
+At the term level, a type test consists of an inheritance check against a particular class (this is also known as a typecase \citep{abadi1991dynamic}).
 At the type level, a type test corresponds to a subtyping test with a particular type.
 This disparity reflects the difference between runtime, where type tests are implemented using class tables, and compile time, where types are compared using the type system in its full extent.
 We discuss the representation of Scala types at runtime in \Cref{subsec:types-at-runtime}.
@@ -275,7 +275,7 @@ Matches with multiple cases can be expressed by nesting match types in default c
 % To improve presentation, we have omitted all well-formedness premises from our typing rules.
 
 \Cref{fig:structure} gives an overview of the proof structure by showing implications between the various lemmas and theorems.
-The basic structure resembles that of \SystemFsub's standard safety proof from~\cite{pierce2002types}.
+The basic structure resembles that of \SystemFsub's standard safety proof from~\citep{pierce2002types}.
 We continue our presentation by introducing the lemmas and theorems used in our type safety proof.
 
 \subsubsection*{Preliminary Lemmas}
@@ -507,7 +507,7 @@ Checking for scrutinee inhabitance prevents this class of errors. In this exampl
 \subsection{Null Values}
 \label{subsec:null-values}
 
-In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \dotty{A | Null} \cite{nieto2020scala}.
+In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \dotty{A | Null} \citep{nieto2020scala}.
 Our implementation of subtyping and disjointness handles union types and therefore needs no particular treatment of null values.
 
 % To allow easy migration from older versions, the strict treatment of nulls is still optional in Scala 3.0, enabled by the command line option \dotty{-Yexplicit-nulls}. The plan is to make strict null checking the default in the future.
@@ -536,7 +536,7 @@ Our disjointness algorithm implements this kind of reasoning to conclude disjoin
 \label{subsec:pattern-matching-exhaustivity}
 
 The Scala compiler checks for pattern matching exhaustivity to prevent runtime exceptions caused by missing cases.
-Exhaustivity checking uses static knowledge about the class hierarchy (such as the sealed and final annotations) to check that every value in the scrutinee type is covered by the pattern clauses \cite{fengyun2016generic}.
+Exhaustivity checking uses static knowledge about the class hierarchy (such as the sealed and final annotations) to check that every value in the scrutinee type is covered by the pattern clauses \citep{fengyun2016generic}.
 Non-exhaustive patterns are compiled with an additional "catch-all" case which throws a runtime exception.
 \SystemFm uses default cases as a replacement for systematic exhaustivity checks or runtime exceptions.
 
@@ -553,7 +553,7 @@ Non-exhaustive patterns are compiled with an additional "catch-all" case which t
 % }
 
 Scala's primary platform is the Java virtual machine (JVM).
-On the JVM, Scala is compiled using \emph{partial erasures}, where parts of types are preserved and translated to the JVM's type systems, and other parts are erased \cite{schinz2005compiling}.
+On the JVM, Scala is compiled using \emph{partial erasures}, where parts of types are preserved and translated to the JVM's type systems, and other parts are erased \citep{schinz2005compiling}.
 For instance, ground classes are compiled directly to JVM classes, but type parameters and type variables are erased and replaced by their bounds.
 
 Erasure directly affects the type tests that can be performed at runtime.
@@ -575,12 +575,12 @@ The compiler is given an initial amount of fuel, which is consumed one unit at a
 If the compiler runs out of fuel, the reduction is aborted with a "recursion limit exceeded" error.
 The current implementation uses a fixed amount of initial fuel.
 Although this seems to be sufficient for most practical purposes, we plan on making it configurable.
-This mechanism is completely standard and already used in other programing languages with unbounded recursion at the type level \cite{eisenberg2014closed, vilhelm2015dependently, eisenberg2016dependent}.
+This mechanism is completely standard and already used in other programing languages with unbounded recursion at the type level \citep{eisenberg2014closed, vilhelm2015dependently, eisenberg2016dependent}.
 
 \subsection{Inference}
 
 \SystemFm's type rules enable any match expression to be typed as a match type, but the situation is different in the full Scala language.
-Pattern matching in Scala supports many sorts of patterns~\cite{emir2007matching}, most of which do not have a match type counterpart.
+Pattern matching in Scala supports many sorts of patterns~\citep{emir2007matching}, most of which do not have a match type counterpart.
 Furthermore, typing match expressions as match types is not enabled by default in order to preserve backward compatibility.
 Instead, explicit type annotations must be provided.
 
@@ -609,20 +609,20 @@ In terms of lines of code, our match type implementation is a relatively modest 
 \label{sec:evaluation}
 
 In this section, we present a case study to show how match types can be used to express complex type constraints, which in turn can prevent certain programming errors at compile time.
-To this end, we outline the type-level implementation of a library for multidimensional arrays which mimics the NumPy API~\cite{harris2020numpy}.
+To this end, we outline the type-level implementation of a library for multidimensional arrays which mimics the NumPy API~\citep{harris2020numpy}.
 The goal of our library is to provide a \emph{shape}-safe interface for manipulating $\n$-dimensional arrays (abbreviated ndarrays), where array shapes and indices are checked for errors at compile-time rather than at runtime.
-Shape and indexing errors in ndarrays is a widely acknowledged problem~\cite{barham2019stuck, rush2019namedtensor}, and several solutions have already been proposed, notably in the form of libraries that rely on type-level programming~\cite{chen2017typesafe, huang2017hasktorch}.
+Shape and indexing errors in ndarrays is a widely acknowledged problem~\citep{barham2019stuck, rush2019namedtensor}, and several solutions have already been proposed, notably in the form of libraries that rely on type-level programming~\citep{chen2017typesafe, huang2017hasktorch}.
 Our library uses match types to provide a shape-safe NumPy-like interface.
 We believe that the approach presented in this case study is an improvement over the status quo because it does not use metaprogramming or any sort of convoluted encoding to express type-level operations.
 
 % \subsection{Related Work}
-% Shape and indexing errors in ndarrays is a widely acknowledged problem~\cite{barham2019stuck, rush2019namedtensor}, and several solutions have been suggested.
-% The Dex language~\cite{maclaurin2019dex} introduces an experimental language with a Hindley--Milner-based type system with types for index sets, but cannot express variable-rank ndarrays and lacks the type-level arithmetic needed for typing reshapes.
-% Nexus~\cite{chen2017typesafe} represents variable-rank ndarrays as HLists of dimension labels, and uses Scala's implicit resolution to express type-level transformations on shapes.
+% Shape and indexing errors in ndarrays is a widely acknowledged problem~\citep{barham2019stuck, rush2019namedtensor}, and several solutions have been suggested.
+% The Dex language~\citep{maclaurin2019dex} introduces an experimental language with a Hindley--Milner-based type system with types for index sets, but cannot express variable-rank ndarrays and lacks the type-level arithmetic needed for typing reshapes.
+% Nexus~\citep{chen2017typesafe} represents variable-rank ndarrays as HLists of dimension labels, and uses Scala's implicit resolution to express type-level transformations on shapes.
 % However, it only guards against rank errors, and not ndarray size errors.
 
 % Match types offer an abstraction that can be used to express what these solutions cannot. They allow us to program shape transformations and type constraints, in order to  achieve shape-safety for variable ranks.
-% The implementation in this case study is inspired by the HaskTorch Haskell library~\cite{huang2017hasktorch}, which also represents shapes using HLists, and makes direct use of type-level computation to compute shape transformations.
+% The implementation in this case study is inspired by the HaskTorch Haskell library~\citep{huang2017hasktorch}, which also represents shapes using HLists, and makes direct use of type-level computation to compute shape transformations.
 
 \subsection{Shape Errors in Python}
 In the example Python code below, the \python{img_batch} ndarray is a batch of 25 randomly generated RGB images of size 256$\×$256.
@@ -650,7 +650,7 @@ Finally, we show how this newly defined API can detect and report the error from
 \subsection{Singleton Types}
 \label{subsec:singleton-types}
 
-Scala supports singleton types, which are types inhabited by a single value~\cite{leontiev2014sip}.
+Scala supports singleton types, which are types inhabited by a single value~\citep{leontiev2014sip}.
 For instance, the singleton type \dotty{1} denotes the type containing the integer value \dotty{1}.
 The Scala standard library contains several predefined match types to perform arithmetic operations at the type level.
 For instance, \dotty{type +[A <: Int,}\dotty{B <: Int]} represents the addition of integer singleton types.
@@ -662,7 +662,7 @@ Representing numbers with singleton types is desirable for practical purposes, b
 
 The shape of an ndarray is a list of dimension lengths; we say that the shape $\(\a_{1}, \a_{2}, \dots, \a_n)$ has $\n$ dimensions.
 For instance, a three-by-four matrix is a two-dimensional ndarray of shape $\(\3, \4)$.
-We represent the shape of an ndarray at the type level using a heterogeneous type list, or HList for short~\cite{kiselyov2004strongly}.
+We represent the shape of an ndarray at the type level using a heterogeneous type list, or HList for short~\citep{kiselyov2004strongly}.
 We define an HList called \dotty{Shape} as an ADT with two constructors\footnotemark, \dotty{#:} and \dotty{Ø}.
 \footnotetext{%
 In the interest of clarity, our presentation omits type bounds that are necessary to guide type inference, for example in the definition of the \dotty{Shape} data type.}
@@ -761,19 +761,19 @@ There is a vast amount of literature on type systems combining subtyping with de
 Instead, we offer a condensed summary of our reading journey and explain what led us to decide on using \SystemFsub as a foundation for our formalization.
 
 Dependently typed calculi typically use the same language to describe terms and types.
-This unification is also commonly used in the presence of subtyping~\cite{zwanenburg1999pure, hutchins2010pure, yang2017unifying}.
+This unification is also commonly used in the presence of subtyping~\citep{zwanenburg1999pure, hutchins2010pure, yang2017unifying}.
 For systems with a complete term/type symmetry, this is a natural design, as it is concise and simplifies the meta-theory.
 Unfortunately, the lack of distinction between term and type level renders these systems impractical for our purpose, given that our research takes place in the context of an existing language with a clear term/type separation.
 
-Singleton types provide an interesting middle ground between unified and separate syntax and have also been studied in conjunction with dependent types and subtyping~\cite{aspinall1994singleton, stone2000deciding, courant2003strong}.
+Singleton types provide an interesting middle ground between unified and separate syntax and have also been studied in conjunction with dependent types and subtyping~\citep{aspinall1994singleton, stone2000deciding, courant2003strong}.
 Singleton types give a mechanism to refer to terms \emph{in} types, usually by means of a set-like syntax.
 This mechanism is appealing because it allows type system designers to cherry-pick the term constructs that should be allowed in types.
 When multiple constructs are shared between terms and types, singleton types provide a clear economy of concepts.
 In our study of match types, a minimal use of singleton types would result in sharing a single constructor between the term and the type languages: the constructor for matches. It is unclear if the benefits in doing so would outweigh the additional complexity.
 
-Dependent Object Types (DOT) are, to this day, the most significant effort in formalizing Scala's type system~\cite{essence2016amin}.
+Dependent Object Types (DOT) are, to this day, the most significant effort in formalizing Scala's type system~\citep{essence2016amin}.
 DOT does not directly support any form of type-level computation.
-We considered using DOT as a starting point for our work, however, despite the recent effort to simplify DOT's soundness proof~\cite{rapoport2017simple, giarrusso2020soundness}, extending DOT remains too big of a challenge to concisely describe language extensions.
+We considered using DOT as a starting point for our work, however, despite the recent effort to simplify DOT's soundness proof~\citep{rapoport2017simple, giarrusso2020soundness}, extending DOT remains too big of a challenge to concisely describe language extensions.
 
 After several attempts at formalizing match types within existing systems, we decided to pursue a simpler route of adding new constructs to a system without dependent types.
 After all, the primary purpose of \SystemFm is to serve as a medium to concisely \emph{explain} our type-checking algorithm for match types.
@@ -782,7 +782,7 @@ For this reason, we built our work on top of \SystemFsub, which we believe shoul
 \subsection{Intensional Type Analysis}
 \label{subsec:intensional-type-analysis}
 
-In their work on intensional type analysis~\cite{harper1995compiling}, Harper and Morrisett introduce the $\λ^{ML}_i$ calculus that supports structural analysis of types.
+In their work on intensional type analysis~\citep{harper1995compiling}, Harper and Morrisett introduce the $\λ^{ML}_i$ calculus that supports structural analysis of types.
 In $\λ^{ML}_i$, types are represented as expressions that can be inspected by case analysis using a "typecase" construct, available both at the term and at the type level.
 Match types can be seen as an extension of intensional type analysis to work with object-oriented class hierarchies and subtyping.
 Whereas patterns in $\λ^{ML}_i$ are limited to a fixed set of disjoint types, match types need to deal with open class hierarchies, of which not all members are known at compile-time.
@@ -792,7 +792,7 @@ Disjointness allows for sound reduction in the presence of overlapping patterns 
 \subsection{Type Families in Haskell}
 \label{subsec:type-families-in-haskell}
 
-Haskell's type families allow programmers to define type-level functions using pattern matching~\cite{chakravarty2005associated, schrijvers2008open}.
+Haskell's type families allow programmers to define type-level functions using pattern matching~\citep{chakravarty2005associated, schrijvers2008open}.
 By default, type families are open, which means that a definition can spread across multiple files and compilations.
 This flexibility induces a substantial restriction on type family definitions: patterns must not overlap.
 One benefit of this restriction is that it prevents any ambiguity in the reduction of type families (patterns are pairwise disjoint), which is required given the distributed nature of definitions.
@@ -804,13 +804,13 @@ In this regard, CTFs are closely related to match types.
 In fact, if we replace unification checks with subtyping and apartness checks with disjointness, their reduction algorithm is practically identical to ours, from a high-level perspective.
 
 By default, Haskell checks for termination of recursive type families, but this check can be disabled to increase type families' expressiveness.
-Although the formalization presented in~\cite{eisenberg2014closed} does not cover non-terminating families, the paper discusses a soundness problem caused by non-termination.
+Although the formalization presented in~\citep{eisenberg2014closed} does not cover non-terminating families, the paper discusses a soundness problem caused by non-termination.
 The problem only occurs in the presence of repeated type bindings in patterns.
 In Scala, match types (and pattern matching in general) do not allow repeated bindings and are therefore not affected by this problem.
 
 % A significant difference between type-checking type families and match types is that type families are entirely handled during type inference, while match types reduce during subtyping.
 % Influencing Haskell's global type inference is notoriously difficult, which can, unfortunately, hinder the usability of type families.
-% For instance, in a functional pearl on typed matrices~\cite{santos2020match}, the authors report that their first (simpler) attempt was deemed inconclusive due to limitations of the Haskell type inference when combining type families with pattern matching.
+% For instance, in a functional pearl on typed matrices~\citep{santos2020match}, the authors report that their first (simpler) attempt was deemed inconclusive due to limitations of the Haskell type inference when combining type families with pattern matching.
 
 \subsection{Roles in Haskell}
 \label{subsec:roles-in-haskell}
@@ -820,7 +820,7 @@ We understand roles as type annotations which specify whether a given type can s
 The word representation in RE refers to the runtime representation of a type.
 In particular, RE dealiases \haskell{newtype} constructs.
 
-In their introductory example,~\citeauthor{weirich2011generative} show how type family reduction can lead to unsoundness in the absence of role annotations.
+In their introductory example,~\citepauthor{weirich2011generative} show how type family reduction can lead to unsoundness in the absence of role annotations.
 Their presentation also includes a hypothetical translation of their example to Standard ML, which translates directly to Scala as follows:
 %
 \begin{lstlisting}
@@ -857,7 +857,7 @@ Our algorithm would not reduce \dotty{M[Int]} to \dotty{Bool} in \dotty{AgeClass
 TypeScript's conditional types, briefly mentioned in the introduction, are a type-level ternary operator based on subtyping.
 Conditional types can be nested into a sequence of patterns that evaluate in order, making them similar to match types.
 
-The TypeScript language specification briefly describes the algorithm used to reduce conditional types in the presence of type variables~\cite{microsoft2020typescript}.
+The TypeScript language specification briefly describes the algorithm used to reduce conditional types in the presence of type variables~\citep{microsoft2020typescript}.
 Given a type \typescript{S extends T ? Tt : Tf}, the TypeScript compiler first replaces all the type parameters in \typescript{S} and \typescript{T} by \typescript{any} (the top of TypeScript's subtyping lattice).
 If the resulting types (after substitution) are not subtypes, the overall condition is reduced to \typescript{Tf}.
 Unfortunately, this algorithm is both \emph{unsound} and \emph{incomplete}.
@@ -876,7 +876,7 @@ function f<X extends string>: M<X> = new A
 %
 Here, TypeScript's reduction algorithm fails to recognize that \typescript{new A} can be typed as \typescript{M<X>}, even though \typescript{X} is clearly a subtype of \typescript{string} in \typescript{f}'s body.
 
-Although the situation is concerning, it might not be as bad as it seems given that soundness is a non-goal of TypeScript's type system~\cite{bierman2014typescript}.
+Although the situation is concerning, it might not be as bad as it seems given that soundness is a non-goal of TypeScript's type system~\citep{bierman2014typescript}.
 Nevertheless, we believe that the results of this paper are directly applicable to conditional types and could be used to improve TypeScript's type checker.
 
 \section{Conclusion}

@@ -39,6 +39,7 @@ Here's an example how to cite.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Introduction}
+\label{chap:introduction}
 
 In March 2017, our lab went on a ski retreat in the Swiss Alps.
 After a full day of skiing on the Diablerets massif, we gathered for a lab dinner.
@@ -46,20 +47,38 @@ Denys Shabalin, who was working on Scala Native at the time \citep{shabalin2020j
 The discussion revolved around the following question: could a Rust-like ownership system be viable for Scala?
 Denys' answer was clear: ownership is fundamentally at odds with the way Scala handles references, and without making deep changes to Scala's type system, the task was simply impossible.
 
-The next day, I showed Denys the following proof of concept, which I quickly hacked together overnight:
+The next day, I came up with a proof-of-concept domain-specific language (DSL), which implements the basis of a linear type system using type-level programming.
+Here is an example of a short program written in this DSL:
 
 \memImplicitMainCodeSection
-% // Context & other definitions hidden to avoid scaring the reader away!
-% def main(ctx: Context[HNil]): Context[HNil] = {
-%   ctx.malloc(32, "mem")
-%      .malloc(1, "bool")
-%      .call(f)
-%      .deref("mem") { (m: Array[Byte]) =>
-%        println(new String(m))
-%      }
-%      .free("mem")
-%      .free("bool")
-% }
+
+\noindent
+The type argument of \scala{Context} is a type-level list of strings that corresponds to the memory regions allocated at each program point.
+Methods of \scala{Context} use type-level programming techniques to maintain that list of memory regions and enforce the following properties:
+
+\begin{enumerate}
+  \item memory regions must be allocated (\scala{malloc}) \emph{before} they can be deallocated (\scala{free}),
+  \item all memory regions must be deallocated by the end of the program,
+  \item dereferencing (\scala{deref}) is only allowed on previously allocated regions.
+\end{enumerate}
+
+\noindent
+The implementation uses Scala's implicits to enforce these properties.
+We discuss this implementation...
+\footnote{We revisit this example in \Cref{chap:ab-using-implicits}... Alternative, clearer implementation using match types in presented in..}
+
+At the time, I was delighted with my solution!
+While it's obviously too simplistic to be of any practical use, this proof of concept demonstrates the power type-level programming.
+Denys, on the other hand, was not impressed by my solution.
+Implicits have a rather bad reputation in some * of the Scala community.
+
+\citep{filip2019implicits}
+
+I was delighted!
+
+Denys didn't...
+
+which we will present in detail \Cref{chap:ab-using-implicits}
 
 % 2. Identify the Research Gap
 I was delighted! Unfortunetly, Denys didn't like my solution. In retrospect, ...
@@ -70,32 +89,40 @@ TLP isn't new. GHC' Haskell is leading the charge with the numerous language ext
 Dependently typed languages unify the term and type language, and are thus naturally able to express TLP. Unfortunetly...
 
 % 5. Mention the Hypothesis
-
-
-% 6. Provide Significance of Your Research
+We can do better! Implicit-based TLP can be better expressed by first class language construct.
 
 % 8. State Research Objectives
 
+
 % 9. Create an Outline
+% - (Ab)Using Implicits
+% - Extending Scala with Dependent Types
+% - Match Types
+% - Performance-Based Evaluation
 
 \lipsum[1]
 
 \chapter{(Ab)Using Implicits}
+\label{chap:ab-using-implicits}
 % \subsection*{Attribution}
 \lipsum[1]
 
 \chapter{Extending Scala with Dependent Types}
+\label{chap:extending-scala-with-dependent-types}
 % \subsection*{Attribution}
 \lipsum[1]
 
 \chapter{Match Types}
+\label{chap:match-types}
 % \subsection*{Attribution}
 \input{article.tex}
 
 \chapter{Performance-Based Evaluation}
+\label{chap:performance-based-evaluation}
 \lipsum[1]
 
 \chapter{Conclusion}
+\label{chap:conclusion}
 \lipsum[1]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

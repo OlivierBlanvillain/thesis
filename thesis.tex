@@ -41,7 +41,7 @@ Here's an example how to cite.
 \chapter{Introduction}
 \label{chap:introduction}
 
-In March 2017, our lab went on a ski retreat in the Swiss Alps.
+In March 2017, our research group went on a ski retreat in the Swiss Alps.
 After a full day of skiing on the Diablerets massif, we gathered for a lab dinner.
 Denys Shabalin, who was working on Scala Native at the time \citep{shabalin2020just}, started a conversation about manual memory management.
 The discussion revolved around the following question: could a Rust-like ownership system be viable for Scala?
@@ -54,37 +54,69 @@ Here is an example of a short program written in this DSL:
 
 \noindent
 The type argument of \scala{Context} is a type-level list of strings that corresponds to the memory regions allocated at each program point.
-Methods of \scala{Context} use type-level programming techniques to maintain that list of memory regions and enforce the following properties:
+Methods of \scala{Context} use type-level programming techniques to enforce the following properties:
 
 \begin{enumerate}
-  \item memory regions must be allocated (\scala{malloc}) \emph{before} they can be deallocated (\scala{free}),
+  \item memory regions must be allocated (\scala{malloc}) \emph{before} they are deallocated (\scala{free}),
   \item all memory regions must be deallocated by the end of the program,
   \item dereferencing (\scala{deref}) is only allowed on previously allocated regions.
 \end{enumerate}
 
 \noindent
-The implementation uses Scala's implicits to enforce these properties.
-We discuss this implementation...
-\footnote{We revisit this example in \Cref{chap:ab-using-implicits}... Alternative, clearer implementation using match types in presented in..}
-
-At the time, I was delighted with my solution!
-While it's obviously too simplistic to be of any practical use, this proof of concept demonstrates the power type-level programming.
-Denys, on the other hand, was not impressed by my solution.
-Implicits have a rather bad reputation in some * of the Scala community.
-
-\citep{filip2019implicits}
-
-I was delighted!
-
-Denys didn't...
-
-which we will present in detail \Cref{chap:ab-using-implicits}
+The implementation makes use of Scala's implicits to enforce these properties.
+While this small DSL is obviously too simplistic to be of any practical use, it demonstrates the power of type-level programming.
 
 % 2. Identify the Research Gap
-I was delighted! Unfortunetly, Denys didn't like my solution. In retrospect, ...
+My solution implemented the impossible, I was delighted!
+Denys, however, was not impressed.
+I attribute this apathy to his animosity toward implicits.
+Despite their widespread usage, implicits are notorious for their complexity \citep{filip2019implicits}.
+
+to the animosity toward
+
+In particular, \emph{type-level programming} with implicits, is among the more advanced...
+
+In the interest of keeping this introduction concise, we will postpone explaining the details of * to \Cref{chap:ab-using-implicits}.
+
+Computing types with implicits is among the , and pehaps what give the feature them their bad reputation.
+Using implicits to compute types is among the most the
+Type-level programming is among the most extreme
+
+Programming with implicits is not an easy task, there are many
+be relatively tricky, one needs to know
+
+so that the reader can get a feel of what type-level programming looked like in 2017's Scala.
+We will postpone the detailed presentation
+Although we differ
+at compile time (we discuss the details of this implementation in \Cref{chap:ab-using-implicits}).
+
+\memImplicitContextCodeSection
+trait Context[Ps <: HList]:
+  def free[V <: Singleton, Out <: HList]
+    (v: V)
+    (implicit ev: Remove[V, Ps, Out])
+    : Context[Out]
+
+\memImplicitRemoveCodeSection
+trait Remove[V, Ps <: HList, O <: HList]
+
+object Remove:
+  implicit def casehead[V, Ps <: HList, O <: HList]
+    : Remove[V, V :: Ps, Ps] = new Remove {}
+
+  implicit def casetail[V, Ph, Pt <: HList, O <: HList]
+    (implicit ev: Remove[V, Pt, O])
+    : Remove[V, Ph :: Pt, Ph :: O] = new Remove {}
+
+
+
+His apathy was likely due the heavy usage of implicits,
+
+Implicits have a rather bad reputation in some * of the Scala community.
+
 
 % 3. State the Background Information
-TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunetly, many of the techniques developed in the context of Haskell are not directly applicable to other programing languages. In particular, subtying ...
+TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunetly, many of the techniques developed in the context of Haskell are not directly applicable to other programming languages. In particular, subtying ...
 
 Dependently typed languages unify the term and type language, and are thus naturally able to express TLP. Unfortunetly...
 

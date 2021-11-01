@@ -51,15 +51,24 @@ The next day, I came up with a toy domain-specific language (DSL), which impleme
 Here is an example of a short program written in this DSL:
 
 \memImplicitMainCodeSection
+% def main(ctx: Context[HNil]): Context[HNil] =
+%   ctx.malloc(32, "mem")
+%      .malloc(1, "bool")
+%      .call(f)
+%      .deref("mem") { (m: Array[Byte]) =>
+%        println(new String(m))
+%      }
+%      .free("mem")
+%      .free("bool")
 
 \noindent
-The type argument of \scala{Context} is a type-level list of strings that corresponds to the memory regions allocated at each program point.
-Methods of \scala{Context} use type-level programming techniques to enforce the following properties:
+The type argument of |Context| is a type-level list of strings that corresponds to the memory regions allocated at each program point.
+Methods of |Context| use type-level programming techniques to enforce the following properties:
 
 \begin{enumerate}
-  \item memory regions must be allocated (\scala{malloc}) \emph{before} they are deallocated (\scala{free}),
+  \item memory regions must be allocated (|malloc|) \emph{before} they are deallocated (|free|),
   \item all memory regions must be deallocated by the end of the program,
-  \item dereferencing (\scala{deref}) is only allowed on previously allocated regions.
+  \item dereferencing (|deref|) is only allowed on previously allocated regions.
 \end{enumerate}
 
 \noindent
@@ -72,7 +81,7 @@ Denys, however, was not impressed.
 I attribute this apathy to his dislike of implicits.
 Despite their widespread usage, implicits are notorious for their complexity \citep{filip2019implicits}.
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
-To give the reader a glance of this pattern, we show the definition of the \scala{free} method on \scala{Context}:
+To give the reader a glance of this pattern, we show the definition of the |free| method on |Context|:
 
 \memImplicitContextCodeSection
 % trait Context[Ps <: HList]:
@@ -81,11 +90,10 @@ To give the reader a glance of this pattern, we show the definition of the \scal
 %     (implicit ev: Remove[V, Ps, Out])
 %     : Context[Out]
 
-In this definition uses three parameter lists, one for type parameters (\scala{V} and \scala{Out}), one for a value parameter (\scala{v}), and one of an implicit value parameter (\scala{ev}).
+In this definition uses three parameter lists, one for type parameters (|V| and |Out|), one for a value parameter (|v|), and one of an implicit value parameter (|ev|).
 Only the second parameter list is intended to be specified at the use site; the type and implicit parameters are intended to be inferred.
-When a user writes \scala{.free("mem")} he only sets the \scala{v} parameter to \scala{v = "mem"}; the compiler takes care of finding valid assignments for \scala{V}, \scala{Out} and \scala{ev}.
-The implicit parameter of type \scala{Remove[V, Ps, Out]} type is the entry point to the world of type-level programming: it specifies how \scala{V} (constrained by \scala{v: V}), \scala{Ps} (defined in the class}, and \scala{Out} (unconstrained) are interrelated.
-The definition of \scala{Remove}
+When a user writes |.free("mem")| he only sets the |v| parameter to |v = "mem"|; the compiler takes care of finding valid assignments for |V|, |Out| and |ev|.
+The implicit parameter of type |Remove[V, Ps, Out]| is the entry point to the world of type-level programming, it specifies how |V| (constrained by |v: V|), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
 
 \memImplicitRemoveCodeSection
 % trait Remove[V, Ps <: HList, O <: HList]
@@ -98,13 +106,12 @@ The definition of \scala{Remove}
 %     (implicit ev: Remove[V, Pt, O])
 %     : Remove[V, Ph :: Pt, Ph :: O] = new Remove {}
 
+Implicit-prefixed definitions can be understood as \emph{facts} and \emph{rules} of a logic program.
+The first definition, |casehead|, specifies a fact: the result of removing |V| from the list |V :: Ps| is |Ps|, which is expressed as an instance of |Remove[V, V :: Ps, Ps]|.
+The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |O|, the results of removing |V| from the list |Ph :: Pt| is |Ph :: O| (which is expressed as in instance of |Remove[V, Ph :: Pt, Ph :: O]|).
+When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool" :: "mem" :: HNil]|, the compiler uses |casehead| and |casetail| to \emph{compute} a type |Out| such that |Out| is the results of removing |"mem"| from |"bool" :: "mem" :: HNil|.
+
 is, to say the least, *very* convoluted
-
-
-His apathy was likely due the heavy usage of implicits,
-
-Implicits have a rather bad reputation in some * of the Scala community.
-
 
 % 3. State the Background Information
 TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunetly, many of the techniques developed in the context of Haskell are not directly applicable to other programming languages. In particular, subtying ...
@@ -138,6 +145,7 @@ We can do better! Implicit-based TLP can be better expressed by first class lang
 \chapter{Match Types}
 \label{chap:match-types}
 % \subsection*{Attribution}
+\lstDeleteShortInline{|}
 \input{article.tex}
 
 \chapter{Performance-Based Evaluation}

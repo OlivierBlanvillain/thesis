@@ -47,7 +47,7 @@ Denys Shabalin, who was working on Scala Native at the time \citep{shabalin2020j
 The discussion revolved around the following question: could a Rust-like ownership system be viable for Scala?
 Denys' answer was clear: ownership is fundamentally at odds with the way Scala handles references, and without making deep changes to Scala's type system, the task was simply impossible.
 
-The next day, I came up with a proof-of-concept domain-specific language (DSL), which implements the basis of a linear type system using type-level programming.
+The next day, I came up with a toy domain-specific language (DSL), which implements the basis of a linear type system using type-level programming.
 Here is an example of a short program written in this DSL:
 
 \memImplicitMainCodeSection
@@ -67,46 +67,30 @@ The implementation makes use of Scala's implicits to enforce these properties.
 While this small DSL is obviously too simplistic to be of any practical use, it demonstrates the power of type-level programming.
 
 % 2. Identify the Research Gap
-My solution implemented the impossible, I was delighted!
+I was delighted with my solution!
 Denys, however, was not impressed.
-I attribute this apathy to his animosity toward implicits.
+I attribute this apathy to his dislike of implicits.
 Despite their widespread usage, implicits are notorious for their complexity \citep{filip2019implicits}.
-
-to the animosity toward
-
-In particular, \emph{type-level programming} with implicits, is among the more advanced...
-
-In the interest of keeping this introduction concise, we will postpone explaining the details of * to \Cref{chap:ab-using-implicits}.
-
-Computing types with implicits is among the , and pehaps what give the feature them their bad reputation.
-Using implicits to compute types is among the most the
-Type-level programming is among the most extreme
-
-Programming with implicits is not an easy task, there are many
-be relatively tricky, one needs to know
-
-so that the reader can get a feel of what type-level programming looked like in 2017's Scala.
-We will postpone the detailed presentation
-Although we differ
-at compile time (we discuss the details of this implementation in \Cref{chap:ab-using-implicits}).
+In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
+To give the reader a glance of this pattern, we show the definition of the \scala{free} function from
 
 \memImplicitContextCodeSection
-trait Context[Ps <: HList]:
-  def free[V <: Singleton, Out <: HList]
-    (v: V)
-    (implicit ev: Remove[V, Ps, Out])
-    : Context[Out]
+% trait Context[Ps <: HList]:
+%   def free[V <: Singleton, Out <: HList]
+%     (v: V)
+%     (implicit ev: Remove[V, Ps, Out])
+%     : Context[Out]
 
 \memImplicitRemoveCodeSection
-trait Remove[V, Ps <: HList, O <: HList]
+% trait Remove[V, Ps <: HList, O <: HList]
 
-object Remove:
-  implicit def casehead[V, Ps <: HList, O <: HList]
-    : Remove[V, V :: Ps, Ps] = new Remove {}
+% object Remove:
+%   implicit def casehead[V, Ps <: HList, O <: HList]
+%     : Remove[V, V :: Ps, Ps] = new Remove {}
 
-  implicit def casetail[V, Ph, Pt <: HList, O <: HList]
-    (implicit ev: Remove[V, Pt, O])
-    : Remove[V, Ph :: Pt, Ph :: O] = new Remove {}
+%   implicit def casetail[V, Ph, Pt <: HList, O <: HList]
+%     (implicit ev: Remove[V, Pt, O])
+%     : Remove[V, Ph :: Pt, Ph :: O] = new Remove {}
 
 
 

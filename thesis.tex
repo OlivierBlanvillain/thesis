@@ -72,7 +72,7 @@ Denys, however, was not impressed.
 I attribute this apathy to his dislike of implicits.
 Despite their widespread usage, implicits are notorious for their complexity \citep{filip2019implicits}.
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
-To give the reader a glance of this pattern, we show the definition of the \scala{free} function from
+To give the reader a glance of this pattern, we show the definition of the \scala{free} method on \scala{Context}:
 
 \memImplicitContextCodeSection
 % trait Context[Ps <: HList]:
@@ -80,6 +80,12 @@ To give the reader a glance of this pattern, we show the definition of the \scal
 %     (v: V)
 %     (implicit ev: Remove[V, Ps, Out])
 %     : Context[Out]
+
+In this definition uses three parameter lists, one for type parameters (\scala{V} and \scala{Out}), one for a value parameter (\scala{v}), and one of an implicit value parameter (\scala{ev}).
+Only the second parameter list is intended to be specified at the use site; the type and implicit parameters are intended to be inferred.
+When a user writes \scala{.free("mem")} he only sets the \scala{v} parameter to \scala{v = "mem"}; the compiler takes care of finding valid assignments for \scala{V}, \scala{Out} and \scala{ev}.
+The implicit parameter of type \scala{Remove[V, Ps, Out]} type is the entry point to the world of type-level programming: it specifies how \scala{V} (constrained by \scala{v: V}), \scala{Ps} (defined in the class}, and \scala{Out} (unconstrained) are interrelated.
+The definition of \scala{Remove}
 
 \memImplicitRemoveCodeSection
 % trait Remove[V, Ps <: HList, O <: HList]
@@ -92,6 +98,7 @@ To give the reader a glance of this pattern, we show the definition of the \scal
 %     (implicit ev: Remove[V, Pt, O])
 %     : Remove[V, Ph :: Pt, Ph :: O] = new Remove {}
 
+is, to say the least, *very* convoluted
 
 
 His apathy was likely due the heavy usage of implicits,

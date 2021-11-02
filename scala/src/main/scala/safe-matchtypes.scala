@@ -6,23 +6,23 @@ sealed trait HNil extends HList
 case object HNil extends HNil
 case class ::[+H, +T <: HList](head: H, tail: T) extends HList
 
-// start section memMatchtypeHlistOps
 type NotIn[V, Ps] <: HList = Ps match {
   case V :: t => NotIn[V, Ps]
   case h :: t => h :: NotIn[V, t]
   case HNil => HNil
 }
 
+// start section memMatchtypeRemove
 type Remove[V, Ps] <: HList = Ps match {
   case V :: t => t
   case h :: t => h :: Remove[V, t]
 }
-// end section memMatchtypeHlistOps
+// end section memMatchtypeRemove
 
 // start section memMatchtypeContext
 trait Context[Ps <: HList] {
   def malloc[V <: Singleton](size: Int, v: V): Context[V :: NotIn[V, Ps]] = ???
-  def free[V <: Singleton, Out <: HList](v: V): Context[Remove[V, Ps]] = ???
+  def free[V <: Singleton](v: V): Context[Remove[V, Ps]] = ???
   def call[Out <: HList](f: Context[Ps] => Context[Out]): Context[Out] = ???
   def deref[V <: Singleton, EV <: Remove[V, Ps]](v: V)(body: Array[Byte] => Unit)
     : Context[Ps] = ???

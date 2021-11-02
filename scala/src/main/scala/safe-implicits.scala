@@ -7,15 +7,15 @@ case object HNil extends HNil
 case class ::[+H, +T <: HList](head: H, tail: T) extends HList
 
 // start section memImplicitRemove
-trait Remove[V, Ps <: HList, O <: HList]
+trait Remove[V, Ps <: HList, Out <: HList]
 
 object Remove:
-  implicit def casehead[V, Ps <: HList, O <: HList]
+  implicit def casehead[V, Ps <: HList, Out <: HList]
     : Remove[V, V :: Ps, Ps] = new Remove {}
 
-  implicit def casetail[V, Ph, Pt <: HList, O <: HList]
-    (implicit ev: Remove[V, Pt, O])
-    : Remove[V, Ph :: Pt, Ph :: O] = new Remove {}
+  implicit def casetail[V, Ph, Pt <: HList, Out <: HList]
+    (implicit ev: Remove[V, Pt, Out])
+    : Remove[V, Ph :: Pt, Ph :: Out] = new Remove {}
 // end section memImplicitRemove
 
 trait NotIn[V, Ps <: HList]

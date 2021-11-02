@@ -90,24 +90,25 @@ The first definition, |casehead|, specifies a fact: the result of removing |V| f
 The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |Out|, the results of removing |V| from the list |Ph::Pt| is |Ph::Out| (which is expressed as in instance of |Remove[V, Ph::Pt, Ph::Out]|).
 When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool"::"mem"::HNil]|, the compiler uses |casehead| and |casetail| to compute a type |Out| such that |Out| is the results of removing |"mem"| from |"bool"::"mem"::HNil|.
 
-In retrospect, I have to agree with Denys' judgement at the time: this style of programming is convoluted, to say the least.
+In retrospect, I have to agree with Denys' judgment at the time: this style of programming is convoluted, to say the least.
 Aesthetics and pragmatism aside, programming with implicits requires a complete paradigm shift.
 Instead using pattern matching and functions, implicits require algorithm to be expressed using relations and constraints, which makes the task harder than it should be.
 
 \emph{Can we do better?} This is the question that motivates the work presented in dissertation.
 
-Dependently-typed programming languages, such as Coq, Agda and Idris, naturally support type-level programming by
-Type-level programming exists in other programming languages
 % 3. State the Background Information
-TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunetly, many of the techniques developed in the context of Haskell are not directly applicable to other programming languages. In particular, subtying ...
+Dependently-typed programming languages, such as Coq \citep{bertot2013interactive}, Agda \citep{norell2007towards}, and Idris \citep{brady2015idris}, make no distinction between terms and types, and thus naturally support type-level programming.
+Scala, on the other hand, has a clear separation between its term and type language
 
-Dependently typed languages unify the term and type language, and are thus naturally able to express TLP. Unfortunetly...
+% When terms are types are unified, the distinction between programming and type-level programming blurs out since value-level computations can be performed during type checking.
+
+TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunately, many of the techniques developed in the context of Haskell are not directly applicable to other programming languages. In particular, subtying ...
 
 % 8. State Research Objectives
 
 % 9. Create an Outline
 % - (Ab)Using Implicits
-% - Extending Scala with Dependent Types
+% - Generalizing Scala's Singleton Types
 % - Match Types
 % - Performance-Based Evaluation
 
@@ -118,8 +119,8 @@ Dependently typed languages unify the term and type language, and are thus natur
 % \subsection*{Attribution}
 \lipsum[1]
 
-\chapter{Extending Scala with Dependent Types}
-\label{chap:extending-scala-with-dependent-types}
+\chapter{Generalizing Scala's Singleton Types}
+\label{chap:generalizing-scala-s-singleton-types}
 % \subsection*{Attribution}
 \lipsum[1]
 

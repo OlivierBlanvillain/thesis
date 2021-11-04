@@ -6,7 +6,8 @@ thesis.pdf: FORCE proofs/structure.pdf scala/code-sections.tex
 	./latexrun --latex-cmd lualatex thesis.tex
 
 clean: FORCE
-	./latexrun --clean-all
+	- ./latexrun --clean-all
+	- rm -rf scala/code-sections.tex
 
 watch: FORCE
 	git ls-files | entr make

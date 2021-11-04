@@ -98,7 +98,7 @@ Instead using pattern matching and functions, implicits require algorithm to be 
 
 % 3. State the Background Information
 Dependently-typed programming languages, such as Coq \citep{bertot2013interactive}, Agda \citep{norell2007towards}, and Idris \citep{brady2015idris}, make no distinction between terms and types, and thus naturally support type-level programming.
-Scala, on the other hand, has a clear separation between its term and type language
+Scala, on the other hand, has a clear separation between its term and type language.
 
 % When terms are types are unified, the distinction between programming and type-level programming blurs out since value-level computations can be performed during type checking.
 
@@ -116,18 +116,72 @@ TLP isn't new. GHC' Haskell is leading the charge with the numerous language ext
 
 \chapter{(Ab)Using Implicits}
 \label{chap:ab-using-implicits}
-% \subsection*{Attribution}
-\lipsum[1]
+
+In this chapter...
+
+\subsection*{Attribution}
+\citep{odersky2018simplicitly}
+
+\section{Implicit Parameters Overview}
+
+\emph{Implicit parameters} offer a convenient way to write code without the need to pass all arguments explicitly.
+The ability to omit arguments to functions gives rise to many interesting coding styles and patterns.
+On every call to functions with implicit parameters, the compiler looks for an implicit definition in scope to satisfy the call.
+So, instead of passing a parameter explicitly:
+
+\explicitModuloCodeSection
+
+We can mark a set of parameters as implicit (a single parameter in this example) and let the compiler retrieve the missing argument for us.
+In the following example, |addm| is a method with one implicit parameter and |modulo| is an implicit definition:
+
+\implicitModuloCodeSection
+
+The process of implicit parameter discovery performed by the compiler is called \emph{implicit resolution}.
+The resolution algorithm looks for implicits in the current scope and in the companion objects of all classes associated with the query type.
+In the previous example, the implicit definition is declared in the current scope.
+Since that definition has type |Int|, the compiler resolves the method call by passing |modulo| automatically.
+
+Implicits can be used to implement type classes \citep{wadler1989howto} as a design pattern in Scala \citep{oliveira2010type}.
+We give an example of an implementation of the "ordered" type class.
+This example consists of three parts:
+
+\begin{enumerate}
+  \item |Ord[T]|, which is a regular trait with a single method, |compare|,
+  \item the generic function |comp|, which compares two arguments and accepts an implicit argument, providing an \emph{implicit evidence} that these two values can be compared,
+  \item the implicit definition |intOrd|, which provides an \emph{instance} of the |Ord| type class for integers.
+\end{enumerate}
+
+We have briefly introduced implicit parameters and showed who they can be used to avoid clutter in function applications.
+In the next section, we introduce type-level programming
+The next section introduces advanced usages of implicits
+
+Implicit methods can themselves have implicit parameters
+
+remedy to this problem by providing the means totype-abstract implicit functions.
+
+\ordExampleCodeSection
+
+\section{Recursive Implicit Resolution}
+
+This is where the fun begins.
+Introduce HList
+Show Remove example in detail
+
+\section{Priorities and Ambiguities}
+
+|implicitly[Remove[1, 1 :: 2 :: 1 :: HNil, ?]]|
+The Implicit Negation Pattern
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}
-% \subsection*{Attribution}
+\subsection*{Attribution}
+\citep{shmid2020coming}
 \lipsum[1]
 
 \chapter{Match Types}
 \label{chap:match-types}
-% \subsection*{Attribution}
-\lstDeleteShortInline{|}
+\subsection*{Attribution}
+\citep{blanvillain2022type}
 \input{article.tex}
 
 \chapter{Performance-Based Evaluation}
@@ -143,7 +197,7 @@ TLP isn't new. GHC' Haskell is leading the charge with the numerous language ext
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \appendix
-\chapter{Type Soudness for System FM}
+\chapter{Type Soundness for System FM}
 \renewenvironment{proof}{{\it Proof: }}{\qed} % Show proofs
 \input{proofs/permutation.tex}
 \input{proofs/weakening.tex}

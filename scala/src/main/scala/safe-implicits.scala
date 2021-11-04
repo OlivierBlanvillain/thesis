@@ -2,15 +2,15 @@ package foo
 import scala.util.NotGiven
 
 sealed trait HList
-sealed trait HNil extends HList
-case object HNil extends HNil
+case object HNil extends HList
 case class ::[+H, +T <: HList](head: H, tail: T) extends HList
+type HNil = HNil.type
 
 // start section memImplicitRemove
 trait Remove[V, Ps <: HList, Out <: HList]
 
 object Remove:
-  implicit def casehead[V, Ps <: HList, Out <: HList]
+  implicit def casehead[V, Ps <: HList]
     : Remove[V, V :: Ps, Ps] = new Remove {}
 
   implicit def casetail[V, Ph, Pt <: HList, Out <: HList]

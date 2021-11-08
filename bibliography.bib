@@ -1,86 +1,87 @@
 @book{pierce2002types,
-  title = {Types and programming languages},
   author = {Benjamin C. Pierce},
+  publisher = {MIT press},
+  title = {Types and programming languages},
   year = {2002},
-  publisher = {MIT press}
 }
 
 @book{bertot2004interactive,
-  title = {Interactive theorem proving and program development: Coq’Art: the calculus of inductive constructions},
   author = {Bertot, Yves and Cast{\'e}ran, Pierre},
+  publisher = {Springer},
+  title = {Interactive theorem proving and program development: Coq’Art: the calculus of inductive constructions},
   year = {2004},
-  publisher = {Springer}
 }
 
-@misc{microsoft2020typescript,
-  title = {The TypeScript Handbook},
-  author = {TypeScript development team},
+@inbook{essence2016amin,
+  author = {Amin, Nada  and Gr{\"u}tter, Samuel and Odersky, Martin and Rompf, Tiark and Stucki, Sandro},
+  booktitle = {A List of Successes That Can Change the World: Essays Dedicated to Philip Wadler on the Occasion of His 60th Birthday},
+  pages = {249--272},
+  publisher = {Springer International Publishing},
+  title = {The Essence of Dependent Object Types},
+  year = {2016},
+}
+
+@manual{microsoft2020typescript,
+  author = {{TypeScript development team}},
   organization = {Microsoft Corporation},
-  url = {https://www.typescriptlang.org/},
-  year = {2020}
+  title = {The TypeScript Handbook},
+  note = {\url{https://www.typescriptlang.org/}},
+  year = {2020},
 }
 
-@misc{leontiev2014sip,
-  title={{SIP}-23 - Literal-Based Singleton Types},
-  author={Leontiev, George and Burmako, Eugene and Zaugg, Jason and Moors, Adriaan and Phillips, Paul and Port, Oron and Sabin, Miles},
-  url="https://docs.scala-lang.org/sips/42.type.html",
-  organization={Scala Center},
-  year={2014}
+@manual{leontiev2014sip,
+  author = {Leontiev, George and Burmako, Eugene and Zaugg, Jason and Moors, Adriaan and Phillips, Paul and Port, Oron and Sabin, Miles},
+  organization = {Scala Center},
+  title = {{SIP}-23 - Literal-Based Singleton Types},
+  note = {\url{https://docs.scala-lang.org/sips/42.type.html}},
+  year = {2014},
 }
 
 @misc{huang2017hasktorch,
   author = {Huang, Austin and Stites, Sam and Scholak, Torsten},
+  howpublished = {\url{https://github.com/hasktorch/hasktorch}},
   title = {{HaskTorch}},
   year = {2017--2021},
-  journal = {GitHub repository},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/hasktorch/hasktorch}},
 }
 
 @misc{rush2019namedtensor,
- author = {Rush, Alexander},
- title = {Tensor Considered Harmful},
- organization = {Harvard NLP},
- year = {2019}
+  author = {Rush, Alexander},
+  howpublished = {\url{https://nlp.seas.harvard.edu/NamedTensor}},
+  title = {Tensor Considered Harmful},
+  year = {2019},
 }
 
 @misc{sabin2011shapeless,
   author = {Miles Sabin and {Shapeless open-source contributors}},
+  howpublished = {\url{https://github.com/milessabin/shapeless}},
   title = {{Shapeless}},
   year = {2011--2021},
-  journal = {GitHub repository},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/milessabin/shapeless}},
 }
 
 @misc{pilquist2013scodecs,
   author = {Michael Pilquist and {Scodec open-source contributors}},
+  howpublished = {\url{https://github.com/scodec/scodec}},
   title = {{Scodec}},
   year = {2013--2021},
-  journal = {GitHub repository},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/scodec/scodec}},
 }
 
 @misc{blanvillain2016frameless,
   author = {Olivier Blanvillain and Marios Iliofotou and Adelbert Chang and Gleb Kanterov and {other open-source contributors}},
+  howpublished = {\url{https://github.com/typelevel/frameless}},
   title = {{Frameless}},
   year = {2016--2021},
-  journal = {GitHub repository},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/typelevel/frameless}},
 }
 
 @article{shmid2020coming,
   author = {Georg Stefan Schmid and Olivier Blanvillain and Jad Hamza and Viktor Kuncak},
+  bibsource = {dblp computer science bibliography, https://dblp.org},
+  eprint = {2011.07653},
+  eprinttype = {arXiv},
+  journal = {CoRR},
+  timestamp = {Wed, 18 Nov 2020 16:48:35 +0100},
   title = {Coming to Terms with Your Choices: An Existential Take on Dependent Types},
   volume = {abs/2011.07653},
-  journal = {CoRR},
   year = {2020},
-  eprinttype = {arXiv},
-  eprint = {2011.07653},
-  timestamp = {Wed, 18 Nov 2020 16:48:35 +0100},
-  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
 % inproceedings{serrano2015type,
@@ -113,14 +114,13 @@
 %   series = {Haskell'20}
 % }
 
-
 % inproceedings{aspinall1996dependent,
-%   title={Subtyping dependent types},
-%   author={Aspinall, David and Compagnoni, Adriana},
-%   booktitle={Proceedings 11th Annual IEEE Symposium on Logic in Computer Science},
-%   year={1996},
-%   publisher={IEEE},
-%   address={New Brunswick, NJ, USA}
+%   title = {Subtyping dependent types},
+%   author = {Aspinall, David and Compagnoni, Adriana},
+%   booktitle = {Proceedings 11th Annual IEEE Symposium on Logic in Computer Science},
+%   year = {1996},
+%   publisher = {IEEE},
+%   address = {New Brunswick, NJ, USA}
 % }
 
 % inproceedings{kazerounian2019type,
@@ -144,380 +144,357 @@
 % }
 
 @inproceedings{eisenberg2014closed,
-  author = {Eisenberg, Richard A. and Vytiniotis, Dimitrios and Peyton Jones, Simon and Weirich, Stephanie},
-  title = {Closed Type Families with Overlapping Equations},
-  booktitle = {Proceedings of the ACM Symposium on Principles of Programming Languages},
-  year = {2014},
-  publisher = {{AMC}},
   address = {New York, NY, USA},
-  series = {POPL'14}
+  author = {Eisenberg, Richard A. and Vytiniotis, Dimitrios and Peyton Jones, Simon and Weirich, Stephanie},
+  booktitle = {Proceedings of the ACM Symposium on Principles of Programming Languages},
+  publisher = {{AMC}},
+  series = {POPL'14},
+  title = {Closed Type Families with Overlapping Equations},
+  year = {2014},
 }
 
 @inproceedings{stolarek2015injective,
+  address = {New York, NY, USA},
   author = {Stolarek, Jan and Peyton Jones, Simon and Eisenberg, Richard A.},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Haskell},
+  publisher = {{ACM}},
+  series = {Haskell'15},
   title = {Injective Type Families for Haskell},
   year = {2015},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Haskell},
-  series = {Haskell'15}
 }
 
 @inproceedings{aydemir2008engineering,
+  address = {New York, NY, USA},
   author = {Aydemir, Brian and Chargu\'{e}raud, Arthur and Pierce, Benjamin C. and Pollack, Randy and Weirich, Stephanie},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
+  publisher = {{ACM}},
+  series = {POPL'08},
   title = {Engineering Formal Metatheory},
   year = {2008},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  series = {POPL'08}
 }
 
 @article{cardelli1994extension,
-  title={An extension of system F with subtyping},
-  author={Cardelli, Luca and Martini, Simone and Mitchell, John C and Scedrov, Andre},
-  journal={Information and computation},
-  volume={109},
-  number={1-2},
-  year={1994},
-  publisher={Elsevier}
+  author = {Cardelli, Luca and Martini, Simone and Mitchell, John C and Scedrov, Andre},
+  journal = {Information and computation},
+  number = {1-2},
+  publisher = {Elsevier},
+  title = {An extension of system F with subtyping},
+  volume = {109},
+  year = {1994},
 }
 
 @inproceedings{schrijvers2008open,
+  address = {New York, NY, USA},
   author = {Schrijvers, Tom and Peyton Jones, Simon and Chakravarty, Manuel and Sulzmann, Martin},
+  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Functional Programming},
+  publisher = {{ACM}},
+  series = {ICFP'08},
   title = {Type Checking with Open Type Functions},
   year = {2008},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Functional Programming},
-  series = {ICFP'08}
 }
 
 @inproceedings{emir2007matching,
+  address = {Berlin, Heidelberg},
   author = {Emir, Burak and Odersky, Martin and Williams, John},
+  booktitle = {Proceedings of the European Conference on Object-Oriented Programming},
+  publisher = {Springer-Verlag},
+  series = {ECOOP'07},
   title = {Matching Objects with Patterns},
   year = {2007},
-  publisher = {Springer-Verlag},
-  address = {Berlin, Heidelberg},
-  booktitle = {Proceedings of the European Conference on Object-Oriented Programming},
-  series = {ECOOP'07}
 }
 
 @inproceedings{bierman2014typescript,
+  address = {Berlin, Heidelberg},
   author = {Bierman, Gavin and Abadi, Mart\'{\i}n and Torgersen, Mads},
+  booktitle = {Proceedings of the European Conference on Object-Oriented Programming},
+  publisher = {Springer-Verlag},
+  series = {ECOOP'14},
   title = {Understanding TypeScript},
   year = {2014},
-  publisher = {Springer-Verlag},
-  address = {Berlin, Heidelberg},
-  booktitle = {Proceedings of the European Conference on Object-Oriented Programming},
-  series = {ECOOP'14}
 }
 
 @inproceedings{weirich2011generative,
+  address = {New York, NY, USA},
   author = {Weirich, Stephanie and Vytiniotis, Dimitrios and Peyton Jones, Simon and Zdancewic, Steve},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
+  publisher = {{ACM}},
+  series = {POPL'11},
   title = {Generative Type Abstraction and Type-Level Computation},
   year = {2011},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  series = {POPL'11}
-}
-
-@inbook{essence2016amin,
-  author="Amin, Nada and Gr{\"u}tter, Samuel and Odersky, Martin and Rompf, Tiark and Stucki, Sandro",
-  title="The Essence of Dependent Object Types",
-  bookTitle="A List of Successes That Can Change the World: Essays Dedicated to Philip Wadler on the Occasion of His 60th Birthday",
-  year="2016",
-  publisher="Springer International Publishing",
-  pages="249--272",
-  doi="10.1007/978-3-319-30936-1_14",
-  url="https://doi.org/10.1007/978-3-319-30936-1_14"
 }
 
 @inproceedings{aspinall1994singleton,
-  title={Subtyping with singleton types},
-  author={Aspinall, David},
-  booktitle={International Workshop on Computer Science Logic},
-  year={1994},
-  organization={Springer},
-  publisher={Springer Berlin Heidelberg},
-  address={Berlin, Heidelberg},
+  address = {Berlin, Heidelberg},
+  author = {Aspinall, David},
+  booktitle = {International Workshop on Computer Science Logic},
+  organization = {Springer},
+  publisher = {Springer Berlin Heidelberg},
+  title = {Subtyping with singleton types},
+  year = {1994},
 }
 
 @inproceedings{hutchins2010pure,
+  address = {New York, NY, USA},
   author = {Hutchins, DeLesley S.},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
+  publisher = {{ACM}},
+  series = {POPL'10},
   title = {Pure Subtype Systems},
   year = {2010},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  series = {POPL'10}
 }
 
 @inproceedings{odersky2018simplicitly,
   author = {Odersky, Martin and Blanvillain, Olivier and Liu, Fengyun and Biboudis, Aggelos and Miller, Heather and Stucki, Sandro},
-  title = {Simplicitly: Foundations and Applications of Implicit Function Types},
   booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  series = {POPL'18},
-  year = {2018},
   publisher = {{ACM}},
+  series = {POPL'18},
+  title = {Simplicitly: Foundations and Applications of Implicit Function Types},
+  year = {2018},
 }
 
 @article{courant2003strong,
-  title={Strong normalization with singleton types},
-  author={Courant, Judica{\"e}l},
-  journal={Electronic Notes in Theoretical Computer Science},
-  volume={70},
-  number={1},
-  year={2003},
-  publisher={Elsevier},
+  author = {Courant, Judica{\"e}l},
+  journal = {Electronic Notes in Theoretical Computer Science},
+  number = {1},
+  publisher = {Elsevier},
+  title = {Strong normalization with singleton types},
+  volume = {70},
+  year = {2003},
 }
 
 @inproceedings{zwanenburg1999pure,
-  title={Pure type systems with subtyping},
-  author={Zwanenburg, Jan},
-  booktitle={International Conference on Typed Lambda Calculi and Applications},
-  year={1999},
-  publisher={Springer Berlin Heidelberg},
-  address={Berlin, Heidelberg},
+  address = {Berlin, Heidelberg},
+  author = {Zwanenburg, Jan},
+  booktitle = {International Conference on Typed Lambda Calculi and Applications},
+  publisher = {Springer Berlin Heidelberg},
+  title = {Pure type systems with subtyping},
+  year = {1999},
 }
 
 @inproceedings{stone2000deciding,
+  address = {New York, NY, USA},
   author = {Stone, Christopher A. and Harper, Robert},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
+  publisher = {{ACM}},
+  series = {POPL'00},
   title = {Deciding Type Equivalence in a Language with Singleton Kinds},
   year = {2000},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  series = {POPL'00}
 }
 
 @article{harris2020numpy,
-  title = {Array programming with {NumPy}},
-  author = {Charles R. Harris and K. Jarrod Millman and St{\'{e}}fan J.
-            van der Walt and Ralf Gommers and Pauli Virtanen and David
-            Cournapeau and Eric Wieser and Julian Taylor and Sebastian
-            Berg and Nathaniel J. Smith and Robert Kern and Matti Picus
-            and Stephan Hoyer and Marten H. van Kerkwijk and Matthew
-            Brett and Allan Haldane and Jaime Fern{\'{a}}ndez del
-            R{\'{\i}}o and Mark Wiebe and Pearu Peterson and Pierre
-            G{\'{e}}rard-Marchant and Kevin Sheppard and Tyler Reddy and
-            Warren Weckesser and Hameer Abbasi and Christoph Gohlke and
-            Travis E. Oliphant},
-  year = {2020},
-  month = sep,
+  author = {Charles R. Harris and K. Jarrod Millman and St{\'{e}}fan J. van der Walt and Ralf Gommers and Pauli Virtanen and David Cournapeau and Eric Wieser and Julian Taylor and Sebastian Berg and Nathaniel J. Smith and Robert Kern and Matti Picus and Stephan Hoyer and Marten H. van Kerkwijk and Matthew Brett and Allan Haldane and Jaime Fern{\'{a}}ndez del R{\'{\i}}o and Mark Wiebe and Pearu Peterson and Pierre G{\'{e}}rard-Marchant and Kevin Sheppard and Tyler Reddy and Warren Weckesser and Hameer Abbasi and Christoph Gohlke and Travis E. Oliphant},
   journal = {Nature},
-  volume = {585},
+  month = sep,
   number = {7825},
   publisher = {Springer Science and Business Media {LLC}},
+  title = {Array programming with {NumPy}},
+  volume = {585},
+  year = {2020},
 }
 
 @inproceedings{kiselyov2004strongly,
+  address = {New York, NY, USA},
   author = {Kiselyov, Oleg and L\"{a}mmel, Ralf and Schupke, Keean},
+  booktitle = {Proceedings of the ACM SIGPLAN Workshop on Haskell},
+  publisher = {{ACM}},
+  series = {Haskell'04},
   title = {Strongly Typed Heterogeneous Collections},
   year = {2004},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Workshop on Haskell},
-  series = {Haskell'04}
 }
 
 @inproceedings{chen2017typesafe,
+  address = {New York, NY, USA},
   author = {Chen, Tongfei},
+  booktitle = {Proceedings of the ACM SIGPLAN International Symposium on Scala},
+  publisher = {{ACM}},
+  series = {SCALA'17},
   title = {Typesafe Abstractions for Tensor Operations (Short Paper)},
   year = {2017},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  abstract = { We propose a typesafe abstraction to tensors (i.e. multidimensional arrays) exploiting the type-level programming capabilities of Scala through heterogeneous lists (HList), and showcase typesafe abstractions of common tensor operations and various neural layers such as convolution or recurrent neural networks. This abstraction could lay the foundation of future typesafe deep learning frameworks that runs on Scala/JVM. },
-  booktitle = {Proceedings of the ACM SIGPLAN International Symposium on Scala},
-  series = {SCALA 2017}
 }
 
 @inproceedings{barham2019stuck,
-  author = {Barham, Paul and Isard, Michael},
-  title = {Machine Learning Systems Are Stuck in a Rut},
-  booktitle = {Proceedings of the Workshop on Hot Topics in Operating Systems},
-  series = {HotOS'19},
-  year = {2019},
-  publisher = {ACM},
   address = {New York, NY, USA},
+  author = {Barham, Paul and Isard, Michael},
+  booktitle = {Proceedings of the Workshop on Hot Topics in Operating Systems},
+  publisher = {ACM},
+  series = {HotOS'19},
+  title = {Machine Learning Systems Are Stuck in a Rut},
+  year = {2019},
 }
 
 @article{chakravarty2005associated,
-  author = {Chakravarty, Manuel M. T. and Keller, Gabriele and Jones, Simon Peyton},
-  title = {Associated Type Synonyms},
-  year = {2005},
-  publisher = {{ACM}},
   address = {New York, NY, USA},
-  volume = {40},
-  number = {9},
+  author = {Chakravarty, Manuel M. T. and Keller, Gabriele and Jones, Simon Peyton},
   issn = {0362-1340},
   journal = {SIGPLAN Not.},
   month = sep,
+  number = {9},
+  publisher = {{ACM}},
+  title = {Associated Type Synonyms},
+  volume = {40},
+  year = {2005},
 }
 
 @phdthesis{eisenberg2016dependent,
-  title = {Dependent types in {Haskell}: Theory and practice},
   author = {Eisenberg, Richard A},
-  year = {2016},
   school = {University of Pennsylvania},
+  title = {Dependent types in {Haskell}: Theory and practice},
   type = {{PhD} dissertation},
+  year = {2016},
 }
 
 @phdthesis{schinz2005compiling,
-  title = {Compiling Scala for the Java virtual machine},
-  author = {Schinz, Michel},
-  year = {2005},
-  school = {EPFL},
   address = {Lausanne},
+  author = {Schinz, Michel},
+  school = {EPFL},
+  title = {Compiling Scala for the Java virtual machine},
   type = {{PhD} dissertation},
+  year = {2005},
 }
 
 @inproceedings{fengyun2016generic,
+  address = {New York, NY, USA},
   author = {Liu, Fengyun},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Scala},
+  publisher = {{ACM}},
+  series = {SCALA'16},
   title = {A Generic Algorithm for Checking Exhaustivity of Pattern Matching (Short Paper)},
   year = {2016},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Scala},
-  series = {SCALA 2016}
 }
 
 @article{abadi1991dynamic,
-  author = {Abadi, Mart\'{\i}n and Cardelli, Luca and Pierce, Benjamin and Plotkin, Gordon},
-  title = {Dynamic Typing in a Statically Typed Language},
-  year = {1991},
-  publisher = {{ACM}},
   address = {New York, NY, USA},
-  volume = {13},
-  number = {2},
+  author = {Abadi, Mart\'{\i}n and Cardelli, Luca and Pierce, Benjamin and Plotkin, Gordon},
   issn = {0164-0925},
   journal = {ACM Trans. Program. Lang. Syst.},
   month = apr,
+  number = {2},
+  publisher = {{ACM}},
+  title = {Dynamic Typing in a Statically Typed Language},
+  volume = {13},
+  year = {1991},
 }
 
 @phdthesis{vilhelm2015dependently,
-  title={A Dependently Typed Language with Nontermination},
-  author={Vilhelm Sjoberg},
-  year={2015},
-  school={University of Pennsylvania},
+  author = {Vilhelm Sjoberg},
+  school = {University of Pennsylvania},
+  title = {A Dependently Typed Language with Nontermination},
+  year = {2015},
 }
 
 @inproceedings{harper1995compiling,
+  address = {New York, NY, USA},
   author = {Harper, Robert and Morrisett, Greg},
+  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
+  publisher = {{ACM}},
+  series = {POPL'95},
   title = {Compiling Polymorphism Using Intensional Type Analysis},
   year = {1995},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  series = {POPL'95}
 }
 
 @inproceedings{nieto2020scala,
   author = {Abel Nieto and Yaoyu Zhao and Ondřej Lhot{\'a}k and Angela Chang and Justin Pu},
-  title = {{Scala with Explicit Nulls}},
   booktitle = {34th European Conference on Object-Oriented Programming (ECOOP'20)},
-  series = {LIPIcs},
-  year = {2020},
   editor = {Robert Hirschfeld and Tobias Pape},
   publisher = {Schloss Dagstuhl--Leibniz-Zentrum f{\"u}r Informatik},
+  series = {LIPIcs},
+  title = {{Scala with Explicit Nulls}},
+  year = {2020},
 }
 
 @phdthesis{shabalin2020just,
-  title = {Just-in-time performance without warm-up},
-  author = {Shabalin, Denys},
-  year = {2020},
-  type = {{PhD} dissertation},
-  school = {EPFL},
   address = {Lausanne},
+  author = {Shabalin, Denys},
+  school = {EPFL},
+  title = {Just-in-time performance without warm-up},
+  type = {{PhD} dissertation},
+  year = {2020},
 }
 
 @phdthesis{norell2007towards,
-  title={Towards a practical programming language based on dependent type theory},
+  author = {Norell, Ulf},
   school = {Chalmers University of Technology},
-  author={Norell, Ulf},
-  year = {2007},
+  title = {Towards a practical programming language based on dependent type theory},
   type = {{PhD} dissertation},
+  year = {2007},
 }
 
 @inproceedings{brady2015idris,
+  address = {New York, NY, USA},
   author = {Brady, Edwin},
+  booktitle = {Proceedings of the International Workshop on Logical Frameworks and Meta-Languages: Theory and Practice},
+  publisher = {{ACM}},
+  series = {LFMTP'14},
   title = {Idris: Implementing a Dependently Typed Programming Language},
   year = {2014},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the International Workshop on Logical Frameworks and Meta-Languages: Theory and Practice},
-  series = {LFMTP'14}
 }
 
 @inproceedings{blanvillain2022type,
-  title={Type-Level Programming with Match Types},
-  author={Olivier Blanvillain and Jonathan Immanuel Brachthäuser and Maxime Kjaer and Martin Odersky},
-  journal={Proc. ACM Program. Lang.},
+  author = {Olivier Blanvillain and Jonathan Immanuel Brachthäuser and Maxime Kjaer and Martin Odersky},
   booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
+  journal = {Proc. ACM Program. Lang.},
+  publisher = {{ACM}},
   series = {POPL'22},
-  year={2022},
-  publisher={{ACM}}
+  title = {Type-Level Programming with Match Types},
+  year = {2022},
 }
 
 @inproceedings{wadler1989howto,
+  address = {New York, NY, USA},
   author = {Wadler, Philip and Blott, Stephen},
   booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles of Programming Languages},
-  location = {Austin, Texas, USA},
   publisher = {{ACM}},
   series = {POPL'89},
-  address = {New York, NY, USA},
   title = {How to Make Ad-hoc Polymorphism Less Ad Hoc},
-  year = {1989}
+  year = {1989},
 }
 
 @inproceedings{oliveira2010type,
+  address = {New York, NY, USA},
   author = {Oliveira, Bruno C.d.S. and Moors, Adriaan and Odersky, Martin},
+  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
+  publisher = {{ACM}},
+  series = {OOPSLA'10},
   title = {Type Classes as Objects and Implicits},
   year = {2010},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
-  series = {OOPSLA'10}
 }
 
 @inproceedings{filip2019implicits,
+  address = {New York, NY, USA},
   author = {K\v{r}ikava, Filip and Miller, Heather and Vitek, Jan},
+  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
+  publisher = {{ACM}},
+  series = {OOPSLA'19},
   title = {Scala Implicits Are Everywhere: A Large-Scale Study of the Use of Scala Implicits in the Wild},
   year = {2019},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
-  series = {OOPSLA'19},
 }
 
 @inproceedings{rapoport2017simple,
+  address = {New York, NY, USA},
   author = {Rapoport, Marianna and Kabir, Ifaz and He, Paul and Lhot\'{a}k, Ond\v{r}ej},
+  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
+  publisher = {{ACM}},
+  series = {OOPSLA'17},
   title = {A Simple Soundness Proof for Dependent Object Types},
   year = {2017},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
-  series = {OOPSLA'17},
 }
 
 @inproceedings{giarrusso2020soundness,
+  address = {New York, NY, USA},
   author = {Giarrusso, Paolo G. and Stefanesco, L\'{e}o and Timany, Amin and Birkedal, Lars and Krebbers, Robbert},
+  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Functional Programming},
+  publisher = {{ACM}},
+  series = {ICFP'20},
   title = {Scala Step-by-Step: Soundness for DOT with Step-Indexed Logical Relations in Iris},
   year = {2020},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Functional Programming},
-  series = {ICFP'20}
-
 }
 
 @inproceedings{yang2017unifying,
+  address = {New York, NY, USA},
   author = {Yang, Yanpeng and Oliveira, Bruno C. d. S.},
+  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
+  publisher = {{ACM}},
+  series = {OOPSLA'17},
   title = {Unifying Typing and Subtyping},
   year = {2017},
-  publisher = {{ACM}},
-  address = {New York, NY, USA},
-  booktitle = {Proceedings of the ACM SIGPLAN International Conference on Object Oriented Programming Systems Languages and Applications},
-  series = {OOPSLA'17},
 }

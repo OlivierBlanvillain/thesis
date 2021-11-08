@@ -128,7 +128,6 @@ Without disjointness, \dotty{Elem[Seq[Int]]} would reduce to \dotty{Seq[Int]} (v
 
 \FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
 
-\clearpage
 \section{Formalization}
 \label{sec:formalization}
 
@@ -144,6 +143,11 @@ In \Cref{subsec:type-binding-extension}, we present an extension of \SystemFm wi
 \SystemFm is parametrized by a set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$.
 The class inheritance forms a partial order on $\C$, that is, it is reflexive, antisymmetric and transitive.
 The class disjointness is symmetric relation over $\C$.
+
+The inheritance and disjointness parameters can be understood as a representation of a hierarchy of Scala traits and classes.
+For example, \dotty{trait C1; class C2 extends C1} is represented  in \Fm as $\Ψ \= \{ \(\C_1, \C_2) \};~ \Ξ \= \{ \}$.
+This representation also models the fact that certain types cannot possibly have common instances.
+For example, \dotty{class C3; class C4} is represented as $\Ψ \= \{ \};~ \Ξ \= \{ \(\C_3, \C_4), \(\C_4, \C_3) \}$, since Scala disallows multiple class inheritance.
 Inheritance and disjointness must be consistent in the sense that $\(\A, \B) \∈ \Ξ$ implies that there is no class $\C$ such that $\(\C, \A) \∈ \Ψ$ and $\(\C, \B) \∈ \Ψ$.
 
 Each class in $\C$ gives rise to a constructor (written $\new \C$), a type (written $\C$), and a constructor singleton type (written $\{ \new \C \})$.
@@ -252,27 +256,23 @@ Let us assume the function~$\f$ defined in \Cref{ex:simplereduction}, adding a n
 Now, consider the term $\(\f~\B~\(\new \E))$. Since we have $\Ø \⊢ \E \<: \B$, this function application is well-typed and, given that $\(\E, \A) \∈ \Ψ$, evaluates to $\foo$. The term-level and type-level reductions are inconsistent!
 The unsoundness arises when using $\(\B, \A) \∉ \Ψ$ with the modified \SMatch1 rule to wrongly conclude that $\(\f~\B~\(\new \E))$ has type $\Bur$. This would result in an inconsistency between types $\(\e \: \Bur)$ and evaluation $\(\e \⟶ \foo)$, and violate type soundness.
 In \SystemFm, the match type obtained when typing $\(\f~\B~\(\new \E))$ does not reduce since the scrutinee type $\B$ is neither disjoint with, nor a subtype of the first pattern type test $\A$.
-In this case, the match type is \emph{stuck}, and is assigned as is.
-Stuck types can appear as the result of programming error, but can also be due to the local irreducibility of a match type.
-For instance, the body of~$\f$ is typed with a stuck type, as shown in \Cref{ex:simplereduction}, but that type can later become reducible depending on type variable instantiations.
+In this case, unreduced match type is assigned "as is".
+Unreduced types can appear as the result of programming error, but can also be due to the local irreducibility of a match type.
+For instance, the body of~$\f$ is typed with an unreduced type, as shown in \Cref{ex:simplereduction}, but that type can later become reducible depending on type variable instantiations.
 
 \subsection{Type Safety}
 \label{subsec:type-safety}
 
 We show the type safety of \SystemFm through the usual progress and preservation theorems.
 This section provides an overview of the proof structure and states the involved lemmas and theorems.
-Detailed pen-and-paper proofs are available in the appendix of this thesis.
-A Coq mechanization of our proofs is available online\footnote{\url{https://zenodo.org/record/5568850}}.
-Our mechanization uses the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings, and a simplified representation of match types with exactly one case per match.
+Detailed proofs are available in the supplementary material of this paper, in two different versions.
+The first version, \cite{blanvillain2021type}, is a pen-and-paper proof where \SystemFm is exactly as presented in \Cref{fig:FMTypingRules}.
+The second version, \cite{blanvillain2021artifact}, is a mechanization of the proof in Coq,
+using the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings.
+Our mechanization uses a simplified representation of match types with exactly one case per match.
 Matches with multiple cases can be expressed by nesting match types in default cases.
 
 \structure{Structure of the type safety proof. Arrows represent implications between lemmas and theorems.}
-
-% There is nothing special about this, omitted since it is standard.
-% An important technical detail that we omitted in \Cref{fig:FMTypingRules} concerns the well-formedness of types on contexts.
-% A type $\T$ is well-formed in $\Γ$ when all the free variables in $\T$ are bound in $\Γ$.
-% A context $\Γ$ is well-formed if each name is bound at most once and if each binding is to a well-formed type in the context preceding its binding.
-% To improve presentation, we have omitted all well-formedness premises from our typing rules.
 
 \Cref{fig:structure} gives an overview of the proof structure by showing implications between the various lemmas and theorems.
 The basic structure resembles that of \SystemFsub's standard safety proof from~\citep{pierce2002types}.
@@ -290,7 +290,8 @@ The following non-standard lemma is necessary to prevent overlap between the \SM
 %
 If such overlap would be allowed, match types could reduce in several different ways, resulting in an unsound system.
 We prove \Cref{lem:disjointness-subtyping-exclusivity} by contradiction.
-Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P$.
+Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P \= \{ \Λ, \V \} \∪ \C$.
+Elements of $\P$ can be understood as equivalence classes for \Fm's types.
 We show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness in $\P$.
 This set-theoretical view lets us conclude the desired result directly.
 In our Coq mechanization, we axiomatize this lemma and delegate to the pen-and-paper proof.
@@ -336,6 +337,10 @@ With these lemmas in hand, the proofs of progress and preservation are straightf
 In this section, we present \SystemFmB, an extension of \SystemFm with support for binding pattern variables in type patterns.
 \FmB is parametrized by two sets of classes, $\A$ and $\B$, representing non-parametric and parametric classes, respectively.
 A parametric class, written $\B~\T$, takes exactly one type parameter\footnotemark.
+We redefine $\C$ to be a syntactic object defined as $\C \::= \A \| \B~\T$.
+The class inheritance $\Ψ$ and class disjointness $\Ξ$ remain as binary relations on $\C$.
+A generic instantiation in the class hierarchy is represented as an element of $\Ψ$, for example, \dotty{A1 extends B2[A3]} is represented as $\(\A_1, \B_2~\A_3) \∈ \Ψ$.
+Generic inheritance is represented using multiple entries in $\Ψ$, for example, \dotty{B1[T] extends B2[T]} is represented as $\∀ \T. \(\B_1~\T, \B_2~\T) \∈ \Ψ$.
 This approach allows us to reuse most of \Fm's definitions.
 Indeed, our formal development treats $\C$, $\Ψ$, and $\Ξ$ as mathematical objects, and is compatible with \FmB's new definition of classes.
 
@@ -463,6 +468,7 @@ class Helmet
 \hfuzz=0pt
 \end{minipage}
 
+\smallskip
 \noindent
 The classes and inheritance relation are practically isomorphic between the two representation: Scala classes have a one-to-one correspondence to their \Fm counterparts (abbreviated with initials) and the inheritance only contains an additional entry for $\R$ and $\V$, obtained by transitivity ($\Ψ$'s reflexivity and $\Ξ$'s symmetry are omitted for brevity).
 
@@ -613,6 +619,8 @@ To this end, we outline the type-level implementation of a library for multidime
 The goal of our library is to provide a \emph{shape}-safe interface for manipulating $\n$-dimensional arrays (abbreviated ndarrays), where array shapes and indices are checked for errors at compile-time rather than at runtime.
 Shape and indexing errors in ndarrays is a widely acknowledged problem~\citep{barham2019stuck, rush2019namedtensor}, and several solutions have already been proposed, notably in the form of libraries that rely on type-level programming~\citep{chen2017typesafe, huang2017hasktorch}.
 Our library uses match types to provide a shape-safe NumPy-like interface.
+
+Scala programmers have a long history of using ad-hoc solutions for type-level programming~\citep{sabin2011shapeless, pilquist2013scodecs, blanvillain2016frameless}. These solutions have several downsides, such as being slow to compile and cumbersome to use. Match types aim at simplifying type-level programming by providing first-class language support.
 We believe that the approach presented in this case study is an improvement over the status quo because it does not use metaprogramming or any sort of convoluted encoding to express type-level operations.
 
 % \subsection{Related Work}

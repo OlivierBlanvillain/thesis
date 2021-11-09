@@ -1,10 +1,17 @@
 package foo
 import scala.util.NotGiven
 
-sealed trait HList
-case object HNil extends HList
-case class ::[+H, +T <: HList](head: H, tail: T) extends HList
-type HNil = HNil.type
+// start section hlistEnumDefinition
+enum HList:
+  case HNil()
+  case ::[H, T <: HList](head: H, tail: T)
+// end section hlistEnumDefinition
+import HList._
+
+// sealed trait HList
+// case object HNil extends HList
+// case class ::[+H, +T <: HList](head: H, tail: T) extends HList
+// type HNil = HNil.type
 
 // start section memImplicitRemove
 trait Remove[V, Ps <: HList, Out <: HList]

@@ -3,11 +3,13 @@
 all: thesis.pdf
 
 thesis.pdf: FORCE proofs/structure.pdf scala/code-sections.tex
-	./latexrun --latex-cmd lualatex thesis.tex
+	- latexmk -f -xelatex -outdir=latex.out -auxdir=latex.out thesis.tex
+	- cp latex.out/thesis.pdf thesis.pdf
 
 clean: FORCE
-	- ./latexrun --clean-all
+	- rm -rf proofs/structure.pdf
 	- rm -rf scala/code-sections.tex
+	- rm -rf latex.out/*
 
 watch: FORCE
 	git ls-files | entr make

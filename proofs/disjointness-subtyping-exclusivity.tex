@@ -5,41 +5,41 @@
 \end{lemma}
 
 \begin{proof}
-  We prove mutual exclusivity of type disjointness and subtyping by first defining $\⟦\· \⟧_Γ$, a mapping from \SystemFm types (in a given context $\Γ$) into non-empty subsets of a newly defined set $\P$. We then show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness relation in $\P$.
+  We prove mutual exclusivity of type disjointness and subtyping by first defining $\⟦\· \⟧_{\Γ}$, a mapping from \SystemFm types (in a given context $\Γ$) into non-empty subsets of a newly defined set $\P$. We then show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness relation in $\P$.
 
   This set-theoretical view of subtyping and disjointness renders the proof trivial.
   Indeed, suppose there exist two types $\S$ and $\T$ with $\Γ \⊢ \S \<: \T$ and $\Γ \⊢ \disj(\S, \T)$.
-  $\⟦ \S \⟧_Γ$ and $\⟦ \T \⟧_Γ$ are two non-empty sets which are both intersecting and disjoint, a contradiction.
+  $\⟦ \S \⟧_{\Γ}$ and $\⟦ \T \⟧_{\Γ}$ are two non-empty sets which are both intersecting and disjoint, a contradiction.
 
   We first define $\P$ as $\P \= \{ \Λ, \V \} \∪ \C$. Elements of $\P$ can be understood as equivalence classes for \SystemFm values: $\Λ$ corresponds to all abstraction values, $\V$ corresponds to type abstraction value, and elements of $\C$ correspond to their respective constructors.
-  The definition of $\⟦\· \⟧_Γ$ makes this correspondence apparent.
+  The definition of $\⟦\· \⟧_{\Γ}$ makes this correspondence apparent.
 
-  We define $\⟦\· \⟧_Γ$, a mapping of \SystemFm types into subsets of $\P$ in a given context $\Γ$:
+  We define $\⟦\· \⟧_{\Γ}$, a mapping of \SystemFm types into subsets of $\P$ in a given context $\Γ$:
 
   \begin{align*}
-    \text{$\⟦ \Top \⟧_Γ$} &=
+    \text{$\⟦ \Top \⟧_{\Γ}$} &=
     \text{$\P$}\\
     %
-    \text{$\⟦ \X \⟧_Γ$} &=
-    \text{$\⟦ \T \⟧_Γ \quad$ where $\X \<: \T \∈ \Γ$}\\
+    \text{$\⟦ \X \⟧_{\Γ}$} &=
+    \text{$\⟦ \T \⟧_{\Γ} \quad$ where $\X \<: \T \∈ \Γ$}\\
     %
-    \text{$\⟦ \T_{1} \→ \T_{2} \⟧_Γ$} &=
+    \text{$\⟦ \T_{1} \→ \T_{2} \⟧_{\Γ}$} &=
     \text{$\{ \Λ \}$}\\
     %
-    \text{$\⟦ \∀ \X \<: \U_{1}.~ \T_{2} \⟧_Γ$} &=
+    \text{$\⟦ \∀ \X \<: \U_{1}.~ \T_{2} \⟧_{\Γ}$} &=
     \text{$\{ \V \}$}\\
     %
-    \text{$\⟦ \{ \new \C_{1} \} \⟧_Γ$} &=
+    \text{$\⟦ \{ \new \C_{1} \} \⟧_{\Γ}$} &=
     \text{$\{ \C_{1} \}$}\\
     %
-    \text{$\⟦ \C_{1} \⟧_Γ$} &=
+    \text{$\⟦ \C_{1} \⟧_{\Γ}$} &=
       \{ \c \∈ \C~\|~(\c, \C_1) \∈ \Ψ \}\\
     \⟦ \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d \⟧_\Γ &=
       \begin{cases}
-        \text{$\⟦ \T_n \⟧_Γ$\phantom{\P} if $\⟦ \T_s \⟧_Γ \⊂ \⟦ \S_n \⟧_Γ$}\\
-        \phantom{\text{$\⟦ \T_n \⟧_Γ$}}\phantom{\P}\text{ and $\∀ \m<n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \S_m \⟧_Γ \= \{ \}$}\\
-        \text{$\⟦ \T_d \⟧_Γ$\phantom{\P} if $\∀ \m.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \S_m \⟧_Γ \= \{ \}$}\\
-        \P\phantom{\text{$\⟦ \T_n \⟧_Γ$}}\text{ otherwise}
+        \text{$\⟦ \T_n \⟧_{\Γ}$\phantom{\P} if $\⟦ \T_s \⟧_{\Γ} \⊂ \⟦ \S_n \⟧_{\Γ}$}\\
+        \phantom{\text{$\⟦ \T_n \⟧_{\Γ}$}}\phantom{\P}\text{ and $\∀ \m<n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \S_m \⟧_{\Γ} \= \{ \}$}\\
+        \text{$\⟦ \T_d \⟧_{\Γ}$\phantom{\P} if $\∀ \m.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \S_m \⟧_{\Γ} \= \{ \}$}\\
+        \P\phantom{\text{$\⟦ \T_n \⟧_{\Γ}$}}\text{ otherwise}
       \end{cases}
   \end{align*}
 
@@ -47,45 +47,45 @@
   In other words, we prove the follows statements:
 
   \begin{enumerate}
-    \item $\Γ \⊢ \S \<: \T$ implies $\⟦ \S \⟧_Γ \⊂ \⟦ \T \⟧_Γ$,
-    \item $\Γ \⊢ \disj(\S, \T)$ implies $\⟦ \S \⟧_Γ \∩ \⟦ \T \⟧_Γ \= \{ \}$,
+    \item $\Γ \⊢ \S \<: \T$ implies $\⟦ \S \⟧_{\Γ} \⊂ \⟦ \T \⟧_{\Γ}$,
+    \item $\Γ \⊢ \disj(\S, \T)$ implies $\⟦ \S \⟧_{\Γ} \∩ \⟦ \T \⟧_{\Γ} \= \{ \}$,
   \end{enumerate}
 
   Both statements are proved simultaneously by induction on derivations of $\Γ \⊢ \disj(\V, \W)$ and $\Γ \⊢ \S \<: \T$.
   More precisely, the induction is done on the cumulative depth of both derivation tree.
   \begin{enumerate}
-    \item ($\Γ \⊢ \S \<: \T$ implies $\⟦ \S \⟧_Γ \⊂ \⟦ \T \⟧_Γ$)
+    \item ($\Γ \⊢ \S \<: \T$ implies $\⟦ \S \⟧_{\Γ} \⊂ \⟦ \T \⟧_{\Γ}$)
     \begin{itemize}
       \Case\SRefl:
       \quad $\T \= \S$
 
-      $\⟦ \S \⟧_Γ \= \⟦ \T \⟧_Γ$ and the result is immediate.
+      $\⟦ \S \⟧_{\Γ} \= \⟦ \T \⟧_{\Γ}$ and the result is immediate.
 
       \Case\STrans:
       \quad $\Γ \⊢ \S \<: \U$
       \quad $\Γ \⊢ \U \<: \T$
 
-      By the IH, $\⟦ \S \⟧_Γ \⊂ \⟦ \U \⟧_Γ$ and $\⟦ \U \⟧_Γ \⊂ \⟦ \T \⟧_Γ$. From subset transitivity, $\⟦ \S \⟧_Γ \⊂ \⟦ \T \⟧_Γ$, as required.
+      By the IH, $\⟦ \S \⟧_{\Γ} \⊂ \⟦ \U \⟧_{\Γ}$ and $\⟦ \U \⟧_{\Γ} \⊂ \⟦ \T \⟧_{\Γ}$. From subset transitivity, $\⟦ \S \⟧_{\Γ} \⊂ \⟦ \T \⟧_{\Γ}$, as required.
 
       \Case\STop:
       \quad $\T \= \Top$
 
-      $\⟦ \Top \⟧_Γ \= \P$ coincides with the codomain of $\⟦\· \⟧_Γ$.
-      Therefore, for any type $\T$, $\⟦ \T \⟧_Γ \⊂ \⟦ \Top \⟧_Γ$, as required.
+      $\⟦ \Top \⟧_{\Γ} \= \P$ coincides with the codomain of $\⟦\· \⟧_{\Γ}$.
+      Therefore, for any type $\T$, $\⟦ \T \⟧_{\Γ} \⊂ \⟦ \Top \⟧_{\Γ}$, as required.
 
       \Case\SSin:
       \quad $\S \= \{ \new \C_{1} \}$
       \quad $\T \= \C_{1}$
 
-      $\⟦ \{ \new \C_{1} \} \⟧_Γ \= \{ \C_{1} \}$ and
-      $\⟦ \C_{1} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$.
+      $\⟦ \{ \new \C_{1} \} \⟧_{\Γ} \= \{ \C_{1} \}$ and
+      $\⟦ \C_{1} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$.
       The result follows by reflexivity of $\Ψ$.
 
       \Case\STvar:
       \quad $\S \= \X$
       \quad $\X \<: \T \∈ \Γ$
 
-      By definition $\⟦ \X \⟧_Γ \= \⟦ \T \⟧_Γ$, and the result is immediate.
+      By definition $\⟦ \X \⟧_{\Γ} \= \⟦ \T \⟧_{\Γ}$, and the result is immediate.
 
       \Case\SArrow:
       \quad $\S \= \S_{1} \→ \S_{2}$
@@ -94,23 +94,23 @@
       \quad $\Γ \⊢ \T_{1} \<: \S_{1}$
       \quad $\Γ \⊢ \S_{2} \<: \T_{2}$
 
-      $\⟦ \S_{1} \→ \S_{2} \⟧_Γ \= \⟦ \T_{1} \→ \T_{2} \⟧_Γ \= \{ \Λ \}$ and the result is immediate.
+      $\⟦ \S_{1} \→ \S_{2} \⟧_{\Γ} \= \⟦ \T_{1} \→ \T_{2} \⟧_{\Γ} \= \{ \Λ \}$ and the result is immediate.
 
       \Case\SAll:
       \quad $\S \= \∀ \X \<: \U_{1}.~ \S_{2}$
       \quad $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$
       \quad $\Γ, \X \<: \U_{1} \⊢ \S_{2} \<: \T_{2}$
 
-      $\⟦ \∀ \X \<: \U_{1}.~ \S_{2} \⟧_Γ \= \⟦ \∀ \X \<: \U_{1}.~ \T_{2} \⟧_Γ \= \{ \V \}$ and the result is immediate.
+      $\⟦ \∀ \X \<: \U_{1}.~ \S_{2} \⟧_{\Γ} \= \⟦ \∀ \X \<: \U_{1}.~ \T_{2} \⟧_{\Γ} \= \{ \V \}$ and the result is immediate.
 
       \Case\SPsi:
       \quad $\S \= \C_{1}$
       \quad $\T \= \C_{2}$
       \quad $\(\C_{1}, \C_{2}) \∈ \Ψ$
 
-      $\⟦ \C_{1} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$ and
-      $\⟦ \C_{2} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{2}) \∈ \Ψ \}$.
-      By transitivity of $\Ψ$, $\⟦ \C_{1} \⟧_Γ \⊂ \⟦ \C_{2} \⟧_Γ$, as required.
+      $\⟦ \C_{1} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$ and
+      $\⟦ \C_{2} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{2}) \∈ \Ψ \}$.
+      By transitivity of $\Ψ$, $\⟦ \C_{1} \⟧_{\Γ} \⊂ \⟦ \C_{2} \⟧_{\Γ}$, as required.
 
       \Case\SMatch1/2:
       \quad $\T_{1} \= \T_n$
@@ -120,8 +120,8 @@
       \quad $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \S_m)$
 
       \hfuzz=1.5pt
-      Using the IH we get $\⟦ \T_s \⟧_Γ \⊂ \⟦ \S_n \⟧_Γ$, $\∀ \m<n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \S_m \⟧_Γ \= \{ \}$ and $\⟦ \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d \⟧_Γ \= \⟦ \T_n \⟧_Γ$.
-      This last equality implies both $\⟦ \T_{1} \⟧_Γ \⊂ \⟦ \T_{2} \⟧_Γ$ and $\⟦ \T_{2} \⟧_Γ \⊂ \⟦ \T_{1} \⟧_Γ$, as required.
+      Using the IH we get $\⟦ \T_s \⟧_{\Γ} \⊂ \⟦ \S_n \⟧_{\Γ}$, $\∀ \m<n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \S_m \⟧_{\Γ} \= \{ \}$ and $\⟦ \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d \⟧_{\Γ} \= \⟦ \T_n \⟧_{\Γ}$.
+      This last equality implies both $\⟦ \T_{1} \⟧_{\Γ} \⊂ \⟦ \T_{2} \⟧_{\Γ}$ and $\⟦ \T_{2} \⟧_{\Γ} \⊂ \⟦ \T_{1} \⟧_{\Γ}$, as required.
 
       \hfuzz=0pt
       \Case\SMatch3/4:
@@ -130,9 +130,9 @@
       \\\phantom{\textit{Case}~\SMatch3/4:}
       \quad $\∀ \n.~ \Γ \⊢ \disj(\T_s, \S_n)$
 
-      By the IH $\∀ \n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \S_n \⟧_Γ \= \{ \}$.
-      By definition, $\⟦ \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d \⟧_Γ \= \⟦ \T_d \⟧_Γ$.
-      This equality implies both $\⟦ \T_{1} \⟧_Γ \⊂ \⟦ \T_{2} \⟧_Γ$ and $\⟦ \T_{2} \⟧_Γ \⊂ \⟦ \T_{1} \⟧_Γ$, the desired result for \SMatch3 and \SMatch4 respectively.
+      By the IH $\∀ \n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \S_n \⟧_{\Γ} \= \{ \}$.
+      By definition, $\⟦ \T_s \match \{ \S_i \⇒ \T_i \} \otherwise \T_d \⟧_{\Γ} \= \⟦ \T_d \⟧_{\Γ}$.
+      This equality implies both $\⟦ \T_{1} \⟧_{\Γ} \⊂ \⟦ \T_{2} \⟧_{\Γ}$ and $\⟦ \T_{2} \⟧_{\Γ} \⊂ \⟦ \T_{1} \⟧_{\Γ}$, the desired result for \SMatch3 and \SMatch4 respectively.
 
       \Case\SMatch5:
       \quad $\S \= \S_s \match \{ \U_i \⇒ \S_i \} \otherwise \S_d$
@@ -142,68 +142,68 @@
       \quad $\∀ \n.~ \Γ \⊢ \S_n \<: \T_n$
       \quad $\Γ \⊢ \S_d \<: \T_d$
 
-      By case analysis on $\⟦ \T \⟧_Γ$:
+      By case analysis on $\⟦ \T \⟧_{\Γ}$:
       \begin{enumerate}
-        \item $\⟦ \T \⟧_Γ \= \⟦ \T_n \⟧_Γ$
-        and $\⟦ \T_s \⟧_Γ \⊂ \⟦ \U_n \⟧_Γ$
-        and $\∀ \m<n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \U_m \⟧_Γ \= \{ \}$:
+        \item $\⟦ \T \⟧_{\Γ} \= \⟦ \T_n \⟧_{\Γ}$
+        and $\⟦ \T_s \⟧_{\Γ} \⊂ \⟦ \U_n \⟧_{\Γ}$
+        and $\∀ \m<n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \U_m \⟧_{\Γ} \= \{ \}$:
 
-        The IH gives $\⟦ \S_s \⟧_Γ \⊂ \⟦ \T_s \⟧_Γ$.
-        Using $\∀ \m<n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \U_m \⟧_Γ \= \{ \}$, we get $\∀ \m<n.~ \⟦ \S_s \⟧_Γ \∩ \⟦ \U_m \⟧_Γ \= \{ \}$.
-        Using $\⟦ \T_s \⟧_Γ \⊂ \⟦ \U_n \⟧_Γ$, we get $\⟦ \S_s \⟧_Γ \⊂ \⟦ \U_n \⟧_Γ$ (by subset transitivity).
-        Therefore, $\⟦ \S \⟧_Γ \= \⟦ \S_n \⟧_Γ$, and the result follows from the IH.
+        The IH gives $\⟦ \S_s \⟧_{\Γ} \⊂ \⟦ \T_s \⟧_{\Γ}$.
+        Using $\∀ \m<n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \U_m \⟧_{\Γ} \= \{ \}$, we get $\∀ \m<n.~ \⟦ \S_s \⟧_{\Γ} \∩ \⟦ \U_m \⟧_{\Γ} \= \{ \}$.
+        Using $\⟦ \T_s \⟧_{\Γ} \⊂ \⟦ \U_n \⟧_{\Γ}$, we get $\⟦ \S_s \⟧_{\Γ} \⊂ \⟦ \U_n \⟧_{\Γ}$ (by subset transitivity).
+        Therefore, $\⟦ \S \⟧_{\Γ} \= \⟦ \S_n \⟧_{\Γ}$, and the result follows from the IH.
 
-        \item $\⟦ \T \⟧_Γ \= \⟦ \T_d \⟧_Γ$ and
-        $\∀ \n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \U_n \⟧_Γ \= \{ \}$:
+        \item $\⟦ \T \⟧_{\Γ} \= \⟦ \T_d \⟧_{\Γ}$ and
+        $\∀ \n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \U_n \⟧_{\Γ} \= \{ \}$:
 
-        The IH gives $\⟦ \S_s \⟧_Γ \⊂ \⟦ \T_s \⟧_Γ$.
-        Using $\∀ \n.~ \⟦ \T_s \⟧_Γ \∩ \⟦ \U_n \⟧_Γ \= \{ \}$ we get $\∀ \n.~ \⟦ \S_s \⟧_Γ \∩ \⟦ \U_n \⟧_Γ \= \{ \}$.
-        Therefore, $\⟦ \S \⟧_Γ \= \⟦ \S_d \⟧_Γ$, and the result follows from the IH.
+        The IH gives $\⟦ \S_s \⟧_{\Γ} \⊂ \⟦ \T_s \⟧_{\Γ}$.
+        Using $\∀ \n.~ \⟦ \T_s \⟧_{\Γ} \∩ \⟦ \U_n \⟧_{\Γ} \= \{ \}$ we get $\∀ \n.~ \⟦ \S_s \⟧_{\Γ} \∩ \⟦ \U_n \⟧_{\Γ} \= \{ \}$.
+        Therefore, $\⟦ \S \⟧_{\Γ} \= \⟦ \S_d \⟧_{\Γ}$, and the result follows from the IH.
 
-        \item $\⟦ \T \⟧_Γ \= \P$:
+        \item $\⟦ \T \⟧_{\Γ} \= \P$:
 
-        $\P$ is the codomain of $\⟦\· \⟧_Γ$, therefore $\⟦ \S \⟧_Γ \⊂ \⟦ \T \⟧_Γ$, as required.
+        $\P$ is the codomain of $\⟦\· \⟧_{\Γ}$, therefore $\⟦ \S \⟧_{\Γ} \⊂ \⟦ \T \⟧_{\Γ}$, as required.
       \end{enumerate}
     \end{itemize}
 
-    \item ($\Γ \⊢ \disj(\S, \T)$ implies $\⟦ \S \⟧_Γ \∩ \⟦ \T \⟧_Γ \= \{ \}$)
+    \item ($\Γ \⊢ \disj(\S, \T)$ implies $\⟦ \S \⟧_{\Γ} \∩ \⟦ \T \⟧_{\Γ} \= \{ \}$)
     \begin{itemize}
       \Case\DXi:
       \quad $\S \= \C_{1}$
       \quad $\T \= \C_{2}$
       \quad $\(\C_{1}, \C_{2}) \∈ \Ξ$
 
-      $\⟦ \C_{1} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$ and
-      $\⟦ \C_{2} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{2}) \∈ \Ψ \}$.
-      By definition of Ξ, there is no class $\c$ such that both $\(\c, \C_{1}) \∈ \Ψ$ and $\(\c, \C_{2}) \∈ \Ψ$, and $\⟦ \C_{1} \⟧_Γ \∩ \⟦ \C_{2} \⟧_Γ \= \{ \}$.
+      $\⟦ \C_{1} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$ and
+      $\⟦ \C_{2} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{2}) \∈ \Ψ \}$.
+      By definition of $\Ξ$, there is no class $\c$ such that both $\(\c, \C_{1}) \∈ \Ψ$ and $\(\c, \C_{2}) \∈ \Ψ$, and $\⟦ \C_{1} \⟧_{\Γ} \∩ \⟦ \C_{2} \⟧_{\Γ} \= \{ \}$.
 
       \Case\DPsi:
       \quad $\S \= \{ \new \C_{1} \}$
       \quad $\T \= \C_{2}$
       \quad $\(\C_{1}, \C_{2}) \∉ \Ψ$
 
-      $\⟦ \{ \new \C_{1} \} \⟧_Γ \= \C_{1}$ and
-      $\⟦ \C_{2} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{2}) \∈ \Ψ \}$.
-      Since $\(\C_{1}, \C_{2}) \∉ \Ψ$, $\C_{1} \∉ \⟦ \C_{2} \⟧_Γ$ and $\⟦ \C_{1} \⟧_Γ \∩ \⟦ \C_{2} \⟧_Γ \= \{ \}$.
+      $\⟦ \{ \new \C_{1} \} \⟧_{\Γ} \= \C_{1}$ and
+      $\⟦ \C_{2} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{2}) \∈ \Ψ \}$.
+      Since $\(\C_{1}, \C_{2}) \∉ \Ψ$, $\C_{1} \∉ \⟦ \C_{2} \⟧_{\Γ}$ and $\⟦ \C_{1} \⟧_{\Γ} \∩ \⟦ \C_{2} \⟧_{\Γ} \= \{ \}$.
 
       \Case\DSub:
       \quad $\Γ \⊢ \S \<: \U$
       \quad $\Γ \⊢ \disj(\U, \T)$
 
-      By the IH, $\⟦ \S \⟧_Γ \⊂ \⟦ \U \⟧_Γ$ and $\⟦ \U \⟧_Γ \∩ \⟦ \T \⟧_Γ \= \{ \}$.
-      $\⟦ \S \⟧_Γ \∩ \⟦ \T \⟧_Γ \= \{ \}$ follows directly.
+      By the IH, $\⟦ \S \⟧_{\Γ} \⊂ \⟦ \U \⟧_{\Γ}$ and $\⟦ \U \⟧_{\Γ} \∩ \⟦ \T \⟧_{\Γ} \= \{ \}$.
+      $\⟦ \S \⟧_{\Γ} \∩ \⟦ \T \⟧_{\Γ} \= \{ \}$ follows directly.
 
       \Case\DArrow:
       \quad $\S \= \S_{1} \→ \S_{2}$
       \quad $\T \= \C_{1}$
 
-      $\⟦ \C_{1} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$, $\⟦ \S_{1} \→ \S_{2} \⟧_Γ \= \{ \Λ \}$ and $\⟦ \C_{1} \⟧_Γ \∩ \⟦ \S_{1} \→ \S_{2} \⟧_Γ \= \{ \}$, as required.
+      $\⟦ \C_{1} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$, $\⟦ \S_{1} \→ \S_{2} \⟧_{\Γ} \= \{ \Λ \}$ and $\⟦ \C_{1} \⟧_{\Γ} \∩ \⟦ \S_{1} \→ \S_{2} \⟧_{\Γ} \= \{ \}$, as required.
 
       \Case\DAll:
       \quad $\S \= \∀ \X \<: \S_{1}.~ \S_{2}$
       \quad $\T \= \C_{1}$
 
-      $\⟦ \C_{1} \⟧_Γ \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$, $\⟦ \∀ \X \<: \S_{1}.~ \S_{2} \⟧_Γ \= \{ \S \}$ and $\⟦ \C_{1} \⟧_Γ \∩ \⟦ \∀ \X \<: \S_{1}.~ \S_{2} \⟧_Γ \= \{ \}$, as required.
+      $\⟦ \C_{1} \⟧_{\Γ} \= \{ \c \∈ \C~\|~\(\c, \C_{1}) \∈ \Ψ \}$, $\⟦ \∀ \X \<: \S_{1}.~ \S_{2} \⟧_{\Γ} \= \{ \S \}$ and $\⟦ \C_{1} \⟧_{\Γ} \∩ \⟦ \∀ \X \<: \S_{1}.~ \S_{2} \⟧_{\Γ} \= \{ \}$, as required.
     \end{itemize}
   \end{enumerate}
 \end{proof}

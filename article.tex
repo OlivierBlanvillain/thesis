@@ -261,7 +261,7 @@ For instance, the body of~$\f$ is typed with a stuck type, as shown in \Cref{ex:
 
 We show the type safety of \SystemFm through the usual progress and preservation theorems.
 This section provides an overview of the proof structure and states the involved lemmas and theorems.
-Detailed pen-and-paper proofs is available in the appendix of this thesis.
+Detailed pen-and-paper proofs are available in the appendix of this thesis.
 A Coq mechanization of our proofs is available online\footnote{\url{https://zenodo.org/record/5568850}}.
 Our mechanization uses the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings, and a simplified representation of match types with exactly one case per match.
 Matches with multiple cases can be expressed by nesting match types in default cases.
@@ -323,7 +323,7 @@ The proofs proceed by routine induction on derivations.
 \input{proofs/inversion-of-typing.tex}
 \input{proofs/minimum-types.tex}
 %
-With these lemmas in place, the proofs of progress and preservation are straightforward.
+With these lemmas in hand, the proofs of progress and preservation are straightforward.
 %
 \input{proofs/progress.tex}
 \input{proofs/preservation.tex}

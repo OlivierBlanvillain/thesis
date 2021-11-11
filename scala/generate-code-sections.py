@@ -46,7 +46,7 @@ for (section, positions) in dict_zip(starts, finishes).items():
             print(f"Start and finish for section '{section}' are in different files ({start_file}, {finish_file}")
             sys.exit(1)
         extension = os.path.splitext(start_file)[1][1:]
-        output.append(f"\\newcommand{{\\{section}CodeSection}}{{\lstinputlisting[style={extension}, firstline={start_line}, lastline={finish_line}, {listing_options}]{{{start_file}}}}}")
+        output.append(f"\\newcommand{{\\{section}CodeSection}}{{\lstinputlisting[float, floatplacement=H, style={extension}, firstline={start_line}, lastline={finish_line}, {listing_options}]{{{start_file}}}}}")
 
 with open(output_file, "w") as f:
     f.write("\n".join(output))

@@ -14,13 +14,10 @@
 \def\thirdA{\begin{minipage}[t]{0.32\linewidth}}
 \def\thirdB{\end{minipage}\begin{minipage}[t]{0.32\linewidth}}
 \def\thirdC{\end{minipage}\begin{minipage}[t]{0.32\linewidth}}
-\def\thirdD{\end{minipage}\bigskip}
+\def\thirdD{\end{minipage}\medskip\smallskip}
 \def\halfA{\hspace{0.04\linewidth}\begin{minipage}[t]{0.45\linewidth}}
 \def\halfB{\end{minipage}\hspace{0.02\linewidth}\begin{minipage}[t]{0.45\linewidth}}
-\def\halfC{\end{minipage}\bigskip}
-\def\onetwoA{\begin{minipage}[t]{0.32\linewidth}}
-\def\onetwoB{\end{minipage}\begin{minipage}[t]{0.64\linewidth}}
-\def\onetwoC{\end{minipage}\bigskip}
+\def\halfC{\end{minipage}\medskip\smallskip}
 
 \newcommand\FMSyntaxEvaluation[1]{
   \begin{figure}%
@@ -223,7 +220,6 @@
       { \Γ \⊢ \t_1~\T_2 \:~[\X \↦ \T_2]\T_{12} }
     \halfC
 
-
     \begin{minipage}[t]{0.24\linewidth}
     \infrule[T-Var]
       { \x \: \T \∈ \Γ}
@@ -238,7 +234,6 @@
     \hlax[T-Class]
       { \,\Γ \⊢ \new \C \: \{ \new \C \}\, }
     \end{minipage}
-    \bigskip
 
     \begin{center}
     \begin{minipage}[t]{0.8\linewidth}

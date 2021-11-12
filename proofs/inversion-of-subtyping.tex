@@ -423,7 +423,7 @@
           and $\T_n$ is a match type with $\Γ \⊢ \T_n \⇌ \T_{1} \→ \T_{2}$:
 
         Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
-        From \STrans we obtain $\Γ \⊢ \S_s \<: \U_n$.
+        From \STrans, $\Γ \⊢ \S_s \<: \U_n$.
         Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
         Since $\Γ \⊢ \S_n \<: \T_n$ and $\Γ \⊢ \T_n \⇌ \T_{1} \→ \T_{2}$, the IH gives 4 subsubcases:
 
@@ -451,7 +451,7 @@
           and $\T_n \= \T_{1} \→ \T_{2}$:
 
         Using \DSub on $\∀ \m.~ \Γ \⊢ \S_m \<: \T_m$ and $\∀ \m<n.~ \Γ \⊢ \disj(\T_s, \U_m)$ we obtain $\∀ \m<n.~ \Γ \⊢ \disj(\S_s, \U_m)$.
-        From \STrans we obtain $\Γ \⊢ \S_s \<: \U_n$.
+        From \STrans, $\Γ \⊢ \S_s \<: \U_n$.
         Using \SMatch1/2 we get $\Γ \⊢ \S \⇌ \S_n$.
         Since $\Γ \⊢ \S_n \<: \T_n$, the IH gives 4 subsubcases:
 

@@ -104,7 +104,7 @@
 
         \Subcase $\Y \<: \T \∈ \Δ$:
 
-        $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \[\X \↦ \P] \Δ$ and $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \(\Γ, \[\X \↦ \P] \Δ)$. The result follows from \STvar.
+        We have $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \[\X \↦ \P] \Δ$ and $\[\X \↦ \P] \Y \<: \[\X \↦ \P] \T \∈ \(\Γ, \[\X \↦ \P] \Δ)$, and the result follows from \STvar.
 
         \Subcase $\Y \<: \T \= \X \<: \Q$ (\emph{i.e.} $\Y \= \X$ and $\T \= \Q$):
 
@@ -239,12 +239,12 @@
         \quad $\Γ, \X \<: \Q, \Δ \⊢ \T_{2} \<: \T_{11}$
 
         By the IH,
-        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \: \[\X \↦ \P] \(\∀ \Y \<: \T_{11}.~ \T_{12})$, i.e.,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \: \[\X \↦ \P] \(\∀ \Y \<: \T_{11}.~ \T_{12})$, that is,
         $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \: \∀ \Y \<: \[\X \↦ \P] \T_{11}.~ \[\X \↦ \P] \T_{12}$.
-        Using the second part of the lemma we get,
+        Using the second part of the lemma,
         $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \T_{2} \<: \[\X \↦ \P] \T_{11}$.
         By \TTApp we get,
-        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \[\X \↦ \P] \T_{2} \: \[\Y \↦ \[\X \↦ \P] \T_{2}] \[\X \↦ \P] \T_{12}$, i.e.,
+        $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \t_{1} \[\X \↦ \P] \T_{2} \: \[\Y \↦ \[\X \↦ \P] \T_{2}] \[\X \↦ \P] \T_{12}$, that is,
         $\Γ, \[\X \↦ \P] \Δ \⊢ \[\X \↦ \P] \(\t_{1} \T_{2}) \: \[\X \↦ \P](\[\Y \↦ \T_{2}] \T_{12})$, as required.
 
         \Case\TSub:
@@ -296,7 +296,7 @@
 
         Ditto.
 
-        \Subcase $\y \: \T \= \x \: \Q$ (i.e. $\y \= \x$ and $\T \= \Q$):
+        \Subcase $\y \: \T \= \x \: \Q$ (\emph{i.e.} $\y \= \x$ and $\T \= \Q$):
 
         Using $\Γ \⊢ \q \: \Q$ and \Cref{lem:weakening} we get $\Γ, \Δ \⊢ \q \: \Q$. Since $\[\x \↦ \q] \y \= \q$ and $\T \= \Q$, $\Γ, \Δ \⊢ \[\x \↦ \q] \y \: \T$, as required.
 
@@ -307,7 +307,7 @@
       \quad $\T \= \T_{1} \→ \T_{2}$
       \quad $\Γ, \x \: \Q, \Δ, \y \: \T_{1} \⊢ \t_{2} \: \T_{2}$
 
-      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \y \: \T_{1})$ to obtain $\Γ, \Δ, \y \: \T_{1} \⊢ \[\x \↦ \q] \t_{2} \: \T_{2}$.
+      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \y \: \T_{1})$ to get $\Γ, \Δ, \y \: \T_{1} \⊢ \[\x \↦ \q] \t_{2} \: \T_{2}$.
       $\[\x \↦ \q] \(\λ \y \: \T_{1} \t_{2}) \= \λ \y \: \T_{1} \[\x \↦ \q] \t_{2}$ and the result follows from \TAbs.
 
       \Case\TApp:
@@ -323,7 +323,7 @@
       \quad $\T \= \∀ \X \<: \U_{1}.~ \T_{2}$
       \quad $\Γ, \x \: \Q, \Δ, \X \<: \U_{1} \⊢ \t_{2} \: \T_{2}$
 
-      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \X \<: \U_{1})$ to obtain $\Γ, \Δ, \X \<: \U_{1} \⊢ \[\x \↦ \q] \t_{2} \: \T_{2}$.
+      We instantiate the IH with $\Δ_{IH} \= \(\Δ, \X \<: \U_{1})$ to get $\Γ, \Δ, \X \<: \U_{1} \⊢ \[\x \↦ \q] \t_{2} \: \T_{2}$.
       $\[\x \↦ \q] \(\λ \X \<: \U_{1}.~ \t_{2}) \= \λ \X \<: \U_{1}.~ \[\x \↦ \q] \t_{2}$ and the result follows from \TTAbs.
 
       \Case\TTApp:

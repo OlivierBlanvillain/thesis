@@ -5,7 +5,7 @@ all: thesis.pdf
 thesis.pdf: FORCE proofs/structure.pdf scala/code-sections.tex
 	- latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out thesis.tex
 	- cp latex.out/thesis.pdf thesis.pdf
-	- echo && ./pplatex -i latex.out/thesis.log
+	- echo && ./pplatex -b -i latex.out/thesis.log
 
 clean: FORCE
 	- rm -rf proofs/structure.pdf

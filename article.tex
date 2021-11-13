@@ -154,7 +154,7 @@ Each class in $\C$ gives rise to a constructor (written $\new \C$), a type (writ
 The type $\C$ denotes all values that inherit $\C$, while the constructor singleton type $\{ \new \C \}$ denotes a single value: $\C$'s constructor call.
 Subtyping between classes is dictated by $\Ψ$ via the \SPsi rule.
 
-This parametric approach allows us to model class inheritance as found in object-oriented languages without the need for dedicated syntax for classes and data type definitions.
+This parametric approach allows us to model class inheritance as it is found in object-oriented languages, without the need for dedicated syntax for classes and data type definitions.
 Although our approach might appear simplistic, it can easily model advanced object-oriented features such as multiple inheritance.
 We discuss the encoding of Scala's types into \SystemFm in \Cref{subsec:disjointness-in-scala}.
 
@@ -211,7 +211,7 @@ For instance, given the function $\f$ defined in \Cref{ex:simplereduction}, the 
 % This pattern could alternatively be written as type test pattern (right-hand side), were \dotty{::[Any]} is the type of Scala's cons node.
 
 \subsubsection*{Match Type Reduction}
-The subtyping relation contains five rules for match type reduction, \SMatch1/2/3/4/5.
+The subtyping relation contains 5 rules for match type reduction, \SMatch1/2/3/4/5.
 These rules are defined in pairs using the $\≡$ shorthand notation, where $\S \≡ \T$ means that $\S$ and $\T$ are in a mutual subtyping relation.
 More precisely, \SMatch1/2 in \Cref{fig:FMTypingRules} corresponds to two typing rules with identical premises and symmetrical conclusion, and the same goes for \SMatch3/4.
 
@@ -297,7 +297,7 @@ This set-theoretical view lets us conclude the desired result directly.
 In our Coq mechanization, we axiomatize this lemma and delegate to the pen-and-paper proof.
 
 \subsubsection*{Inversion of Subtyping}
-\harpoon{Definition of the auxiliary relation $\⇌$, used to state inversion of subtyping (\Cref{lem:inversion-of-subtyping}).}
+\harpoon{Definition of the auxiliary relation $\⇌$, used to state inversion of subtyping.}
 
 The following \Cref{lem:inversion-of-subtyping} allows us to perform inversion on the subtyping relation,
 which is important to show canonical forms (\Cref{lem:canonical-forms}) and inversion of typing (\Cref{lem:inversion-of-typing}).
@@ -356,7 +356,7 @@ In $\t_s \match \[\X] \{ \x_i \: \C_i \⇒ \t_i \} \otherwise \t_d$, the pattern
 The definitions of \SMatch3/4, \SMatch5, and \TMatch require minor adjustments to account for the pattern variable in typing contexts.
 Note that pattern variables appear in contexts unconditionally, regardless of whether or not those variables are used in the corresponding patterns.
 
-In the new subtyping rule for non-default match reduction, \BSMatch1/2, the first premise instantiates the pattern variable $\X$ to some type $\U$ such that the scrutinee type is a subtype of the $\n$th pattern:
+In the new subtyping rule for non-default match reduction, called \BSMatch1/2, the first premise instantiates the pattern variable $\X$ to some type $\U$ such that the scrutinee type is a subtype of the $\n$th pattern:
 \BSMatchInline
 Here $\U$ is completely unconstrained: any instantiation of $\X$ such that $\T_s \<: \S_n$ would be admissible.
 The disjointness judgments use a weaker upper bound for $\X$ than the subtyping judgment ($\X \<: \Top$ instead of $\X \<: \U$).

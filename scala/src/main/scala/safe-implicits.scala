@@ -74,3 +74,36 @@ def main(ctx: Context[HNil]): Context[HNil] =
      .free("mem")
      .free("bool")
 // end section memImplicitMain
+
+trait js {
+// start section addEventListenerJS
+/** Attaches an event handler.
+ *
+ *  @param event     The event type, one of "mousedown", "mouseup",
+ *                   "mouseover", "mousewheel" and "contextmenu".
+ *  @param listener  The function to run when the event occurs.
+ */
+def addEventListener(event: String, listener: Event => Unit): Unit
+// end section addEventListenerJS
+
+}
+trait Event {
+
+// start section addEventListenerImplicitDef
+type EventTypes =
+  "mousedown" :: "mouseup" :: "mouseover" :: "mousewheel" :: "contextmenu" :: HNil
+
+def addEventListener[E <: Singleton]
+  (event: E, listener: Event => Unit)
+  (implicit ev: Remove[E, EventTypes, ?]): Unit
+// end section addEventListenerImplicitDef
+
+// start section addEventListenerImplicitCall
+addEventListener("mouseover", e => ())(
+  // Evidence that "mouseover" is in EventTypes,
+  // automatically infered by the compiler.
+  Remove.casetail(Remove.casetail(Remove.casehead))
+)
+// end section addEventListenerImplicitCall
+
+}

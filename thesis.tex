@@ -208,21 +208,47 @@ Let us consider the remove operation on |HList|s in more details.
 %     : Remove[V, Ph :: Pt, Ph :: Out] = new Remove {}
 
 \noindent
-The |Remove| trait takes 3 type parameters, 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out|.
-This trait is intended to be used as an implicit parameter with fixed input types, and a variable output type.
+The |Remove| trait takes 3 type parameters, 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the first occurrence of the element removed).
+This trait is intended to be used as an implicit parameter, with constrained input types, and unconstrained output type.
 
-% def addEventListener(tpe: String, listener: Event => Unit): Unit
+The remove operation is undefined if the element is not part of the list.
+In that case, implicit resolution will fail with an "implicit not found" error.
+More precisely, implicit resolution will iterates thought the list by repeatedly using |casetail|, until it reaches |Remove[V, HNil, Out]|, the last goal of the search, which is unsatisfied.
 
+As an example of usage, consider the following "stringly-typed", JavaScript-inspired API:
+
+\addEventListenerJS
+% /** Attaches an event handler.
+%  *
+%  *  @param event     The event type, one of "mousedown", "mouseup",
+%  *                   "mouseover", "mousewheel" and "contextmenu".
+%  *  @param listener  The function to run when the event occurs.
+%  */
+% def addEventListener(event: String, listener: Event => Unit): Unit
+
+This method clearly specifies a fixed set of alternatives for its |event| argument, but this constrain is not reflected in the method's type signature.
+In JavaScript, calling this method with unknown element event type is a \emph{no-op}, which can make errors particularly hard to spot.
+
+Instead of specifying this constrain in the documentation, we list the alternative in a |HList| type, and use an implicit parameter of type |Remove|:
+
+\addEventListenerImplicitDef
 % type EventTypes = "mousedown" :: "mouseup" :: "mouseover" :: "mousewheel" :: "contextmenu" :: HNil
 
-% From the intro:
-% The first definition, |casehead|, specifies a fact: the result of removing |V| from the list |V::Ps| is |Ps|, which is expressed as an instance of |Remove[V, V::Ps, Ps]|.
-% The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |Out|, the results of removing |V| from the list |Ph::Pt| is |Ph::Out| (which is expressed as in instance of |Remove[V, Ph::Pt, Ph::Out]|).
-% When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool"::"mem"::HNil]|, the compiler uses |casehead| and |casetail| to compute a type |Out| such that |Out| is the results of removing |"mem"| from |"bool"::"mem"::HNil|.
+% def addEventListener[E <: Singleton]
+%   (event: E, listener: Event => Unit)
+%   (implicit ev: Remove[E, EventTypes, ?]): Unit
 
-\section{Priorities and Ambiguities}
+\noindent
+With this updated signature, the compiler is able to detect invalid event types at compile time.
+In case of valid event types |E|, the compiler will syntheses an implicit evidence of type |Remove[E, EventTypes, ?]|, witnessing |E|'s validity:
 
-|implicitly[Remove[1, 1 :: 2 :: 1 :: HNil, ?]]|
+\addEventListenerImplicitCall
+
+The |Singleton| bound is...
+
+\section{Implicit Priorities}
+\section{Implicit Ambiguities}
+
 The Implicit Negation Pattern
 
 \chapter{Generalizing Scala's Singleton Types}

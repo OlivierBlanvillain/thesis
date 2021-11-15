@@ -4,49 +4,49 @@ case object Ø extends Shape
 
 // cheating a little bit here, but there's a footnote to explain it!
 object SimplifiedShape {
-// start section shape
+// start section shapeEnum
 enum Shape {
   case #:[H <: Int, T <: Shape](head: H, tail: T)
   case Ø
 }
-// end section shape
+// end section shapeEnum
 }
 
 type Ø = Ø.type
 type None = None.type
 
-// start section datatype
+// start section datatypeTrait
 trait DataType[T]
-// end section datatype
+// end section datatypeTrait
 
-// start section ndarray
+// start section ndarrayTrait
 trait NDArray[T, S <: Shape]
-// end section ndarray
+// end section ndarrayTrait
 
-// start section randomnormal
+// start section randomnormalDef
 def random_normal[S <: Shape](shape: S): NDArray[Float, S] = ???
-// end section randomnormal
+// end section randomnormalDef
 
-// start section multiply
+// start section multiplyDef
 def multiply[T, S <: Shape](x: NDArray[T, S], y: NDArray[T, S]): NDArray[T, S] = ???
-// end section multiply
+// end section multiplyDef
 
 import scala.compiletime.ops.int.*
-// start section numelements
+// start section numelementsType
 type NumElements[X <: Shape] <: Int =
   X match {
     case Ø => 1
     case head #: tail => head * NumElements[tail]
   }
-// end section numelements
+// end section numelementsType
 
-// start section reshape
+// start section reshapeDef
 def reshape[T, From <: Shape, To <: Shape](arr: NDArray[T, From], newshape: To)
     (implicit ev: NumElements[From] =:= NumElements[To]): NDArray[T, To] = ???
-// end section reshape
+// end section reshapeDef
 
 import scala.compiletime.ops.int.+
-// start section reduce
+// start section reduceType
 type Reduce[S <: Shape, Axes <: None | Shape] <: Shape =
   Axes match {
     case None => Ø
@@ -64,7 +64,7 @@ type Loop[S <: Shape, Axes <: Shape, I <: Int] <: Shape =
       // otherwise, do not reduce further
     }
   }
-// end section reduce
+// end section reduceType
 
 type Contains[Haystack <: Shape, Needle <: Int] <: Boolean = Haystack match {
   case Ø => false
@@ -82,7 +82,7 @@ type Remove[From <: Shape, Value <: Int & Singleton] <: Shape = From match {
   }
 }
 
-// start section npmean
+// start section npmeanDef
 def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T,
     Reduce[S, A]] = ???
-// end section npmean
+// end section npmeanDef

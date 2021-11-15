@@ -50,7 +50,7 @@ Denys' answer was clear: ownership is fundamentally at odds with the way Scala h
 The next day, I came up with a toy domain-specific language (DSL), which implements the basis of a linear type system using type-level programming.
 Here is an example of a short program written in this DSL:
 
-\memImplicitMainCodeSection
+\memImplicitMain
 
 \noindent
 The type argument of |Context| is a type-level list of strings that corresponds to the memory regions allocated at each program point.
@@ -74,7 +74,7 @@ Despite their widespread usage, implicits are notorious for their complexity \ci
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
 To give the reader a glance of this pattern, we show the definition of the |free| method on |Context|:
 
-\memImplicitContextCodeSection
+\memImplicitContext
 
 \noindent
 This definition uses three parameter lists, one for type parameters (|V| and |Out|), one for a value parameter (|v|), and one of an implicit value parameter (|ev|).
@@ -82,7 +82,7 @@ Only the second parameter list is intended to be specified at use site; the type
 When a user writes |.free("mem")| he only sets the |v| parameter (|v="mem"|); the compiler takes care of finding valid assignments for |V|, |Out| and |ev|.
 The implicit parameter of type |Remove[V, Ps, Out]| is the entry point to the world of type-level programming, it specifies how |V| (constrained by to be |v|'s type), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
 
-\memImplicitRemoveCodeSection
+\memImplicitRemove
 
 \noindent
 Implicit-prefixed definitions can be understood as \emph{facts} and \emph{rules} of a logic program.
@@ -129,13 +129,13 @@ The ability to omit arguments to functions gives rise to many interesting coding
 On every call to functions with implicit parameters, the compiler looks for an implicit definition in scope to satisfy the call.
 So, instead of passing a parameter explicitly:
 
-\explicitModuloCodeSection
+\explicitModulo
 
 \noindent
 We can mark a set of parameters as implicit (a single parameter in this example) and let the compiler retrieve the missing argument for us.
 In the following example, |addm| is a method with one implicit parameter and |modulo| is an implicit definition:
 
-\implicitModuloCodeSection
+\implicitModulo
 
 The process of implicit parameter discovery performed by the compiler is called \emph{implicit resolution}.
 The resolution algorithm looks for implicits in the current scope and in the companion objects of all classes associated with the query type.
@@ -154,7 +154,7 @@ This example consists of three parts:
   \item the implicit definition |intOrdering|, which provides an \emph{instance} of the |Ordering| type class for integers.
 \end{enumerate}
 
-\ordExampleCodeSection
+\ordExample
 
 We have briefly introduced implicit parameters and showed who they can be used to avoid clutter in function applications.
 In the next section, we present recursive implicit resolution.
@@ -164,7 +164,7 @@ In the next section, we present recursive implicit resolution.
 Implicit methods can themselves have implicit parameters.
 For example, we can define the lexicographic list ordering as follows:
 
-\ordListExampleCodeSection
+\ordListExample
 
 \noindent
 This definition is parametrized by the list's element type and by an ordering of that type, passed as an implicit parameter.
@@ -178,7 +178,7 @@ This is where the (type-level) fun begins!
 A heterogeneous list, or |HList| for short~\citep{kiselyov2004strongly}, is a datatype capable of storing data of different types.
 In Scala, we can define the |HList| datatype as follows:
 
-\hlistEnumDefinitionCodeSection
+\hlistEnumDefinition
 % enum HList:
 %   case HNil()
 %   case ::[H, T <: HList](head: H, tail: T)
@@ -196,7 +196,7 @@ Each operation the form of a trait, the operation's entry point, and several imp
 
 Let us consider the remove operation on |HList|s in more details.
 
-\memImplicitRemoveCodeSection
+\memImplicitRemove
 % trait Remove[V, Ps <: HList, Out <: HList]
 
 % object Remove:

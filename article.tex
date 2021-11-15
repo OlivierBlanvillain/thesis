@@ -675,14 +675,14 @@ We define an HList called \dotty{Shape} as an ADT with two constructors\footnote
 \footnotetext{%
 In the interest of clarity, our presentation omits type bounds that are necessary to guide type inference, for example in the definition of the \dotty{Shape} data type.}
 %
-\shapeCodeSection
+\shapeEnum
 %
 This data type definition allows us to write lists of dimension sizes, both at the term level as \dotty{#:(3, #:(4, Ø))}, and at the type level as \dotty{#:[3, #:[4, Ø]]}.
 The HList type can equivalently be written with \dotty{#:} in infix notation, as \dotty{3 #: 4 #: Ø}.
 
 To represent ndarrays, we define the \dotty{NDArray} type. This type is indexed by the ndarray element type (\dotty{T}), and by the ndarray shape (\dotty{S}), represented as an HList:
 %
-\ndarrayCodeSection
+\ndarrayTrait
 
 The goal of our presentation is to define type-safe operations on \dotty{NDArrays}.
 Since our focus is on the type-level, we do not include value-level counterparts to \dotty{T} and \dotty{S} in the definition of \dotty{NDArray}, but this would be necessary in a complete implementation.
@@ -692,7 +692,7 @@ To construct ndarrays, we define \dotty{random_normal}, which creates an ndarray
 This snippet uses the triple question mark operator, Scala's standard notation for missing or omitted implementations.
 }
 %
-\randomnormalCodeSection
+\randomnormalDef
 
 \subsection{Computation on Shapes with Match Types}
 \label{subsec:shape-match-types}
@@ -701,7 +701,7 @@ Encoding the types and shapes of ndarrays in the types allows us to readily prov
 For instance, the element-wise Hadamard product, written as \python{np.multiply(x, y)}, requires the \python{x} and \python{y} ndarrays to have the same shape and element types.
 This constraint does not require any match types, but can simply be expressed as:
 %
-\multiplyCodeSection
+\multiplyDef
 %
 However, we will need the additional expressiveness of match types to implement more complex constraints on array shapes, such as for reshapes (\ref{subsubsec:reshape}) and reductions (\ref{subsubsec:reduction}).
 
@@ -713,12 +713,12 @@ A restriction imposed by the NumPy API is that the output shape must have the sa
 Note that an ndarray of shape \dotty{Ø} is a scalar, and thus has a single element.
 This can be naturally expressed with a match type:
 %
-\numelementsCodeSection
+\numelementsType
 
 To restrict reshaping to be applicable only on valid shapes, the type system must support encoding type equality constraints.
 For this, we make use of Scala's implicit parameters, and of the \dotty{=:=} type equality constraint that is a part of Scala's standard library.
 %
-\reshapeCodeSection
+\reshapeDef
 %
 With this definition of \dotty{reshape}, the compiler will only accept a usage of \dotty{reshape} if it is able to prove that the number of elements in the old shape is the same as in the new shape.
 This example illustrates how match types can be used in concert with existing features like singleton types and implicit resolution to express powerful constraints.
@@ -735,27 +735,27 @@ Note that this is the opposite of passing \dotty{Ø}, which means that we reduce
 This behavior is more complex than the previous examples, but can still be described accurately by a match type.
 We use a match type called \dotty{Reduce} to compute the return shape of the operation.
 
-\npmeanCodeSection
+\npmeanDef
 
 We implement reductions along a given list of indices with logic similar to two nested loops.
 The outer loop, \dotty{Loop}, traverses the shape and counts the current index.
 The inner loops are implemented using \dotty{Contains} and \dotty{Remove}, standard operations on HLists (omitted).
 When \dotty{Loop} reaches the end of the list, if there are still axes to remove, these are out of bounds for the initial shape: the match type intentionally gets stuck in such cases.
 %
-\reduceCodeSection
+\reduceType
 
 \subsection{Shape safety}
 \label{sec:shape-safety}
 
 Having defined \dotty{random_normal}, \dotty{reshape} and \dotty{mean}, we can rewrite our original Python example in Scala:
 %
-\badreducescalaCodeSection
+\badreducescala
 %
 As expected, the call to \dotty{mean} returns a tensor of shape \dotty{3 #: Ø}.
 Therefore, the call to \dotty{reshape} does not type-check since the input shape has 3 elements instead of 25.
 If we fix the off by one error to reduce along the correct indices, \dotty{1 #: 2 #:} \dotty{3 #: Ø}, the call to \dotty{reshape} type-checks and \dotty{avg_color} has shape \dotty{25 #: Ø}, as expected.
 
-% \goodreducescalaCodeSection
+% \goodreducescala
 
 \section{Related work}
 \label{sec:related-work}

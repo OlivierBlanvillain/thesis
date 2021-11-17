@@ -80,14 +80,14 @@ To give the reader a glance of this pattern, we show the definition of the |free
 This definition uses three parameter lists, one for type parameters (|V| and |Out|), one for a value parameter (|v|), and one of an implicit value parameter (|ev|).
 Only the second parameter list is intended to be specified at use site; the type and implicit parameters are intended to be inferred.
 When a user writes |.free("mem")| he only sets the |v| parameter (|v="mem"|); the compiler takes care of finding valid assignments for |V|, |Out| and |ev|.
-The implicit parameter of type |Remove[V, Ps, Out]| is the entry point to the world of type-level programming, it specifies how |V| (constrained by to be |v|'s type), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
+The implicit parameter of type |Remove[V,Ps,Out]| is the entry point to the world of type-level programming, it specifies how |V| (constrained by to be |v|'s type), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
 
 \memImplicitRemove
 
 \noindent
 Implicit-prefixed definitions can be understood as \emph{facts} and \emph{rules} of a logic program.
-The first definition, |casehead|, specifies a fact: the result of removing |V| from the list |V::Ps| is |Ps|, which is expressed as an instance of |Remove[V, V::Ps, Ps]|.
-The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |Out|, the results of removing |V| from the list |Ph::Pt| is |Ph::Out| (which is expressed as in instance of |Remove[V, Ph::Pt, Ph::Out]|).
+The first definition, |casehead|, specifies a fact: the result of removing |V| from the list |V::Ps| is |Ps|, which is expressed as an instance of |Remove[V,V::Ps,Ps]|.
+The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |Out|, the results of removing |V| from the list |Ph::Pt| is |Ph::Out| (which is expressed as in instance of |Remove[V,Ph::Pt,Ph::Out]|).
 When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool"::"mem"::HNil]|, the compiler uses |casehead| and |casetail| to compute a type |Out| such that |Out| is the results of removing |"mem"| from |"bool"::"mem"::HNil|.
 
 In retrospect, I have to agree with Denys' judgment at the time: this style of programming is convoluted, to say the least.
@@ -186,7 +186,7 @@ In Scala, we can define the |HList| datatype as follows:
 
 \noindent
 The |::| constructor offers an interesting symmetry between the term and type level, which allows |HList| types to capture the same structure that their term-level counterparts.
-For example, the term |::(1, ::(2, HNil()))| can be typed as |::[1, ::[2, HNil]]|, which is a perfect reification of that term\footnotemark.
+For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term\footnotemark.
 We can define type-level processing operations on |HList|s using implicits.
 Each operation the form of a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
 
@@ -213,18 +213,12 @@ This trait is intended to be used as an implicit parameter, with constrained inp
 
 The remove operation is undefined if the element is not part of the list.
 In that case, implicit resolution will fail with an "implicit not found" error.
-More precisely, implicit resolution will iterates thought the list by repeatedly using |casetail|, until it reaches |Remove[V, HNil, Out]|, the last goal of the search, which is unsatisfied.
+More precisely, implicit resolution will iterates thought the list by repeatedly using |casetail|, until it reaches |Remove[V,HNil,Out]|, which is unsatisfiable (neither |casehead| nor |casetail| can produce an instance of |Remove| with |Ps=HNil|).
 
-As an example of usage, consider the following "stringly-typed", JavaScript-inspired API:
+\newpage
+As an example usage of |Remove|, consider the following "stringly-typed", JavaScript-inspired method:
 
 \addEventListenerJS
-% /** Attaches an event handler.
-%  *
-%  *  @param event     The event type, one of "mousedown", "mouseup",
-%  *                   "mouseover", "mousewheel" and "contextmenu".
-%  *  @param listener  The function to run when the event occurs.
-%  */
-% def addEventListener(event: String, listener: Event => Unit): Unit
 
 This method clearly specifies a fixed set of alternatives for its |event| argument, but this constrain is not reflected in the method's type signature.
 In JavaScript, calling this method with unknown element event type is a \emph{no-op}, which can make errors particularly hard to spot.
@@ -232,21 +226,21 @@ In JavaScript, calling this method with unknown element event type is a \emph{no
 Instead of specifying this constrain in the documentation, we list the alternative in a |HList| type, and use an implicit parameter of type |Remove|:
 
 \addEventListenerImplicitDef
-% type EventTypes = "mousedown" :: "mouseup" :: "mouseover" :: "mousewheel" :: "contextmenu" :: HNil
-
-% def addEventListener[E <: Singleton]
-%   (event: E, listener: Event => Unit)
-%   (implicit ev: Remove[E, EventTypes, ?]): Unit
 
 \noindent
+The |Singleton| type bound is a marker that instructs type inference to preserve literal singleton types (by default, the compiler widens those types).
+The "|?|" type is Scala 3's new syntax for wildcard types \citep{dotty2014wildcard}.
+
 With this updated signature, the compiler is able to detect invalid event types at compile time.
-In case of valid event types |E|, the compiler will syntheses an implicit evidence of type |Remove[E, EventTypes, ?]|, witnessing |E|'s validity:
+In case of valid event types |E|, the compiler will syntheses an implicit evidence of type |Remove[E,EventTypes,?]|, witnessing |E|'s validity.
+After implicit resolution, calls to the |addEventListener| method are expanded to insert implicit parameters in place of the second parameter list, such as in the following example:
 
 \addEventListenerImplicitCall
 
-The |Singleton| bound is...
-
 \section{Implicit Priorities}
+
+\citep{odersky2009arrays}
+
 \section{Implicit Ambiguities}
 
 The Implicit Negation Pattern

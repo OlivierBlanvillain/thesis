@@ -8,11 +8,6 @@ enum HList:
 // end section hlistEnumDefinition
 import HList._
 
-// sealed trait HList
-// case object HNil extends HList
-// case class ::[+H, +T <: HList](head: H, tail: T) extends HList
-// type HNil = HNil.type
-
 // start section memImplicitRemove
 trait Remove[V, Ps <: HList, Out <: HList]
 
@@ -34,6 +29,27 @@ object NotIn:
       no: NotGiven[V =:= Ph],
       xs: NotIn[V, Pt]
     ): NotIn[V, Ph :: Pt] = new NotIn {}
+
+// start section removeAllWithPriority
+trait RemoveAll[V, Ps <: HList] { type Out <: HList }
+
+trait RemoveAllLowPrio:
+  type Aux[V, Ps <: HList, Out <: HList] = RemoveAll[V, Ps] { type Out }
+
+  implicit def casediff[V, Ph, Pt <: HList, Out <: HList]
+    (implicit ev: Aux[Ph, Pt, Out])
+    : Aux[V, Ph :: Pt, Ph :: Out] = new RemoveAll {}
+
+object RemoveAll extends RemoveAllLowPrio:
+  implicit def casenil[V]
+    : Aux[V, HNil, HNil] = new RemoveAll {}
+
+  implicit def casematch[V, Ps <: HList, Out <: HList]
+    (implicit ev: Aux[V, Ps, Out])
+    : Aux[V, V :: Ps, Out] = new RemoveAll {}
+// end section removeAllWithPriority
+
+val removeAllTest = implicitly[RemoveAll.Aux[1, 1 :: 2 :: 1 :: 3 :: HNil, 2 :: 3 :: HNil]]
 
 // start section memImplicitContext
 trait Context[Ps <: HList]:
@@ -78,7 +94,6 @@ def main(ctx: Context[HNil]): Context[HNil] =
 trait js {
 // start section addEventListenerJS
 /** Attaches an event handler.
- *
  *  @param event     The event type, one of "mousedown", "mouseup",
  *                   "mouseover", "mousewheel" and "contextmenu".
  *  @param listener  The function to run when the event occurs.
@@ -94,14 +109,15 @@ type EventTypes =
   "mousedown" :: "mouseup" :: "mouseover" :: "mousewheel" :: "contextmenu" :: HNil
 
 def addEventListener[E <: Singleton]
-  (event: E, listener: Event => Unit)
+  (event: E, handler: Event => Unit)
   (implicit ev: Remove[E, EventTypes, ?]): Unit
 // end section addEventListenerImplicitDef
 
+val myHandler: Event => Unit = e => ()
+
 // start section addEventListenerImplicitCall
-addEventListener("mouseover", e => ())(
-  // Evidence that "mouseover" is in EventTypes,
-  // automatically infered by the compiler.
+addEventListener("mouseover", myHandler)(
+  // Evidence that "mouseover" is in EventTypes, infered automatically.
   Remove.casetail(Remove.casetail(Remove.casehead))
 )
 // end section addEventListenerImplicitCall

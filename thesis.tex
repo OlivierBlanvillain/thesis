@@ -179,22 +179,22 @@ A heterogeneous list, or |HList| for short~\citep{kiselyov2004strongly}, is a da
 In Scala, we can define the |HList| datatype as follows:
 
 \hlistEnumDefinition
-% enum HList:
-%   case HNil()
-%   case ::[H, T <: HList](head: H, tail: T)
-
 
 \noindent
 The |::| constructor offers an interesting symmetry between the term and type level, which allows |HList| types to capture the same structure that their term-level counterparts.
 For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term\footnotemark.
-We can define type-level processing operations on |HList|s using implicits.
-Each operation the form of a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
 
 \footnotetext{In this example, 1 and 2 are used both as term and type literals.}
 
 \subsubsection{HList's remove}
 
-Let us consider the remove operation on |HList|s in more details.
+Scala's implicits allow us to define type-level processing operations for heterogeneous lists.
+We develop the example presented the introduction by looking into the type-level remove operation on |HList|s.
+Remove takes as argument an element and a list, and returns a new list with the first occurence of the element removed.
+This operation should yield an error if the element is not part of the list.
+
+An implicit-based type-level operation take the form a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
+Let us consider the implementation of the remove operation in more details:
 
 \memImplicitRemove
 % trait Remove[V, Ps <: HList, Out <: HList]
@@ -209,21 +209,21 @@ Let us consider the remove operation on |HList|s in more details.
 
 \noindent
 The |Remove| trait takes 3 type parameters, 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the first occurrence of the element removed).
-This trait is intended to be used as an implicit parameter, with constrained input types, and unconstrained output type.
+The two implicit definitions, |casehead| and |casetail|, correspond to the base case and the recursive case of the list removal operation, respectively.
+The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and unconstrained output type.
 
-The remove operation is undefined if the element is not part of the list.
-In that case, implicit resolution will fail with an "implicit not found" error.
-More precisely, implicit resolution will iterates thought the list by repeatedly using |casetail|, until it reaches |Remove[V,HNil,Out]|, which is unsatisfiable (neither |casehead| nor |casetail| can produce an instance of |Remove| with |Ps=HNil|).
+If the given element is not part of the list, the corresponding implicit resolution will fail with an "implicit not found" error, which indicates the incorrect use of |Remove|.
+More precisely, the implicit resolution will first iterate thought the list by repeatedly using |casetail|, until it reaches |Remove[V,HNil,Out]|, which is unsatisfiable (neither |casehead| nor |casetail| can produce an instance of |Remove| with |Ps=HNil|).
 
 \newpage
 As an example usage of |Remove|, consider the following "stringly-typed", JavaScript-inspired method:
 
 \addEventListenerJS
 
-This method clearly specifies a fixed set of alternatives for its |event| argument, but this constrain is not reflected in the method's type signature.
-In JavaScript, calling this method with unknown element event type is a \emph{no-op}, which can make errors particularly hard to spot.
+This method's documentation specifies 5 alternatives for the |event| argument, but this constrain is not reflected in the method's type signature.
+In JavaScript, calling the |addEventListener| method with an unknown element event type is a \emph{no-op}, which can make such error particularly hard to spot.
 
-Instead of specifying this constrain in the documentation, we list the alternative in a |HList| type, and use an implicit parameter of type |Remove|:
+Instead of specifying this constrain in the documentation, we can represent the alternatives in a |HList|, and use an implicit parameter of type |Remove|, to statically enforce that property:
 
 \addEventListenerImplicitDef
 

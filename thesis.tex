@@ -168,9 +168,9 @@ For example, we can define the lexicographic list ordering as follows:
 
 \noindent
 This definition is parametrized by the list's element type and by an ordering of that type, passed as an implicit parameter.
-Since |listOrdering| is itself implicit, it defines a \emph{rule}: it allows the compiler to obtain an implicit |Ordering[List[T]]| given an implicit |Ordering[T]|, for any type |T|.
+Since |listOrdering| is itself implicit, it defines a \emph{rule}: it allows the compiler to materialize an implicit |Ordering[List[T]]|, given an implicit |Ordering[T]| (for any type |T|).
 
-Parametrized implicit definitions can lead to recursive implicit resolution, for example, the compiler will use |listOrdering| twice to synthesize an implicit |Ordering[List[List[T]]]|.
+Parametrized implicit definitions can lead to recursive implicit resolution. For example, the compiler will use |listOrdering| twice to synthesize an implicit |Ordering[List[List[T]]]|.
 This is where the (type-level) fun begins!
 
 \subsubsection{Heterogeneous lists}
@@ -187,12 +187,12 @@ For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, w
 \subsubsection{HList's remove}
 
 Scala's implicits allow us to define type-level processing operations for heterogeneous lists.
-We develop the example presented the introduction by looking into the type-level remove operation on |HList|s.
+We develop the example presented in the introduction by looking into the type-level remove operation on |HList|s.
 Remove takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
 This operation should yield an error if the element is not part of the list.
 
-An implicit-based type-level operation typically takes the form a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
-Let us consider the implementation of the remove operation in more details:
+An implicit-based type-level operation typically takes the form of a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
+Let us consider the implementation of the remove operation in more detail:
 
 \memImplicitRemove
 % trait Remove[V, Ps <: HList, Out <: HList]
@@ -211,17 +211,17 @@ The two implicit definitions, |casehead| and |casetail|, correspond to the base 
 The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and an unconstrained output type.
 
 When the given element is not part of the list, implicit resolution fails with an "implicit not found" error, which indicates the incorrect use of |Remove|.
-More precisely, the implicit search first iterates thought the list by repeatedly using |casetail| until it reaches the end of the list, at which point it fails to find an implicit value of type |Remove[V,HNil,Out]| (neither |casehead| nor |casetail| produce an instantiation of |Remove| with |Ps=HNil|).
+More precisely, the implicit search first iterates though the list by repeatedly using |casetail| until it reaches the end of the list, at which point it fails to find an implicit value of type |Remove[V,HNil,Out]| (neither |casehead| nor |casetail| produce an instantiation of |Remove| with |Ps=HNil|).
 
 As an example usage of |Remove|, consider the following "stringly-typed", JavaScript-inspired method:
 
 \addEventListenerJS
 
 \noindent
-This method's documentation specifies 5 alternatives for the |event| argument, but that constrain is not reflected in the method's type signature.
+This method's documentation specifies 5 valid alternatives for the |event| argument, but that constrain is not reflected in the method's type signature.
 In JavaScript, calling this method with an erroneous element event type is a \emph{no-op}, which can make this kind of error particularly hard to spot.
 
-Instead of specifying that constrain in the documentation, we can represent the alternatives in a |HList|, and use an implicit parameter of type |Remove| to statically enforce that property:
+Instead of specifying that constrain in the documentation, we can represent the valid event types in a |HList|, and use an implicit parameter of type |Remove| to statically enforce that property:
 
 \addEventListenerImplicitDef
 
@@ -230,10 +230,13 @@ The |Singleton| type bound is a marker that instructs type inference to preserve
 The "|?|" type is Scala 3's new syntax for wildcard types \citep{dotty2014wildcard}.
 
 With this updated signature, the compiler is able to detect invalid event types at compile time.
-When given a valid event types |E|, the compiler synthesizes an implicit evidence of type |Remove[E,EventTypes,?]| which witnesses |E|'s validity.
+When given a valid event type |E|, the compiler synthesizes an implicit evidence of type |Remove[E,EventTypes,?]| which witnesses |E|'s validity.
 After implicit resolution, calls to the |addEventListener| method are expanded to automatically insert an implicit parameter for the second parameter list, such as in the following example:
 
 \addEventListenerImplicitCall
+
+We have introduced an implicit-based pattern to encode type-level computation.
+Despite its verbosity, this pattern generalizes to arbitrary recursive computations and enables Scala programmers to write elaborate type-level programs solely based on implicits.
 
 \section{Implicit Priorities}
 

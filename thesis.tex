@@ -125,14 +125,14 @@ In this chapter...
 \section{Implicit Parameters: Overview}
 
 \emph{Implicit parameters} offer a convenient way to write code without the need to pass all arguments explicitly.
-The ability to omit arguments to functions gives rise to many interesting coding styles and patterns.
+The ability to omit function arguments gives rise to many interesting coding styles and patterns.
 On every call to functions with implicit parameters, the compiler looks for an implicit definition in scope to satisfy the call.
 So, instead of passing a parameter explicitly:
 
 \explicitModulo
 
 \noindent
-We can mark a set of parameters as implicit (a single parameter in this example) and let the compiler retrieve the missing argument for us.
+we can mark a set of parameters as implicit (a single parameter in this example) and let the compiler retrieve the missing argument for us.
 In the following example, |addm| is a method with one implicit parameter and |modulo| is an implicit definition:
 
 \implicitModulo
@@ -156,7 +156,7 @@ This example consists of three parts:
 
 \ordExample
 
-We have briefly introduced implicit parameters and showed who they can be used to avoid clutter in function applications.
+We have briefly introduced implicit parameters and showed how they can be used to avoid clutter in function applications.
 In the next section, we present recursive implicit resolution.
 
 \section{Recursive Implicit Resolution}
@@ -186,9 +186,9 @@ For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, w
 
 \subsubsection{HList's remove}
 
-Scala's implicits allow us to define type-level processing operations for heterogeneous lists.
+Scala's implicits allow us to define type-level operations for heterogeneous lists.
 We develop the example presented in the introduction by looking into the type-level remove operation on |HList|s.
-Remove takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
+The remove operation takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
 This operation should yield an error if the element is not part of the list.
 
 An implicit-based type-level operation typically takes the form of a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
@@ -206,7 +206,7 @@ Let us consider the implementation of the remove operation in more detail:
 %     : Remove[V, Ph :: Pt, Ph :: Out] = new Remove {}
 
 \noindent
-The |Remove| trait takes 3 type parameters, 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the element removed).
+The |Remove| trait takes 3 type parameters: 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the element removed).
 The two implicit definitions, |casehead| and |casetail|, correspond to the base case and the recursive case of the list removal operation, respectively.
 The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and an unconstrained output type.
 
@@ -218,10 +218,10 @@ As an example usage of |Remove|, consider the following "stringly-typed", JavaSc
 \addEventListenerJS
 
 \noindent
-This method's documentation specifies 5 valid alternatives for the |event| argument, but that constrain is not reflected in the method's type signature.
+This method's documentation specifies 5 valid alternatives for the |event| argument, but that constraint is not reflected in the method's type signature.
 In JavaScript, calling this method with an erroneous element event type is a \emph{no-op}, which can make this kind of error particularly hard to spot.
 
-Instead of specifying that constrain in the documentation, we can represent the valid event types in a |HList|, and use an implicit parameter of type |Remove| to statically enforce that property:
+Instead of specifying that constraint in the documentation, we can represent the valid event types in a |HList|, and use an implicit parameter of type |Remove| to statically enforce that property:
 
 \addEventListenerImplicitDef
 
@@ -235,7 +235,7 @@ After implicit resolution, calls to the |addEventListener| method are expanded t
 
 \addEventListenerImplicitCall
 
-We have introduced an implicit-based pattern to encode type-level computation.
+This concludes our presentation of the implicit-based encoding of type-level computation.
 Despite its verbosity, this pattern generalizes to arbitrary recursive computations and enables Scala programmers to write elaborate type-level programs solely based on implicits.
 
 \section{Implicit Priorities}

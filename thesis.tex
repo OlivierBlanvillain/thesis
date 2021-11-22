@@ -161,7 +161,7 @@ In the next section, we present recursive implicit resolution.
 
 \section{Recursive Implicit Resolution}
 
-Implicit methods can themselves have implicit parameters.
+Implicit methods can themselves take implicit parameters.
 For example, we can define the lexicographic list ordering as follows:
 
 \ordListExample
@@ -176,24 +176,22 @@ This is where the (type-level) fun begins!
 \subsubsection{Heterogeneous lists}
 
 A heterogeneous list, or |HList| for short~\citep{kiselyov2004strongly}, is a datatype capable of storing data of different types.
-In Scala, we can define the |HList| datatype as follows:
+In Scala 3, we can define the |HList| datatype as follows:
 
 \hlistEnumDefinition
 
 \noindent
 The |::| constructor offers an interesting symmetry between the term and type level, which allows |HList| types to capture the same structure that their term-level counterparts.
-For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term\footnotemark.
-
-\footnotetext{In this example, 1 and 2 are used both as term and type literals.}
+For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term (we use literal singleton types to represent constant literals at the type level \citep{leontiev2014sip}).
 
 \subsubsection{HList's remove}
 
 Scala's implicits allow us to define type-level processing operations for heterogeneous lists.
 We develop the example presented the introduction by looking into the type-level remove operation on |HList|s.
-Remove takes as argument an element and a list, and returns a new list with the first occurence of the element removed.
+Remove takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
 This operation should yield an error if the element is not part of the list.
 
-An implicit-based type-level operation take the form a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
+An implicit-based type-level operation typically takes the form a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
 Let us consider the implementation of the remove operation in more details:
 
 \memImplicitRemove
@@ -208,22 +206,22 @@ Let us consider the implementation of the remove operation in more details:
 %     : Remove[V, Ph :: Pt, Ph :: Out] = new Remove {}
 
 \noindent
-The |Remove| trait takes 3 type parameters, 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the first occurrence of the element removed).
+The |Remove| trait takes 3 type parameters, 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the element removed).
 The two implicit definitions, |casehead| and |casetail|, correspond to the base case and the recursive case of the list removal operation, respectively.
-The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and unconstrained output type.
+The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and an unconstrained output type.
 
-If the given element is not part of the list, the corresponding implicit resolution will fail with an "implicit not found" error, which indicates the incorrect use of |Remove|.
-More precisely, the implicit resolution will first iterate thought the list by repeatedly using |casetail|, until it reaches |Remove[V,HNil,Out]|, which is unsatisfiable (neither |casehead| nor |casetail| can produce an instance of |Remove| with |Ps=HNil|).
+When the given element is not part of the list, implicit resolution fails with an "implicit not found" error, which indicates the incorrect use of |Remove|.
+More precisely, the implicit search first iterates thought the list by repeatedly using |casetail| until it reaches the end of the list, at which point it fails to find an implicit value of type |Remove[V,HNil,Out]| (neither |casehead| nor |casetail| produce an instantiation of |Remove| with |Ps=HNil|).
 
-\newpage
 As an example usage of |Remove|, consider the following "stringly-typed", JavaScript-inspired method:
 
 \addEventListenerJS
 
-This method's documentation specifies 5 alternatives for the |event| argument, but this constrain is not reflected in the method's type signature.
-In JavaScript, calling the |addEventListener| method with an unknown element event type is a \emph{no-op}, which can make such error particularly hard to spot.
+\noindent
+This method's documentation specifies 5 alternatives for the |event| argument, but that constrain is not reflected in the method's type signature.
+In JavaScript, calling this method with an erroneous element event type is a \emph{no-op}, which can make this kind of error particularly hard to spot.
 
-Instead of specifying this constrain in the documentation, we can represent the alternatives in a |HList|, and use an implicit parameter of type |Remove|, to statically enforce that property:
+Instead of specifying that constrain in the documentation, we can represent the alternatives in a |HList|, and use an implicit parameter of type |Remove| to statically enforce that property:
 
 \addEventListenerImplicitDef
 
@@ -232,18 +230,22 @@ The |Singleton| type bound is a marker that instructs type inference to preserve
 The "|?|" type is Scala 3's new syntax for wildcard types \citep{dotty2014wildcard}.
 
 With this updated signature, the compiler is able to detect invalid event types at compile time.
-In case of valid event types |E|, the compiler will syntheses an implicit evidence of type |Remove[E,EventTypes,?]|, witnessing |E|'s validity.
-After implicit resolution, calls to the |addEventListener| method are expanded to insert implicit parameters in place of the second parameter list, such as in the following example:
+When given a valid event types |E|, the compiler synthesizes an implicit evidence of type |Remove[E,EventTypes,?]| which witnesses |E|'s validity.
+After implicit resolution, calls to the |addEventListener| method are expanded to automatically insert an implicit parameter for the second parameter list, such as in the following example:
 
 \addEventListenerImplicitCall
 
 \section{Implicit Priorities}
 
+\removeAllWithPriority
+
 \citep{odersky2009arrays}
 
 \section{Implicit Ambiguities}
 
+% NotIn
 The Implicit Negation Pattern
+
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}

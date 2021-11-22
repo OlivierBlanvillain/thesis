@@ -108,12 +108,13 @@ trait Event {
 type EventTypes =
   "mousedown" :: "mouseup" :: "mouseover" :: "mousewheel" :: "contextmenu" :: HNil
 
-def addEventListener[E <: Singleton]
+def addEventListener[E <: String & Singleton]
   (event: E, handler: Event => Unit)
   (implicit ev: Remove[E, EventTypes, ?]): Unit
 // end section addEventListenerImplicitDef
 
 val myHandler: Event => Unit = e => ()
+addEventListener("mouseover", myHandler) // implicitly
 
 // start section addEventListenerImplicitCall
 addEventListener("mouseover", myHandler)(

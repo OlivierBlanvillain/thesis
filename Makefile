@@ -22,8 +22,8 @@ publish: FORCE
 	- git add -f docs/thesis.pdf
 	- git commit -m "Publish snapshot to GitHub pages"
 
-scala/code-sections.tex: scala/generate-code-sections.py $(shell git ls | grep .scala$)
-	python3 scala/generate-code-sections.py $(shell git ls | grep .scala$)
+scala/code-sections.tex: scala/generate-code-sections.py $(shell find scala -name "*.scala")
+	python3 scala/generate-code-sections.py $(shell find scala -name "*.scala")
 
 %.pdf: %.dot
 	- dot -Tpdf $< -o $@.pdf # dot from the graphviz package

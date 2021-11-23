@@ -1,5 +1,4 @@
 package foo
-import scala.util.NotGiven
 
 // start section hlistEnumDefinition
 enum HList:
@@ -20,15 +19,24 @@ object Remove:
     : Remove[V, Ph :: Pt, Ph :: Out] = new Remove {}
 // end section memImplicitRemove
 
+// start section memImplicitNotIn
 trait NotIn[V, Ps <: HList]
 
 object NotIn:
   implicit def casenil[V]: NotIn[V, HNil] = new NotIn {}
-  implicit def casecons[Ph, Pt <: HList, V]
-    (implicit
-      no: NotGiven[V =:= Ph],
-      xs: NotIn[V, Pt]
-    ): NotIn[V, Ph :: Pt] = new NotIn {}
+
+  implicit def casecons[V, Ph, Pt <: HList]
+    (implicit xs: NotIn[V, Pt])
+    : NotIn[V, Ph :: Pt] = new NotIn {}
+
+  implicit def ambiguous1[V, Ph, Pt <: HList]
+    (implicit ev: V =:= Ph)
+    : NotIn[V, Ph :: Pt] = new NotIn {}
+
+  implicit def ambiguous2[V, Ph, Pt <: HList]
+    (implicit ev: V =:= Ph)
+    : NotIn[V, Ph :: Pt] = new NotIn {}
+// end section memImplicitNotIn
 
 // start section removeAllWithPriority
 trait RemoveAll[V, Ps <: HList] { type Out <: HList }
@@ -118,7 +126,7 @@ addEventListener("mouseover", myHandler) // implicitly
 
 // start section addEventListenerImplicitCall
 addEventListener("mouseover", myHandler)(
-  // Evidence that "mouseover" is in EventTypes, infered automatically.
+  // Evidence that "mouseover" is a valid event type, infered automatically.
   Remove.casetail(Remove.casetail(Remove.casehead))
 )
 // end section addEventListenerImplicitCall

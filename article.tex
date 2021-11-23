@@ -168,7 +168,7 @@ As we will see, runtime tags are essential to runtime type testing and play a ce
 \SystemFm supports both pattern matching on the term level (\emph{match expressions}) as well as on the type-level (\emph{match types}).
 Matches, both on terms and on types, are composed of a scrutinee, a list of cases and a default expression/type.
 Each case consists of a \emph{type test} and a corresponding expression/type.
-At the term level, a type test consists of an inheritance check against a particular class (this is also known as a typecase \citep{abadi1991dynamic}).
+At the term level, a type test consists of an inheritance check against a particular class (this is also known as a typecase~\citep{abadi1991dynamic}).
 At the type level, a type test corresponds to a subtyping test with a particular type.
 This disparity reflects the difference between runtime, where type tests are implemented using class tables, and compile time, where types are compared using the type system in its full extent.
 We discuss the representation of Scala types at runtime in \Cref{subsec:types-at-runtime}.
@@ -513,7 +513,7 @@ Checking for scrutinee inhabitance prevents this class of errors. In this exampl
 \subsection{Null Values}
 \label{subsec:null-values}
 
-In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \dotty{A | Null} \citep{nieto2020scala}.
+In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \dotty{A | Null}~\citep{nieto2020scala}.
 Our implementation of subtyping and disjointness handles union types and therefore needs no particular treatment of null values.
 
 % To allow easy migration from older versions, the strict treatment of nulls is still optional in Scala 3.0, enabled by the command line option \dotty{-Yexplicit-nulls}. The plan is to make strict null checking the default in the future.
@@ -542,7 +542,7 @@ Our disjointness algorithm implements this kind of reasoning to conclude disjoin
 \label{subsec:pattern-matching-exhaustivity}
 
 The Scala compiler checks for pattern matching exhaustivity to prevent runtime exceptions caused by missing cases.
-Exhaustivity checking uses static knowledge about the class hierarchy (such as the sealed and final annotations) to check that every value in the scrutinee type is covered by the pattern clauses \citep{fengyun2016generic}.
+Exhaustivity checking uses static knowledge about the class hierarchy (such as the sealed and final annotations) to check that every value in the scrutinee type is covered by the pattern clauses~\citep{fengyun2016generic}.
 Non-exhaustive patterns are compiled with an additional "catch-all" case which throws a runtime exception.
 \SystemFm uses default cases as a replacement for systematic exhaustivity checks or runtime exceptions.
 
@@ -559,7 +559,7 @@ Non-exhaustive patterns are compiled with an additional "catch-all" case which t
 % }
 
 Scala's primary platform is the Java virtual machine (JVM).
-On the JVM, Scala is compiled using \emph{partial erasures}, where parts of types are preserved and translated to the JVM's type systems, and other parts are erased \citep{schinz2005compiling}.
+On the JVM, Scala is compiled using \emph{partial erasures}, where parts of types are preserved and translated to the JVM's type systems, and other parts are erased~\citep{schinz2005compiling}.
 For instance, ground classes are compiled directly to JVM classes, but type parameters and type variables are erased and replaced by their bounds.
 
 Erasure directly affects the type tests that can be performed at runtime.
@@ -581,7 +581,7 @@ The compiler is given an initial amount of fuel, which is consumed one unit at a
 If the compiler runs out of fuel, the reduction is aborted with a "recursion limit exceeded" error.
 The current implementation uses a fixed amount of initial fuel.
 Although this seems to be sufficient for most practical purposes, we plan on making it configurable.
-This mechanism is completely standard and already used in other programing languages with unbounded recursion at the type level \citep{eisenberg2014closed, vilhelm2015dependently, eisenberg2016dependent}.
+This mechanism is completely standard and already used in other programing languages with unbounded recursion at the type level~\citep{eisenberg2014closed, vilhelm2015dependently, eisenberg2016dependent}.
 
 \subsection{Inference}
 

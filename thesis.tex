@@ -43,7 +43,7 @@
 
 In March 2017, our research group went on a ski retreat in the Swiss Alps.
 After a full day of skiing on the Diablerets massif, we gathered for a lab dinner.
-Denys Shabalin, who was working on Scala Native at the time \citep{shabalin2020just}, started a conversation about manual memory management.
+Denys Shabalin, who was working on Scala Native at the time~\citep{shabalin2020just}, started a conversation about manual memory management.
 The discussion revolved around the following question: could a Rust-like ownership system be viable for Scala?
 Denys' answer was clear: ownership is fundamentally at odds with the way Scala handles references, and without making deep changes to Scala's type system, the task was simply impossible.
 
@@ -70,7 +70,7 @@ While this small DSL is obviously too simplistic to be of any practical use, it 
 I was delighted with my solution!
 Denys, however, was not impressed.
 I attribute this apathy to his dislike of implicits.
-Despite their widespread usage, implicits are notorious for their complexity \citep{filip2019implicits}.
+Despite their widespread usage, implicits are notorious for their complexity~\citep{filip2019implicits}.
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
 To give the reader a glance of this pattern, we show the definition of the |free| method on |Context|:
 
@@ -97,7 +97,7 @@ Instead using pattern matching and functions, implicits require algorithm to be 
 \emph{Can we do better?} This is the question that motivates the work presented in dissertation.
 
 % 3. State the Background Information
-Dependently-typed programming languages, such as Coq \citep{bertot2004interactive}, Agda \citep{norell2007towards}, and Idris \citep{brady2015idris}, make no distinction between terms and types, and thus naturally support type-level programming.
+Dependently-typed programming languages, such as Coq~\citep{bertot2004interactive}, Agda~\citep{norell2007towards}, and Idris~\citep{brady2015idris}, make no distinction between terms and types, and thus naturally support type-level programming.
 Scala, on the other hand, has a clear separation between its term and type language.
 
 % When terms are types are unified, the distinction between programming and type-level programming blurs out since value-level computations can be performed during type checking.
@@ -144,7 +144,7 @@ Since that definition has type |Int|, the compiler resolves the method call by p
 
 \subsubsection{The type class pattern}
 
-Implicits can be used to implement type classes \citep{wadler1989howto} as a design pattern \citep{oliveira2010type}.
+Implicits can be used to implement type classes~\citep{wadler1989howto} as a design pattern~\citep{oliveira2010type}.
 We give an example of an implementation of the |Ordering| type class.
 This example consists of three parts:
 
@@ -182,7 +182,7 @@ In Scala 3, we can define the |HList| datatype as follows:
 
 \noindent
 The |::| constructor offers an interesting symmetry between the term and type level, which allows |HList| types to capture the same structure that their term-level counterparts.
-For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term (we use literal singleton types to represent constant literals at the type level \citep{leontiev2014sip}).
+For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term (we use literal singleton types to represent constant literals at the type level~\citep{leontiev2014sip}).
 
 \subsubsection{HList's remove}
 
@@ -195,15 +195,6 @@ An implicit-based type-level operation typically takes the form of a trait, the 
 Let us consider the implementation of the remove operation in more detail:
 
 \memImplicitRemove
-% trait Remove[V, Ps <: HList, Out <: HList]
-
-% object Remove:
-%   implicit def casehead[V, Ps <: HList]
-%     : Remove[V, V :: Ps, Ps] = new Remove {}
-
-%   implicit def casetail[V, Ph, Pt <: HList, Out <: HList]
-%     (implicit ev: Remove[V, Pt, Out])
-%     : Remove[V, Ph :: Pt, Ph :: Out] = new Remove {}
 
 \noindent
 The |Remove| trait takes 3 type parameters: 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the element removed).
@@ -227,7 +218,7 @@ Instead of specifying that constraint in the documentation, we can represent the
 
 \noindent
 The |Singleton| type bound is a marker that instructs type inference to preserve literal singleton types (by default, the compiler widens those types).
-The "|?|" type is Scala 3's new syntax for wildcard types \citep{dotty2014wildcard}.
+The "|?|" type is Scala 3's new syntax for wildcard types~\citep{dotty2014wildcard}.
 
 With this updated signature, the compiler is able to detect invalid event types at compile time.
 When given a valid event type |E|, the compiler synthesizes an implicit evidence of type |Remove[E,EventTypes,?]| which witnesses |E|'s validity.
@@ -237,18 +228,54 @@ After implicit resolution, calls to the |addEventListener| method are expanded t
 
 This concludes our presentation of the implicit-based encoding of type-level computation.
 Despite its verbosity, this pattern generalizes to arbitrary recursive computations and enables Scala programmers to write elaborate type-level programs solely based on implicits.
+In the next section, we discuss ... % implicit ambiguities Scala's priority system for implicits.
 
-\section{Implicit Priorities}
+\section{Ambiguities and Priorities}
 
-\removeAllWithPriority
+Scala's implicit resolution relies on an intricate priority system to establish the precedence of implicit definitions.
+Implicit-based programs sometimes rely on ambiguities and priorities of implicit definition, as we will see in this section thought a series of example.
 
-\citep{odersky2009arrays}
+\subsection{Implicit Ambiguities}
 
-\section{Implicit Ambiguities}
+The Scala compiler rejects programs with \emph{ambiguous} implicit definition.
+For example, if we write two identically-typed implicit definitions in the same scope, the compiler will consider them ambiguous and report an error:
+
+\implicitAmbiguity
+
+While ambiguities typically indicate programing error, they can also be used purposefully to implement the error case of a type-level program.
+For example, consider the |NotIn| operation on |HList| that
+
+they can also be can also
+
+\memImplicitNotIn
+% trait NotIn[V, Ps <: HList]
+
+% object NotIn:
+%   implicit def casenil[V]: NotIn[V, HNil] = new NotIn {}
+
+%   implicit def casecons[V, Ph, Pt <: HList]
+%     (implicit xs: NotIn[V, Pt])
+%     : NotIn[V, Ph :: Pt] = new NotIn {}
+
+%   implicit def ambiguous1[V, Ph, Pt <: HList]
+%     (implicit ev: V =:= Ph)
+%     : NotIn[V, Ph :: Pt] = new NotIn {}
+
+%   implicit def ambiguous2[V, Ph, Pt <: HList]
+%     (implicit ev: V =:= Ph)
+%     : NotIn[V, Ph :: Pt] = new NotIn {}
+
+
+considers definitions by \emph{scope}, the order of definitions is a given scope has no semantic significance.
 
 % NotIn
 The Implicit Negation Pattern
 
+\subsection{Implicit Priorities}
+
+While details of the language specification are outside of the scope of this disertations, type-level \citep{odersky2006scala} \citep{odersky2009arrays}
+
+\removeAllWithPriority
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}

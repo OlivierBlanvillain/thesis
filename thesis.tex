@@ -78,7 +78,7 @@ To give the reader a glance of this pattern, we show the definition of the |free
 
 \noindent
 This definition uses three parameter lists, one for type parameters (|V| and |Out|), one for a value parameter (|v|), and one of an implicit value parameter (|ev|).
-Only the second parameter list is intended to be specified at use site; the type and implicit parameters are intended to be inferred.
+Only the second parameter list is intended to be specified at use site; the type and implicit parameters are meant to be inferred.
 When a user writes |.free("mem")| he only sets the |v| parameter (|v="mem"|); the compiler takes care of finding valid assignments for |V|, |Out| and |ev|.
 The implicit parameter of type |Remove[V,Ps,Out]| is the entry point to the world of type-level programming, it specifies how |V| (constrained by to be |v|'s type), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
 
@@ -202,7 +202,7 @@ The two implicit definitions, |casehead| and |casetail|, correspond to the base 
 The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and an unconstrained output type.
 
 When the given element is not part of the list, implicit resolution fails with an "implicit not found" error, which indicates the incorrect use of |Remove|.
-More precisely, the implicit search first iterates though the list by repeatedly using |casetail| until it reaches the end of the list, at which point it fails to find an implicit value of type |Remove[V,HNil,Out]| (neither |casehead| nor |casetail| produce an instantiation of |Remove| with |Ps=HNil|).
+More precisely, the implicit search first iterates through the list by repeatedly using |casetail| until it reaches the end of the list, at which point it fails to find an implicit value of type |Remove[V,HNil,Out]| (neither |casehead| nor |casetail| produce an instantiation of |Remove| with |Ps=HNil|).
 
 As an example usage of |Remove|, consider the following "stringly-typed", JavaScript-inspired method:
 
@@ -233,43 +233,26 @@ In the next section, we discuss ... % implicit ambiguities Scala's priority syst
 \section{Ambiguities and Priorities}
 
 Scala's implicit resolution relies on an intricate priority system to establish the precedence of implicit definitions.
-Implicit-based programs sometimes rely on ambiguities and priorities of implicit definition, as we will see in this section thought a series of example.
+Implicit-based programs sometimes rely on ambiguities and priorities of implicit definition, as we will see in this section through a series of example.
 
 \subsection{Implicit Ambiguities}
 
 The Scala compiler rejects programs with \emph{ambiguous} implicit definition.
-For example, if we write two identically-typed implicit definitions in the same scope, the compiler will consider them ambiguous and report an error:
+For instance, if we write two identically-typed implicit definitions in the same scope, the compiler will consider them ambiguous and report an error:
 
 \implicitAmbiguity
 
-While ambiguities typically indicate programing error, they can also be used purposefully to implement the error case of a type-level program.
-For example, consider the |NotIn| operation on |HList| that
-
-they can also be can also
+While ambiguities typically indicate programming errors, we can also use them purposefully to implement the error case of a type-level program.
+As an example, consider the |NotIn| operation on |HList| that is only defined if the given element is \emph{not} part of the list.
+The ambiguity-based implementation is lengthy, but straightforward:
 
 \memImplicitNotIn
-% trait NotIn[V, Ps <: HList]
 
-% object NotIn:
-%   implicit def casenil[V]: NotIn[V, HNil] = new NotIn {}
+\noindent
+The |casenil| and |casecons| implicits simply iterate through the list.
+The |ambiguous| implicits are two identical definitions that will cause the compiler to raise an error if there is an evidence of |V=:=Ph|, for any element |Ph| of the list (|=:=| is a type from Scala's standard library that witnesses type equality).
 
-%   implicit def casecons[V, Ph, Pt <: HList]
-%     (implicit xs: NotIn[V, Pt])
-%     : NotIn[V, Ph :: Pt] = new NotIn {}
-
-%   implicit def ambiguous1[V, Ph, Pt <: HList]
-%     (implicit ev: V =:= Ph)
-%     : NotIn[V, Ph :: Pt] = new NotIn {}
-
-%   implicit def ambiguous2[V, Ph, Pt <: HList]
-%     (implicit ev: V =:= Ph)
-%     : NotIn[V, Ph :: Pt] = new NotIn {}
-
-
-considers definitions by \emph{scope}, the order of definitions is a given scope has no semantic significance.
-
-% NotIn
-The Implicit Negation Pattern
+\citep{dotty2014given}
 
 \subsection{Implicit Priorities}
 

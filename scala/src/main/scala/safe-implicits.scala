@@ -26,16 +26,13 @@ object NotIn:
   implicit def casenil[V]: NotIn[V, HNil] = new NotIn {}
 
   implicit def casecons[V, Ph, Pt <: HList]
-    (implicit xs: NotIn[V, Pt])
-    : NotIn[V, Ph :: Pt] = new NotIn {}
+    (implicit xs: NotIn[V, Pt]): NotIn[V, Ph :: Pt] = new NotIn {}
 
   implicit def ambiguous1[V, Ph, Pt <: HList]
-    (implicit ev: V =:= Ph)
-    : NotIn[V, Ph :: Pt] = new NotIn {}
+    (implicit ev: V =:= Ph): NotIn[V, Ph :: Pt] = new NotIn {}
 
   implicit def ambiguous2[V, Ph, Pt <: HList]
-    (implicit ev: V =:= Ph)
-    : NotIn[V, Ph :: Pt] = new NotIn {}
+    (implicit ev: V =:= Ph): NotIn[V, Ph :: Pt] = new NotIn {}
 // end section memImplicitNotIn
 
 // start section removeAllWithPriority

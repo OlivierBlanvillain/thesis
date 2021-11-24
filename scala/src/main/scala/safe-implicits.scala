@@ -35,6 +35,18 @@ object NotIn:
     (implicit ev: V =:= Ph): NotIn[V, Ph :: Pt] = new NotIn {}
 // end section memImplicitNotIn
 
+object NotGivenExample {
+import scala.util.NotGiven
+
+// start section memImplicitNotGiven
+implicit def casecons[V, Ph, Pt <: HList]
+  (implicit
+    no: NotGiven[V =:= Ph],
+    xs: NotIn[V, Pt]
+  ): NotIn[V, Ph :: Pt] = new NotIn {}
+// end section memImplicitNotGiven
+}
+
 // start section removeAllWithPriority
 trait RemoveAll[V, Ps <: HList] { type Out <: HList }
 

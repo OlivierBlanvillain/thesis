@@ -90,7 +90,7 @@ When the scrutinee type is a \dotty{List}, the match type \dotty{Elem} is define
 Hence, in our example \dotty{Elem[List[Int]]} first reduces to the type \dotty{Elem[Int]}, and eventually to the type \dotty{Int}.
 
 \subsection{A Lightweight Form of Dependent Typing}
-Match types enable a lightweight form of dependent typing, since a term-level pattern matching expression can be typed accordingly at the type level as a match type.
+Match types enable a lightweight form of dependent typing, since term-level pattern matching expressions can be typed accordingly at the type level as a match types.
 Consider the following function definition:
 %
 \begin{lstlisting}
@@ -800,7 +800,7 @@ Disjointness allows for sound reduction in the presence of overlapping patterns 
 \subsection{Type Families in Haskell}
 \label{subsec:type-families-in-haskell}
 
-Haskell's type families allow programmers to define type-level functions using pattern matching~\citep{chakravarty2005associated, schrijvers2008open}.
+Haskell's type families~\citep{chakravarty2005associated, schrijvers2008open} allow programmers to define type-level functions using pattern matching.
 By default, type families are open, which means that a definition can spread across multiple files and compilations.
 This flexibility induces a substantial restriction on type family definitions: patterns must not overlap.
 One benefit of this restriction is that it prevents any ambiguity in the reduction of type families (patterns are pairwise disjoint), which is required given the distributed nature of definitions.

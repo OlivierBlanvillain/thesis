@@ -87,7 +87,7 @@ The implicit parameter of type |Remove[V,Ps,Out]| is the entry point to the worl
 \noindent
 Implicit-prefixed definitions can be understood as \emph{facts} and \emph{rules} of a logic program.
 The first definition, |casehead|, specifies a fact: the result of removing |V| from the list |V::Ps| is |Ps|, which is expressed as an instance of |Remove[V,V::Ps,Ps]|.
-The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |Out|, the results of removing |V| from the list |Ph::Pt| is |Ph::Out| (which is expressed as in instance of |Remove[V,Ph::Pt,Ph::Out]|).
+The second definition, |casetail|, specifies a rule: if the result of removing |V| from the list |Pt| is |Out|, the results of removing |V| from the list |Ph::Pt| is |Ph::Out| (\Cref{sec:hlists-remove} develops this example in more details).
 When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool"::"mem"::HNil]|, the compiler uses |casehead| and |casetail| to compute a type |Out| such that |Out| is the results of removing |"mem"| from |"bool"::"mem"::HNil|.
 
 In retrospect, I have to agree with Denys' judgment at the time: this style of programming is convoluted, to say the least.
@@ -185,6 +185,7 @@ The |::| constructor offers an interesting symmetry between the term and type le
 For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, which is a perfect reification of that term (we use literal singleton types to represent constant literals at the type level~\citep{leontiev2014sip}).
 
 \subsubsection{HList's remove}
+\label{sec:hlists-remove}
 
 Scala's implicits allow us to define type-level operations for heterogeneous lists.
 We develop the example presented in the introduction by looking into the type-level remove operation on |HList|s.
@@ -204,7 +205,7 @@ The |Remove| trait is intended to be used as an implicit parameter, with constra
 When the given element is not part of the list, implicit resolution fails with an "implicit not found" error, which indicates the incorrect use of |Remove|.
 More precisely, the implicit search first iterates through the list by repeatedly using |casetail| until it reaches the end of the list, at which point it fails to find an implicit value of type |Remove[V,HNil,Out]| (neither |casehead| nor |casetail| produce an instantiation of |Remove| with |Ps=HNil|).
 
-As an example usage of |Remove|, consider the following "stringly-typed", JavaScript-inspired method:
+As an example usage of |Remove|, consider the following stringly-typed, JavaScript-inspired method:
 
 \addEventListenerJS
 
@@ -228,7 +229,7 @@ After implicit resolution, calls to the |addEventListener| method are expanded t
 
 This concludes our presentation of the implicit-based encoding of type-level computation.
 Despite its verbosity, this pattern generalizes to arbitrary recursive computations and enables Scala programmers to write elaborate type-level programs solely based on implicits.
-In the next section, we discuss ... % implicit ambiguities Scala's priority system for implicits.
+In the next section, we discuss ambiguities and priorities between implicit definitions.
 
 \section{Ambiguities and Priorities}
 
@@ -244,19 +245,27 @@ For instance, if we write two identically-typed implicit definitions in the same
 
 While ambiguities typically indicate programming errors, we can also use them purposefully to implement the error case of a type-level program.
 As an example, consider the |NotIn| operation on |HList| that is only defined if the given element is \emph{not} part of the list.
-The ambiguity-based implementation is lengthy, but straightforward:
+We define |NotIn| using two ambiguous implicits; the implementation is lengthy, but straightforward:
 
 \memImplicitNotIn
 
 \noindent
 The |casenil| and |casecons| implicits simply iterate through the list.
-The |ambiguous| implicits are two identical definitions that will cause the compiler to raise an error if there is an evidence of |V=:=Ph|, for any element |Ph| of the list (|=:=| is a type from Scala's standard library that witnesses type equality).
+The |ambiguous| implicits are two identical definitions that will cause the compiler to raise an error if |V| and |Ph| are equal, for any element |Ph| of the list ("|=:=|" is a type from Scala's standard library that witnesses mutual subtyping).
 
-\citep{dotty2014given}
+As an example usage of |NotIn|, ...:b
+
+Scala 3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep{dotty2014given}.
+The compiler will synthesize an implicit parameter of type |NotGiven[T]|, if and only if there is no implicit of type |T| in scope.
+We can use a "negative" implicit evidence to simplify the definition of |NotIn| by removing the |ambiguous| definitions and changing |casecons| to the following:
+
+\memImplicitNotGiven
+
+% We presented
 
 \subsection{Implicit Priorities}
 
-While details of the language specification are outside of the scope of this disertations, type-level \citep{odersky2006scala} \citep{odersky2009arrays}
+While details of the language specification are outside of the scope of this dissertation, type-level \citep{odersky2006scala} \citep{odersky2009arrays}
 
 \removeAllWithPriority
 

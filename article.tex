@@ -18,7 +18,7 @@ Unfortunately, most of the existing research conducted in this domain is not dir
 Although the combination of subtyping and type-level programming has been studied extensively on the theoretical side, through the means of dependently typed systems~\citep{aspinall1994singleton, zwanenburg1999pure, stone2000deciding, courant2003strong, hutchins2010pure, yang2017unifying}, the practical side remains largely unexplored.
 
 One notable exception is the TypeScript language, which recently introduced a new feature called \emph{conditional type}, a type-level ternary operator based on subtyping.
-A conditional type, written \typescript{S extends T ? Tt : Tf}, reduces to \typescript{Tt} when \typescript{S} is a subtype of \typescript{T}, to \typescript{Tf} when \typescript{S} is not a subtype of \typescript{T}, and is left unreduced when types variables do not allow to draw a conclusion. Unfortunately, the algorithm used to reduce such conditional types is both \emph{unsound} and \emph{incomplete}.
+A conditional type, written |S extends T ? Tt : Tf|, reduces to |Tt| when |S| is a subtype of |T|, to |Tf| when |S| is not a subtype of |T|, and is left unreduced when types variables do not allow to draw a conclusion. Unfortunately, the algorithm used to reduce such conditional types is both \emph{unsound} and \emph{incomplete}.
 Despite the unsoundness (discussed in \Cref{subsec:conditional-types-in-typescript}), the addition of conditional types to TypeScript illustrates the practical need and timeliness of this feature.
 
 This chapter presents an alternative construct for type-level programming based on subtyping, which we call \emph{match types}.
@@ -32,7 +32,7 @@ type Elem[X] = X match {
 }
 \end{lstlisting}
 %
-The example, which we explain in detail in \Cref{sec:overview}, defines the type \dotty{Elem} by matching on the type parameter \dotty{X}.
+The example, which we explain in detail in \Cref{sec:overview}, defines the type |Elem| by matching on the type parameter |X|.
 %
 We have implemented match types in the latest version of Scala, an industry-grade, production-ready compiler.
 Match types have received a great interest from the Scala community, and are already in active use.
@@ -72,7 +72,7 @@ type Elem[X] = X match {
 }
 \end{lstlisting}
 %
-This example defines a type \dotty{Elem} parametrized by one type parameter \dotty{X}. The right-hand side is defined in terms of a match on the type parameter -- a \emph{match type}.
+This example defines a type |Elem| parametrized by one type parameter |X|. The right-hand side is defined in terms of a match on the type parameter -- a \emph{match type}.
 A match type reduces to one of its right-hand sides, depending on the type of its scrutinee.
 For example, the above type reduces as follows:
 %
@@ -82,12 +82,12 @@ Elem[Int] =:= Int
 Elem[List[Int]] =:= Int
 \end{lstlisting}
 %
-Here we use \dotty{S =:= T} to denote type equality between the two types \dotty{S} and \dotty{T}, witnessed by mutual subtyping.
+Here we use |S =:= T| to denote type equality between the two types |S| and |T|, witnessed by mutual subtyping.
 To reduce a match type, the scrutinee is compared to each pattern, one after the other, using \emph{subtyping}.
-For example, although \dotty{String} is a subtype of both \dotty{String} and \dotty{Any} (the top of Scala's subtyping lattice), \dotty{Elem[String]} reduces to \dotty{Char} because the corresponding case appears first.
+For example, although |String| is a subtype of both |String| and |Any| (the top of Scala's subtyping lattice), |Elem[String]| reduces to |Char| because the corresponding case appears first.
 
-When the scrutinee type is a \dotty{List}, the match type \dotty{Elem} is defined recursively on the element type of the list.
-Hence, in our example \dotty{Elem[List[Int]]} first reduces to the type \dotty{Elem[Int]}, and eventually to the type \dotty{Int}.
+When the scrutinee type is a |List|, the match type |Elem| is defined recursively on the element type of the list.
+Hence, in our example |Elem[List[Int]]| first reduces to the type |Elem[Int]|, and eventually to the type |Int|.
 
 \subsection{A Lightweight Form of Dependent Typing}
 Match types enable a lightweight form of dependent typing, since term-level pattern matching expressions can be typed accordingly at the type level as a match types.
@@ -101,26 +101,26 @@ def elem[X](x: X): Elem[X] = x match {
 }
 \end{lstlisting}
 %
-This definition is well-typed because the match expression in \dotty{elem}'s body has the exact same scrutinee and pattern types as \dotty{Elem[X]} (the function's return type).
+This definition is well-typed because the match expression in |elem|'s body has the exact same scrutinee and pattern types as |Elem[X]| (the function's return type).
 
-Thanks to Scala's type inference, a call to the \dotty{elem} function can have a result type that \emph{depends} on a term-level parameter.
-For instance, in the expression \dotty{elem(1)}, the Scala compiler infers the singleton type \dotty{X = 1} for \dotty{elem}'s type parameter.
-This expression thus has type \dotty{Elem[1]}, which reduces to \dotty{Int} (via \dotty{Elem}'s third case).
-Similarly, in \dotty{elem(x)}, the compiler infers the singleton type \dotty{X = x.type} and the expression has type \dotty{Elem[x.type]}, which might reduce further at the callsite depending on \dotty{x}'s type.
+Thanks to Scala's type inference, a call to the |elem| function can have a result type that \emph{depends} on a term-level parameter.
+For instance, in the expression |elem(1)|, the Scala compiler infers the singleton type |X = 1| for |elem|'s type parameter.
+This expression thus has type |Elem[1]|, which reduces to |Int| (via |Elem|'s third case).
+Similarly, in |elem(x)|, the compiler infers the singleton type |X = x.type| and the expression has type |Elem[x.type]|, which might reduce further at the callsite depending on |x|'s type.
 
 In both examples, singleton types create a dependency between a type parameter and a term, which, by transitivity, results in a lightweight form of dependent typing, that is, a dependency between a term parameter and a function's result type.
 
 \subsection{Disjointness}
 Our design of match types induces an additional constraint on match type reduction: the scrutinee type must be known to be \emph{disjoint} with all type patterns preceding the matching case. Informally, disjointness means that two types have no shared inhabitants.
 
-The necessity for disjointness is best illustrated with an example. Consider \dotty{Seq[Int]}, the type of integer sequences. \dotty{Elem[Seq[Int]]} does not reduce:
+The necessity for disjointness is best illustrated with an example. Consider |Seq[Int]|, the type of integer sequences. |Elem[Seq[Int]]| does not reduce:
 \begin{enumerate}
-  \item \dotty{Elem}'s first case does not apply because \dotty{Seq[Int]} is not a subtype of \dotty{String}.
-  \item \dotty{Elem}'s second case does not apply because \dotty{Seq[Int]} is not a subtype of \dotty{List[Int]} (lists are sequences, but not the other way around).
-  \item \dotty{Elem}'s third case is \emph{not considered} because \dotty{Seq[Int]} and \dotty{List[Int]} are not disjoint.
+  \item |Elem|'s first case does not apply because |Seq[Int]| is not a subtype of |String|.
+  \item |Elem|'s second case does not apply because |Seq[Int]| is not a subtype of |List[Int]| (lists are sequences, but not the other way around).
+  \item |Elem|'s third case is \emph{not considered} because |Seq[Int]| and |List[Int]| are not disjoint.
 \end{enumerate}
 Therefore, the reduction algorithm gets stuck on the second case and the overall type is irreducible.
-Without disjointness, \dotty{Elem[Seq[Int]]} would reduce to \dotty{Seq[Int]} (via \dotty{Elem}'s third case), which would be unsound. For example, the expression \dotty{elem[Seq[Int]](List(1,2,3))} would have type \dotty{Seq[Int]}, but evaluates to the integer \dotty{1}.
+Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s third case), which would be unsound. For example, the expression |elem[Seq[Int]](List(1,2,3))| would have type |Seq[Int]|, but evaluates to the integer |1|.
 
 \Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
 
@@ -145,9 +145,9 @@ The class inheritance forms a partial order on $\C$, that is, it is reflexive, a
 The class disjointness is symmetric relation over $\C$.
 
 The inheritance and disjointness parameters can be understood as a representation of a hierarchy of Scala traits and classes.
-For example, \dotty{trait C1; class C2 extends C1} is represented  in \Fm as $\Ψ \= \{ \(\C_1, \C_2) \};~ \Ξ \= \{ \}$.
+For example, |trait C1; class C2 extends C1| is represented  in \Fm as $\Ψ \= \{ \(\C_1, \C_2) \};~ \Ξ \= \{ \}$.
 This representation also models the fact that certain types cannot possibly have common instances.
-For example, \dotty{class C3; class C4} is represented as $\Ψ \= \{ \};~ \Ξ \= \{ \(\C_3, \C_4), \(\C_4, \C_3) \}$, since Scala disallows multiple class inheritance.
+For example, |class C3; class C4| is represented as $\Ψ \= \{ \};~ \Ξ \= \{ \(\C_3, \C_4), \(\C_4, \C_3) \}$, since Scala disallows multiple class inheritance.
 Inheritance and disjointness must be consistent in the sense that $\(\A, \B) \∈ \Ξ$ implies that there is no class $\C$ such that $\(\C, \A) \∈ \Ψ$ and $\(\C, \B) \∈ \Ψ$.
 
 Each class in $\C$ gives rise to a constructor (written $\new \C$), a type (written $\C$), and a constructor singleton type (written $\{ \new \C \})$.
@@ -193,22 +193,6 @@ The cases of a match expression are evaluated \emph{sequentially}: the scrutinee
 The overall expression reduces to the expression that corresponds to the first successful type test (\EMatch2).
 When no type test succeeds, the match evaluates to its default expression (\EMatch3/4/5).
 For instance, given the function $\f$ defined in \Cref{ex:simplereduction}, the expression $\(\f~\A~\(\new \A))$ evaluates to $\foo$ and $\(\f~\B~\(\new \B))$ to $\bur$.
-
-% Even though \Fm is limited to type test patterns, more elaborate patterns can be expressed using type tests.
-% For example, consider the following data type deconstruction pattern (left-hand side):
-
-% list match {
-%   case x :: xs => print(x)
-%   case Nil => ()
-% }
-
-% list match {
-%   case l : ::[Any] => print(l.head)
-%   case Nil => ()
-% }
-
-% \noindent
-% This pattern could alternatively be written as type test pattern (right-hand side), were \dotty{::[Any]} is the type of Scala's cons node.
 
 \subsubsection*{Match Type Reduction}
 The subtyping relation contains 5 rules for match type reduction, \SMatch1/2/3/4/5.
@@ -339,8 +323,8 @@ In this section, we present \SystemFmB, an extension of \SystemFm with support f
 A parametric class, written $\B~\T$, takes exactly one type parameter\footnotemark.
 We redefine $\C$ to be a syntactic object defined as $\C \::= \A \| \B~\T$.
 The class inheritance $\Ψ$ and class disjointness $\Ξ$ remain as binary relations on $\C$.
-A generic instantiation in the class hierarchy is represented as an element of $\Ψ$, for example, \dotty{A1 extends B2[A3]} is represented as $\(\A_1, \B_2~\A_3) \∈ \Ψ$.
-Generic inheritance is represented using multiple entries in $\Ψ$, for example, \dotty{B1[T] extends B2[T]} is represented as $\∀ \T. \(\B_1~\T, \B_2~\T) \∈ \Ψ$.
+A generic instantiation in the class hierarchy is represented as an element of $\Ψ$, for example, |A1 extends B2[A3]| is represented as $\(\A_1, \B_2~\A_3) \∈ \Ψ$.
+Generic inheritance is represented using multiple entries in $\Ψ$, for example, |B1[T] extends B2[T]| is represented as $\∀ \T. \(\B_1~\T, \B_2~\T) \∈ \Ψ$.
 This approach allows us to reuse most of \Fm's definitions.
 Indeed, our formal development treats $\C$, $\Ψ$, and $\Ξ$ as mathematical objects, and is compatible with \FmB's new definition of classes.
 
@@ -483,7 +467,7 @@ If that turns out to be a desirable property, disjointness could easily be obtai
 \label{subsec:empty-types}
 
 An important limitation of \SystemFm compared to Scala's type system is that it does not support empty types.
-The bottom of Scala's subtyping lattice, called \dotty{Nothing}, provides a direct way to refer to empty sets of values.
+The bottom of Scala's subtyping lattice, called |Nothing|, provides a direct way to refer to empty sets of values.
 Intersection types also provide a way to construct uninhabited types given that Scala does not forbid intersecting two disjoint types.
 Empty types are problematic for the match type reduction algorithm as they break the fundamental assumption that two types cannot be both disjoint and subtypes (\Cref{lem:disjointness-subtyping-exclusivity}).
 To account for this, our implementation uses an additional \emph{inhabitance check} on scrutinee types before attempting any reduction.
@@ -504,38 +488,38 @@ class D extends C {
 }
 \end{lstlisting}
 %
-In this example, the definition of \dotty{f} in \dotty{C} type-checks because \dotty{X & String} and \dotty{Int} are disjoint (since \dotty{String} and \dotty{Int} are disjoint) and \dotty{M[X & String]} reduces to \dotty{Int} (\dotty{M}'s second case applies).
-Class \dotty{D} refines the definition of \dotty{C} by giving concrete definition of \dotty{X}.
-The unsoundness manifests itself in the body of class \dotty{D}, where \dotty{X & String} is a subtype of \dotty{Int} and \dotty{M[X & String]} reduces to \dotty{String} (\dotty{M}'s first case applies).
-There, it is possible to call the function~\dotty{f} with a string argument, which would result in a runtime error.
-Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent \dotty{M[Int & String]} from reducing given that \dotty{Int & String} is not inhabited.
+In this example, the definition of |f| in |C| type-checks because |X & String| and |Int| are disjoint (since |String| and |Int| are disjoint) and |M[X & String]| reduces to |Int| (|M|'s second case applies).
+Class |D| refines the definition of |C| by giving concrete definition of |X|.
+The unsoundness manifests itself in the body of class |D|, where |X & String| is a subtype of |Int| and |M[X & String]| reduces to |String| (|M|'s first case applies).
+There, it is possible to call the function~|f| with a string argument, which would result in a runtime error.
+Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent |M[Int & String]| from reducing given that |Int & String| is not inhabited.
 
 \subsection{Null Values}
 \label{subsec:null-values}
 
-In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \dotty{A | Null}~\citep{nieto2020scala}.
+In Scala 3, null values no longer inhabit every type: nullable types require explicit annotations of the form \lstinline!A | Null!~\citep{nieto2020scala}.
 Our implementation of subtyping and disjointness handles union types and therefore needs no particular treatment of null values.
-
-% To allow easy migration from older versions, the strict treatment of nulls is still optional in Scala 3.0, enabled by the command line option \dotty{-Yexplicit-nulls}. The plan is to make strict null checking the default in the future.
+To allow easy migration from older versions, the strict treatment of nulls is still optional in Scala 3.0, enabled by the command line option |-Yexplicit-nulls|.
+The plan is to make strict null checking the default in the future.
 
 \subsection{Variance}
 
 Scala supports variance annotations on type parameters of higher-kinded types.
 These annotations allow programmers to specify how the subtyping of annotated parameters influences the subtyping of the higher-kinded type.
-For instance, \dotty{type F[+T]} defines a type \dotty{F} that is covariant in its first type parameter, meaning that \dotty{T1 <: T2} implies \dotty{F[T1] <: F[T2]}.
-Contravariance, written \dotty{type G[-T]}, has the opposite meaning: \dotty{T1 <: T2} implies \dotty{G[T2] <: G[T1]}.
+For instance, |type F[+T]| defines a type |F| that is covariant in its first type parameter, meaning that |T1 <: T2| implies |F[T1] <: F[T2]|.
+Contravariance, written |type G[-T]|, has the opposite meaning: |T1 <: T2| implies |G[T2] <: G[T1]|.
 
-It would appear that co- and contravariant types are always overlapping, given that, for all types \dotty{X}, \dotty{F[Nothing] <:} \dotty{F[X]} and \dotty{G[Any] <: G[X]} (where \dotty{Nothing} and \dotty{Any} are Scala's bottom and top types).
-However, in the case of covariant parameters, an exception can be made when the said type parameter corresponds to a field or a constructor parameter: the \dotty{Nothing} instantiation can be ruled out because no runtime program can produce a value of that type.
+It would appear that co- and contravariant types are always overlapping, given that, for all types |X|, |F[Nothing] <: F[X]| and |G[Any] <: G[X]| (where |Nothing| and |Any| are Scala's bottom and top types).
+However, in the case of covariant parameters, an exception can be made when the said type parameter corresponds to a field or a constructor parameter: the |Nothing| instantiation can be ruled out because no runtime program can produce a value of that type.
 
 Scala tuples, for example, fall into this category.
-\dotty{Tuple2}, the class for pairs, is defined as follows:
+|Tuple2|, the class for pairs, is defined as follows:
 %
 \begin{lstlisting}
 case class Tuple2[+T1, +T2](_1: T1, _2: T2)
 \end{lstlisting}
 %
-Given two instantiations of this this type, \dotty{Tuple2[Int,} \dotty{X]} and \dotty{Tuple2[String,X]}, although \dotty{Tuple2[Nothing,X]} is a subtype of both, there is no runtime value of type \dotty{Tuple2[} \dotty{Nothing,X]} (since \dotty{Nothing} is uninhabited), and, as a result, those two types are disjoint.
+Given two instantiations of this this type, |Tuple2[Int,X]| and |Tuple2[String,X]|, although |Tuple2[Nothing,X]| is a subtype of both, there is no runtime value of type |Tuple2[Nothing,X]| (since |Nothing| is uninhabited), and, as a result, those two types are disjoint.
 Our disjointness algorithm implements this kind of reasoning to conclude disjointness in the presence of covariant type parameters.
 
 \subsection{Pattern Matching Exhaustivity}
@@ -563,7 +547,7 @@ On the JVM, Scala is compiled using \emph{partial erasures}, where parts of type
 For instance, ground classes are compiled directly to JVM classes, but type parameters and type variables are erased and replaced by their bounds.
 
 Erasure directly affects the type tests that can be performed at runtime.
-For example, while \dotty{case xs: List[Int] =>} is a syntactically valid pattern, it will lead to a compiler warning since the \dotty{Int} type parameter is eliminated by erasure and cannot be checked at runtime.
+For example, while |case xs: List[Int] =>| is a syntactically valid pattern, it will lead to a compiler warning since the |Int| type parameter is eliminated by erasure and cannot be checked at runtime.
 
 This restriction is reflected in our formalism by the difference between the evaluation rules for match expressions and the reduction rules for match types: evaluation is limited to inheritance checks on statically defined classes ($\(\C, \C_n) \∈ \Ψ$ in \EMatch2/3), as opposed to the match type reduction rules which are defined using the subtyping and type disjointness relations ($\Γ \⊢ \T_s \<: \S_n$ and $\Γ \⊢ \disj(\T_s, \S_m)$ in \SMatch1/2/3/4).
 
@@ -633,7 +617,7 @@ We believe that the approach presented in this case study is an improvement over
 % The implementation in this case study is inspired by the HaskTorch Haskell library~\citep{huang2017hasktorch}, which also represents shapes using HLists, and makes direct use of type-level computation to compute shape transformations.
 
 \subsection{Shape Errors in Python}
-In the example Python code below, the \python{img_batch} ndarray is a batch of 25 randomly generated RGB images of size 256$\×$256.
+In the example Python code below, the |img_batch| ndarray is a batch of 25 randomly generated RGB images of size 256$\×$256.
 The code aims to compute a vector of length 25 containing the average grayscale color of each image in the batch, and then create a square 5$\×$5 image of the average grayscale colors.
 However, this code contains a shape error and will throw an error at runtime.
 %
@@ -644,24 +628,24 @@ avg_colors = np.mean(img_batch, (0, 1, 2))
 avg_color_square = np.reshape(avg_colors, (5, 5))
 \end{lstlisting}
 %
-The error is in the call to \python{np.mean}, which takes as argument a list of axes to reduce along.
-Unfortunately, the arguments to \python{np.mean} are off-by-one and result in a vector of length 3 (\python{img_batch}'s last dimension) instead of the intended length of 25 (\python{img_batch}'s first dimension); \python{avg_color} thus contains the average RGB color of the batch instead of the average grayscale color for each image.
+The error is in the call to |np.mean|, which takes as argument a list of axes to reduce along.
+Unfortunately, the arguments to |np.mean| are off-by-one and result in a vector of length 3 (|img_batch|'s last dimension) instead of the intended length of 25 (|img_batch|'s first dimension); |avg_color| thus contains the average RGB color of the batch instead of the average grayscale color for each image.
 The reshape operation will then fail at runtime, as it cannot reshape a 3-element vector into a 25-element matrix.
 This error can be difficult to spot, given that NumPy's interface for reducing along multiple axes is index-based.
 Runtime errors like this one can be particularly frustrating when they occur late in a long-running computation.
 
 In the remainder of this section, we show how match types can be used to prevent this class of error.
 After a preliminary introduction of singleton types (\Cref{subsec:singleton-types}), we introduce ndarray shapes at the type level using HLists (\Cref{subsec:array-shape}).
-In \Cref{subsec:shape-match-types}, we show type-level implementations of the \python{np.mean} and \python{np.reshape} operations using match types.
+In \Cref{subsec:shape-match-types}, we show type-level implementations of the |np.mean| and |np.reshape| operations using match types.
 Finally, we show how this newly defined API can detect and report the error from our original Python example.
 
 \subsection{Singleton Types}
 \label{subsec:singleton-types}
 
 Scala supports singleton types, which are types inhabited by a single value~\citep{leontiev2014sip}.
-For instance, the singleton type \dotty{1} denotes the type containing the integer value \dotty{1}.
+For instance, the singleton type |1| denotes the type containing the integer value |1|.
 The Scala standard library contains several predefined match types to perform arithmetic operations at the type level.
-For instance, \dotty{type +[A <: Int,}\dotty{B <: Int]} represents the addition of integer singleton types.
+For instance, |type +[A <: Int, B <: Int]| represents the addition of integer singleton types.
 Internally, the compiler is special-cased to implement these arithmetic operations using constant folding.
 Representing numbers with singleton types is desirable for practical purposes, but not absolutely necessary for this case study (for instance, Peano numerals could be used instead).
 
@@ -671,23 +655,23 @@ Representing numbers with singleton types is desirable for practical purposes, b
 The shape of an ndarray is a list of dimension lengths; we say that the shape $\(\a_{1}, \a_{2}, \dots, \a_n)$ has $\n$ dimensions.
 For instance, a three-by-four matrix is a two-dimensional ndarray of shape $\(\3, \4)$.
 We represent the shape of an ndarray at the type level using a heterogeneous type list, or HList for short~\citep{kiselyov2004strongly}.
-We define an HList called \dotty{Shape} as an ADT with two constructors\footnotemark, \dotty{#:} and \dotty{Ø}.
+We define an HList called |Shape| as an ADT with two constructors\footnotemark, |#:| and |Ø|.
 \footnotetext{%
-In the interest of clarity, our presentation omits type bounds that are necessary to guide type inference, for example in the definition of the \dotty{Shape} data type.}
+In the interest of clarity, our presentation omits type bounds that are necessary to guide type inference, for example in the definition of the \lstinline!Shape! data type.}
 %
 \shapeEnum
 %
-This data type definition allows us to write lists of dimension sizes, both at the term level as \dotty{#:(3, #:(4, Ø))}, and at the type level as \dotty{#:[3, #:[4, Ø]]}.
-The HList type can equivalently be written with \dotty{#:} in infix notation, as \dotty{3 #: 4 #: Ø}.
+This data type definition allows us to write lists of dimension sizes, both at the term level as |#:(3, #:(4, Ø))|, and at the type level as |#:[3, #:[4, Ø]]|.
+The HList type can equivalently be written with |#:| in infix notation, as |3 #: 4 #: Ø|.
 
-To represent ndarrays, we define the \dotty{NDArray} type. This type is indexed by the ndarray element type (\dotty{T}), and by the ndarray shape (\dotty{S}), represented as an HList:
+To represent ndarrays, we define the |NDArray| type. This type is indexed by the ndarray element type (|T|), and by the ndarray shape (|S|), represented as an HList:
 %
 \ndarrayTrait
 
-The goal of our presentation is to define type-safe operations on \dotty{NDArrays}.
-Since our focus is on the type-level, we do not include value-level counterparts to \dotty{T} and \dotty{S} in the definition of \dotty{NDArray}, but this would be necessary in a complete implementation.
+The goal of our presentation is to define type-safe operations on |NDArrays|.
+Since our focus is on the type-level, we do not include value-level counterparts to |T| and |S| in the definition of |NDArray|, but this would be necessary in a complete implementation.
 
-To construct ndarrays, we define \dotty{random_normal}, which creates an ndarray of a given shape, where all elements are random \dotty{Float}s:\footnotemark
+To construct ndarrays, we define |random_normal|, which creates an ndarray of a given shape, where all elements are random |Float|s:\footnotemark
 \footnotetext{%
 This snippet uses the triple question mark operator, Scala's standard notation for missing or omitted implementations.
 }
@@ -698,7 +682,7 @@ This snippet uses the triple question mark operator, Scala's standard notation f
 \label{subsec:shape-match-types}
 
 Encoding the types and shapes of ndarrays in the types allows us to readily provide type- and shape-safety for simple ndarray operations.
-For instance, the element-wise Hadamard product, written as \python{np.multiply(x, y)}, requires the \python{x} and \python{y} ndarrays to have the same shape and element types.
+For instance, the element-wise Hadamard product, written as |np.multiply(x, y)|, requires the |x| and |y| ndarrays to have the same shape and element types.
 This constraint does not require any match types, but can simply be expressed as:
 %
 \multiplyDef
@@ -708,52 +692,53 @@ However, we will need the additional expressiveness of match types to implement 
 \subsubsection{Reshape}
 \label{subsubsec:reshape}
 
-An operation commonly used in NumPy is \python{np.reshape}, which changes the shape of an ndarray, but does not change its values.
-A restriction imposed by the NumPy API is that the output shape must have the same number of elements as the input shape. The number of elements of a shape is the product of the sizes of its dimensions; an ndarray of shape\hspace{4pt}\dotty{2 #: 3 #: 4 #: Ø}\hspace{4pt}has \begin{math}2\times3\times4 = 24\end{math} elements.
-Note that an ndarray of shape \dotty{Ø} is a scalar, and thus has a single element.
+An operation commonly used in NumPy is |np.reshape|, which changes the shape of an ndarray, but does not change its values.
+A restriction imposed by the NumPy API is that the output shape must have the same number of elements as the input shape. The number of elements of a shape is the product of the sizes of its dimensions; an ndarray of shape\hspace{4pt}|2 #: 3 #: 4 #: Ø|\hspace{4pt}has \begin{math}2\times3\times4 = 24\end{math} elements.
+Note that an ndarray of shape |Ø| is a scalar, and thus has a single element.
 This can be naturally expressed with a match type:
 %
 \numelementsType
 
 To restrict reshaping to be applicable only on valid shapes, the type system must support encoding type equality constraints.
-For this, we make use of Scala's implicit parameters, and of the \dotty{=:=} type equality constraint that is a part of Scala's standard library.
+For this, we make use of Scala's implicit parameters, and of the |=:=| type equality constraint that is a part of Scala's standard library.
 %
 \reshapeDef
 %
-With this definition of \dotty{reshape}, the compiler will only accept a usage of \dotty{reshape} if it is able to prove that the number of elements in the old shape is the same as in the new shape.
+With this definition of |reshape|, the compiler will only accept a usage of |reshape| if it is able to prove that the number of elements in the old shape is the same as in the new shape.
 This example illustrates how match types can be used in concert with existing features like singleton types and implicit resolution to express powerful constraints.
 
 \subsubsection{Reduction}
 \label{subsubsec:reduction}
 
-The NumPy API provides a variety of functions to reduce along a set of axes of an ndarray, such as \python{np.mean(ndarray, axes)} or \python{np.var(ndarray, axes)}.
-The \python{axes} parameter is a list of indices of dimensions, listing exactly those dimensions that will no longer be present in the output ndarray.
+The NumPy API provides a variety of functions to reduce along a set of axes of an ndarray, such as |np.mean(ndarray, axes)| or |np.var(ndarray, axes)|.
+The |axes| parameter is a list of indices of dimensions, listing exactly those dimensions that will no longer be present in the output ndarray.
 The dimension indices can be unordered and repeated, and out-of-bounds indices result in an error.
-In the Python API, passing the \python{None} value instead of a list of axes reduces along all axes, meaning that the operation returns a scalar.
-Note that this is the opposite of passing \dotty{Ø}, which means that we reduce over no axes (effectively a no-op).
+In the Python API, passing the |None| value instead of a list of axes reduces along all axes, meaning that the operation returns a scalar.
+Note that this is the opposite of passing |Ø|, which means that we reduce over no axes (effectively a no-op).
 
 This behavior is more complex than the previous examples, but can still be described accurately by a match type.
-We use a match type called \dotty{Reduce} to compute the return shape of the operation.
+We use a match type called |Reduce| to compute the return shape of the operation.
 
 \npmeanDef
 
 We implement reductions along a given list of indices with logic similar to two nested loops.
-The outer loop, \dotty{Loop}, traverses the shape and counts the current index.
-The inner loops are implemented using \dotty{Contains} and \dotty{Remove}, standard operations on HLists (omitted).
-When \dotty{Loop} reaches the end of the list, if there are still axes to remove, these are out of bounds for the initial shape: the match type intentionally gets stuck in such cases.
+The outer loop, |Loop|, traverses the shape and counts the current index.
+The inner loops are implemented using |Contains| and |Remove|, standard operations on HLists (omitted).
+When |Loop| reaches the end of the list, if there are still axes to remove, these are out of bounds for the initial shape: the match type intentionally gets stuck in such cases.
 %
 \reduceType
+\reduceLoop
 
 \subsection{Shape safety}
 \label{sec:shape-safety}
 
-Having defined \dotty{random_normal}, \dotty{reshape} and \dotty{mean}, we can rewrite our original Python example in Scala:
+Having defined |random_normal|, |reshape| and |mean|, we can rewrite our original Python example in Scala:
 %
 \badreducescala
 %
-As expected, the call to \dotty{mean} returns a tensor of shape \dotty{3 #: Ø}.
-Therefore, the call to \dotty{reshape} does not type-check since the input shape has 3 elements instead of 25.
-If we fix the off by one error to reduce along the correct indices, \dotty{1 #: 2 #:} \dotty{3 #: Ø}, the call to \dotty{reshape} type-checks and \dotty{avg_color} has shape \dotty{25 #: Ø}, as expected.
+As expected, the call to |mean| returns a tensor of shape |3 #: Ø|.
+Therefore, the call to |reshape| does not type-check since the input shape has 3 elements instead of 25.
+If we fix the off by one error to reduce along the correct indices, |1 #: 2 #: 3 #: Ø|, the call to |reshape| type-checks and |avg_color| has shape |25 #: Ø|, as expected.
 
 % \goodreducescala
 
@@ -816,17 +801,13 @@ Although the formalization presented in~\citep{eisenberg2014closed} does not cov
 The problem only occurs in the presence of repeated type bindings in patterns.
 In Scala, match types (and pattern matching in general) do not allow repeated bindings and are therefore not affected by this problem.
 
-% A significant difference between type-checking type families and match types is that type families are entirely handled during type inference, while match types reduce during subtyping.
-% Influencing Haskell's global type inference is notoriously difficult, which can, unfortunately, hinder the usability of type families.
-% For instance, in a functional pearl on typed matrices~\citep{santos2020match}, the authors report that their first (simpler) attempt was deemed inconclusive due to limitations of the Haskell type inference when combining type families with pattern matching.
-
 \subsection{Roles in Haskell}
 \label{subsec:roles-in-haskell}
 
-Haskell's roles were introduced by~\citet{weirich2011generative} to fix a long-standing unsoundness caused by the interaction of open type families and the \haskell{newtype} construct.
+Haskell's roles were introduced by~\citet{weirich2011generative} to fix a long-standing unsoundness caused by the interaction of open type families and the |newtype| construct.
 We understand roles as type annotations which specify whether a given type can safely be nominally compared to other types, or if \emph{representational equality} (RE) should be used instead.
 The word representation in RE refers to the runtime representation of a type.
-In particular, RE dealiases \haskell{newtype} constructs.
+In particular, RE dealiases |newtype| constructs.
 
 In their introductory example,~\citeauthor{weirich2011generative} show how type family reduction can lead to unsoundness in the absence of role annotations.
 Their presentation also includes a hypothetical translation of their example to Standard ML, which translates directly to Scala as follows:
@@ -842,12 +823,12 @@ object AgeObject extends AgeClass {
 }
 \end{lstlisting}
 %
-In this example, type \dotty{Age} is abstract in \dotty{AgeClass} and concrete in \dotty{AgeObject}.
-In the pre-role Haskell equivalent of this example, the unsoundness comes when the above definitions are combined with a type family that discriminates \dotty{Age} and \dotty{Int}.
-Such type family would reduce differently in \dotty{AgeClass}, where the types are different, and in \dotty{AgeObject}, where those two types are synonyms, which can easily be exploited to obtain a runtime error.
+In this example, type |Age| is abstract in |AgeClass| and concrete in |AgeObject|.
+In the pre-role Haskell equivalent of this example, the unsoundness comes when the above definitions are combined with a type family that discriminates |Age| and |Int|.
+Such type family would reduce differently in |AgeClass|, where the types are different, and in |AgeObject|, where those two types are synonyms, which can easily be exploited to obtain a runtime error.
 
 Luckily, our design of match types is not affected by this issue.
-The reason comes from the use of subtyping (and disjointness), which shields our implementation from incorrectly discriminating \dotty{Age} from \dotty{Int} when \dotty{Age} is abstract.
+The reason comes from the use of subtyping (and disjointness), which shields our implementation from incorrectly discriminating |Age| from |Int| when |Age| is abstract.
 Consider the following match type definition (directly translated from the Haskell example):
 %
 \begin{lstlisting}
@@ -857,7 +838,7 @@ type M[X] = X match {
 }
 \end{lstlisting}
 %
-Our algorithm would not reduce \dotty{M[Int]} to \dotty{Bool} in \dotty{AgeClass} as this reduction would require evidence that \dotty{Age} and \dotty{Int} are disjoint, which cannot be constructed when \dotty{Age} is an unbounded abstract type.
+Our algorithm would not reduce |M[Int]| to |Bool| in |AgeClass| as this reduction would require evidence that |Age| and |Int| are disjoint, which cannot be constructed when |Age| is an unbounded abstract type.
 
 \subsection{Conditional Types in TypeScript}
 \label{subsec:conditional-types-in-typescript}
@@ -866,13 +847,13 @@ TypeScript's conditional types, briefly mentioned in the introduction, are a typ
 Conditional types can be nested into a sequence of patterns that evaluate in order, making them similar to match types.
 
 The TypeScript language specification briefly describes the algorithm used to reduce conditional types in the presence of type variables~\citep{microsoft2020typescript}.
-Given a type \typescript{S extends T ? Tt : Tf}, the TypeScript compiler first replaces all the type parameters in \typescript{S} and \typescript{T} by \typescript{any} (the top of TypeScript's subtyping lattice).
-If the resulting types (after substitution) are not subtypes, the overall condition is reduced to \typescript{Tf}.
+Given a type |S extends T ? Tt : Tf|, the TypeScript compiler first replaces all the type parameters in |S| and |T| by |any| (the top of TypeScript's subtyping lattice).
+If the resulting types (after substitution) are not subtypes, the overall condition is reduced to |Tf|.
 Unfortunately, this algorithm is both \emph{unsound} and \emph{incomplete}.
 
 The unsoundness is caused by the incorrect widening of type parameters in contravariant position.
 Although TypeScript does not have syntax for variance annotations, function types are covariant in their return type and contravariant in their arguments.
-The conditional type unification algorithm wrongly approximates \typescript{X => string} to \typescript{any => string} and unifies the former with latter, which can lead to a runtime errors.
+The conditional type unification algorithm wrongly approximates |X => string| to |any => string| and unifies the former with latter, which can lead to a runtime errors.
 
 The incompleteness comes from the fact that type parameter approximation does not account for type parameter bounds.
 Consider the following example:
@@ -882,7 +863,7 @@ type M<X> = X extends string ? A : B
 function f<X extends string>: M<X> = new A
 \end{lstlisting}
 %
-Here, TypeScript's reduction algorithm fails to recognize that \typescript{new A} can be typed as \typescript{M<X>}, even though \typescript{X} is clearly a subtype of \typescript{string} in \typescript{f}'s body.
+Here, TypeScript's reduction algorithm fails to recognize that |new A| can be typed as |M<X>|, even though |X| is clearly a subtype of |string| in |f|'s body.
 
 Although the situation is concerning, it might not be as bad as it seems given that soundness is a non-goal of TypeScript's type system~\citep{bierman2014typescript}.
 Nevertheless, we believe that the results of this paper are directly applicable to conditional types and could be used to improve TypeScript's type checker.

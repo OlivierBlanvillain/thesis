@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{book} % ,draft
+\documentclass[a4paper,11pt,]{book} % draft
 
 \usepackage{silence}
 \WarningFilter{fourier}{Please consider}
@@ -7,8 +7,6 @@
 \usepackage[T1]{fontenc}
 \usepackage{fontspec}
 \usepackage[french,english]{babel}
-\usepackage{lmodern}
-\usepackage{fourier}
 \setmonofont{Ubuntu Mono}
 \setlength{\textwidth}{146.8mm}
 \setlength{\oddsidemargin}{11.6mm}
@@ -23,8 +21,10 @@
 \setlength{\@fptop}{0pt}
 \makeatother
 
-\usepackage{graphicx,xcolor}
-\graphicspath{{images/}}
+\usepackage{lmodern}
+\usepackage{fourier}
+\usepackage{graphicx}
+\usepackage{xcolor}
 \usepackage{subfig}
 \usepackage{booktabs}
 \usepackage{lipsum}
@@ -52,7 +52,7 @@
   \fancyfoot[RO,LE]{\thepage}
 }
 
-\usepackage{hyperref}
+\usepackage[final]{hyperref}
 \definecolor[named]{purplish}{cmyk}{0.55,1,0,0.15}
 \definecolor[named]{darkblueish}{cmyk}{1,0.58,0,0.21}
 \hypersetup{
@@ -200,12 +200,6 @@
 \lstdefinestyle{py}{language=Python, otherkeywords={as}}
 \lstdefinestyle{scala}{language=scala}
 \lstdefinestyle{typescript}{language=scala, otherkeywords={function}}
-
-\newcommand{\scala}[1]{{\lstinline{#1}}}
-\newcommand{\dotty}[1]{{\lstinline{#1}}}
-\newcommand{\python}[1]{{\lstinline[breaklines,style=py]{#1}}}
-\newcommand{\typescript}[1]{{\lstinline{#1}}}
-\newcommand{\haskell}[1]{{\lstinline{#1}}}
 
 \usepackage[autostyle=false, style=english]{csquotes}
 \MakeOuterQuote{"}

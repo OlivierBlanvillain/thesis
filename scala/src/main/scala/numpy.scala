@@ -52,7 +52,9 @@ type Reduce[S <: Shape, Axes <: None | Shape] <: Shape =
     case None => Ø
     case Shape => Loop[S, Axes, 0]
   }
+// end section reduceType
 
+// start section reduceLoop
 type Loop[S <: Shape, Axes <: Shape, I <: Int] <: Shape =
   S match {
     case head #: tail => Contains[Axes, I] match {
@@ -64,7 +66,7 @@ type Loop[S <: Shape, Axes <: Shape, I <: Int] <: Shape =
       // otherwise, do not reduce further
     }
   }
-// end section reduceType
+// end section reduceLoop
 
 type Contains[Haystack <: Shape, Needle <: Int] <: Boolean = Haystack match {
   case Ø => false
@@ -83,6 +85,5 @@ type Remove[From <: Shape, Value <: Int & Singleton] <: Shape = From match {
 }
 
 // start section npmeanDef
-def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T,
-    Reduce[S, A]] = ???
+def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, Reduce[S, A]] = ???
 // end section npmeanDef

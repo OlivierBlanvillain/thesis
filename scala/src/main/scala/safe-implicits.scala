@@ -68,13 +68,13 @@ object RemoveAll extends RemoveAllLowPrio:
 
 val removeAllTest = implicitly[RemoveAll.Aux[1, 1 :: 2 :: 1 :: 3 :: HNil, 2 :: 3 :: HNil]]
 
-// start section memImplicitContext
+// start section memImplicitContextFree
 trait Context[Ps <: HList]:
   def free[V <: Singleton, Out <: HList]
     (v: V)
     (implicit ev: Remove[V, Ps, Out])
     : Context[Out]
-// end section memImplicitContext
+// end section memImplicitContextFree
 
   def malloc[V <: Singleton]
     (size: Int, v: V)
@@ -90,6 +90,16 @@ trait Context[Ps <: HList]:
     (body: Array[Byte] => Unit)
     (implicit ev: Remove[V, Ps, ?])
     : Context[Ps]
+
+object Ctx0 {
+// start section memImplicitContextMalloc
+trait Context[Ps <: HList]:
+  def malloc[V <: Singleton]
+    (size: Int, v: V)
+    (implicit ev: NotIn[V, Ps])
+    : Context[V :: Ps]
+// end section memImplicitContextMalloc
+}
 
 def f[Ps <: HList](ctx: Context["bool" :: Ps]): Context["bool" :: Ps] =
   ctx.deref("bool") { b =>

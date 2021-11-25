@@ -74,7 +74,7 @@ Despite their widespread usage, implicits are notorious for their complexity~\ci
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
 To give the reader a glance of this pattern, we show the definition of the |free| method on |Context|:
 
-\memImplicitContext
+\memImplicitContextFree
 
 \noindent
 This definition uses three parameter lists, one for type parameters (|V| and |Out|), one for a value parameter (|v|), and one of an implicit value parameter (|ev|).
@@ -188,7 +188,7 @@ For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, w
 \label{sec:hlists-remove}
 
 Scala's implicits allow us to define type-level operations for heterogeneous lists.
-We develop the example presented in the introduction by looking into the type-level remove operation on |HList|s.
+We develop the example presented in \Cref{chap:introduction} by looking into the type-level remove operation on |HList|s.
 The remove operation takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
 This operation should yield an error if the element is not part of the list.
 
@@ -253,11 +253,15 @@ We define |NotIn| using two ambiguous implicits; the implementation is lengthy, 
 The |casenil| and |casecons| implicits simply iterate through the list.
 The |ambiguous| implicits are two identical definitions that will cause the compiler to raise an error if |V| and |Ph| are equal, for any element |Ph| of the list ("|=:=|" is a type from Scala's standard library that witnesses mutual subtyping).
 
-As an example usage of |NotIn|, ...:b
+As an example usage of |NotIn|, we revisit the DSL presented in \Cref{chap:introduction}.
+Programs in our DSL consist of sequences of method calls on a |Context|, which tracks the memory regions that are currently allocated in the program, using a |HList| of names.
+We use the |NotIn| operation to constrain the allocation method, |malloc|, to prevent allocating regions with already used names:
+
+\memImplicitContextMalloc
 
 Scala 3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep{dotty2014given}.
-The compiler will synthesize an implicit parameter of type |NotGiven[T]|, if and only if there is no implicit of type |T| in scope.
-We can use a "negative" implicit evidence to simplify the definition of |NotIn| by removing the |ambiguous| definitions and changing |casecons| to the following:
+The compiler will synthesize an implicit parameter of type |NotGiven[T]|, if and only if there is no implicit value of type |T| in scope.
+We can use a "negative" implicit evidence to simplify the definition of |NotIn| by removing the ambiguous implicits and changing |casecons| to the following:
 
 \memImplicitNotGiven
 

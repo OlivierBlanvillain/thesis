@@ -17,7 +17,7 @@ We provide a case study in which we develop a strongly-typed wrapper for Spark d
 \section{Introduction}
 
 Dependent types have been met with considerable interest from the research community in recent years.
-Their primary application so far has been in proof assistants such as Agda~\citep{norell2007towards}, Coq~\citep{bertot2004interactive} and Idris~\citep{brady2013idris}, where they provide a sound and expressive foundation for theorem proving.
+Their primary application so far has been in proof assistants such as Coq~\citep{bertot2004interactive} and Agda~\citep{norell2007towards}, where they provide a sound and expressive foundation for theorem proving.
 However, dependent types are still largely absent from general-purpose programming languages, despite a long history of lightweight approaches~\citep{xi1998eliminating}.
 In the context of Haskell, much research has gone into extending the language to support computations on types, for instance in the form of functional dependencies~\citep{jones2000type}, type families~\citep{kiselyov2010fun} and promoted datatypes~\citep{yorgey2012giving}.
 These techniques have seen adoption by Haskell programmers, showing that there is a real demand for such mechanisms.
@@ -54,7 +54,7 @@ Our contributions are as follows:
   The type system of \oursystem combines dependent types, subtyping and a generalization of singleton types to non-deterministic terms.
   We demonstrate how the interplay of these features allows us to leverage term-level programs for type-level computation.
 \item
-  We provide a soundness proof of \oursystem by reusing reducibility semantics of \FR~\citep{hamza2019system}.
+  We provide a soundness proof of \oursystem by reusing the reducibility semantics of \FR \citep{hamza2019system}.
   Using its semantics we prove the soundness of our rules.
   These proofs are mechanized using the Coq proof assistant~\citep{bertot2004interactive}.
   The formalization is available in the additional materials.
@@ -159,7 +159,7 @@ dependent case class Table(schema: Lst, data: spark.DataFrame):
 \end{lstlisting}
 
 \noindent
-In this example, we wrap a weakly-typed implementation of Spark's |DataFrame| in the |dependent| class |Table|.
+In this example, we wrap a Spark's |DataFrame| in the |dependent| class |Table|.
 The first argument of this class represents the schema of the table as a precisely-typed list.
 The second argument is the underlying |DataFrame|.
 In the implementation of |join|, we execute the join operation on the underlying tables (|newData|) and compute the resulting schema corresponding to that join (|newSchema|).
@@ -313,7 +313,7 @@ Our extension does not model virtual dispatch explicitly in singleton types.
 Instead, the result type of a method call |t.m(|\ldots{}|)| is always the result type of |m| in |t|'s static type.
 Consequently, |dependent| methods effectively become |final|, given that only a provably-equivalent implementation could be used to override it.
 
-Special care must be taken when an imprecisely-typed method is overridden with a |dependent| one.
+Special care must be taken when an imprecisely-typed method is overridden with a dependent one.
 In this situation, the result type of a method invocation can lose precision depending on type of the receiver.
 Calls to the |equals| methods are a common example of this: |equals| is defined at the top of Scala's type hierarchy as referential equality and can be overridden arbitrarily.
 Given a class Foo with a |dependent| overrides of |equals|, calls to |Foo.equals(Any)| and |Any.equals(Foo)| are not equivalent; the former precisely reflects the equality defined in |Foo| whereas the latter merely returns a |Boolean|.
@@ -455,7 +455,7 @@ val pred = (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \pha
 
 \noindent
 Given our definitions of column addition and equality, the overall |pred| expression is typed as |Column[Boolean]|.
-All the safety properties stated above are therefore enforced by the dependently-typed interface presented in this section.
+Thus, the dependently-typed interface presented in this section successfully enforces all the safety properties stated above.
 
 \subsection{Comparison to an Existing Technique}
 
@@ -506,53 +506,8 @@ Cayenne's treatment of erasure is similar to Scala's: types are systematically e
 Augustsson proves that Cayenne's erasure is semantics-preserving, but does not provide any other metatheoretical results.
 
 Adding dependent types to object-oriented languages is a remarkably under-explored area of research.
-A notable exception is the recent work of Kazerounian et al.~on adding dependent types to Ruby~\citep{kazerounian2019type}.
+A notable exception is the recent work of~\cite{kazerounian2019type} on adding dependent types to Ruby.
 Their goals are very much aligned with ours: using type-level programming to increase program safety.
 Given the extremely dynamic nature of Ruby, it is unsurprising that their solution greatly differs from ours.
 In their work, type checking happens entirely at runtime and has to be performed at every function invocation to account for possible changes in function definitions.
 Safety is obtained by inserting dynamic checks, similarly to gradual typing.
-
-The work of Campos and Vasconcelos on DOL (Dependent Object-oriented Language)~\citep{campos2018dependent} shares similar goals but is limited to inequality constraints on integer parameters (in the style of~\citep{xi1998eliminating}).
-
-Dependently-typed lambda calculi with subtyping were described at least as far back as 1988 by Cardelli~\citep{cardelli1988structural}.
-His type system is much more expressive than ours and allows bounded quantification over both types and terms using the notion of a |Type| type and power types.
-Unlike our system, which is designed with the concrete evaluation of types in mind, Cardelli does not provide semantics for his system and leaves the equivalence relation among types unspecified.
-
-In~\citep{aspinall1994singleton} Aspinall introduces ${\lambda}_{\leq}{}$, a dependently-typed system with subtyping \emph{and} singleton types that resembles ours in its type language.
-His equivalence relation on types is more powerful and is not syntax-directed, unlike our type evaluation relation.
-Furthermore, singleton types in his work are indexed by the type through which equality is "viewed", thereby enabling a form of polymorphism beyond ours.
-Aspinall's system also has primitive types and allows for atomic subtyping among them, but no congruence rules, hence partially-widened forms cannot be represented.
-
-System ${\lambda}P_{\leq}$~\citep{aspinall1996subtyping} combines subtyping and dependent types in the Edinburgh Logical Framework.
-In this work, Aspinall et al.~propose a type-checking algorithm for ${\lambda}P_{\leq}$ which they show to be complete and terminating.
-Their system uses a kinding relation to ensure well-formedness of type applications.
-A kind system is not required in \oursystem as we emulate type applications inside singleton types.
-
-In~\citep{stone2000deciding}, Stone and Harper describe a dependently-typed calculus with singleton kinds and subkinding.
-Their type-and-kind system is similar to Aspinall's ${\lambda}_{\leq}{}$ term-and-type system, but operates one level up the hierarchy.
-
-More recently, Courant~\citep{courant2003strong} developed a variant of Aspinall's ${\lambda}_{\leq}{}$ with a type-inference algorithm that he proves to be sound and complete.
-The main takeaway from Courant's work is the inclusion of a coercion rule in delta reduction.
-These coercions are used to "tag" variables with their declared type, which prevents these types from being lost during substitution.
-Our formalism resembled Courant's system, it shares the \textsc{SubSing} subtyping rule (SUB/SINGL in Courant's work), and $\beta\delta$-reduction.
-
-Pure Type Systems~\citep{barendregt1991introduction} provide a unified presentation of systems of dependently-typed $\lambda$-calculus by using a single syntactic category for both terms and types.
-
-In~\citep{zwanenburg1999pure}, Zwanenburg defines an extension of pure type systems that include both subtyping and bounded quantification.
-A central design decision of his system is that subtyping rules do not depend on typing rules.
-The absence of circularity simplifies both the theory and the metatheory, at the cost of having to define subtyping on pseudoterms rather than only well-typed terms.
-Another limitation of Zwanenburg's theory is that it cannot be extended with a Top-type.
-
-Pure Subtype Systems~\citep{hutchins2010pure} is another framework with unified syntax; it differs from traditional approaches in that it uses a single relation, subtyping, that subsumes typing, subtyping, and type evaluation as found in our system.
-Their system allows for partially-widened types similar to ours and also enables the computation with different levels of precision.
-For instance, it can conclude that Int + 5 can be approximated as Int.
-The paper presents a partial investigation of the metatheory, but the proof of soundness remains incomplete.
-Nevertheless, Hutchins reports that he has not been able to construct a counter-example, even with the addition of fixpoints.
-
-In~\citep{yang2017unifying}, Yang and Oliveira propose a dependently-typed generalization of System $F_{\leq}$ with unified syntax and a single relation that subsumes typing and subtyping.
-In their system, type computations are driven by cast operators: each reduction or expansion step requires an annotation to explicitly instruct the type checker to take a step.
-Explicit casts make it possible to allow general recursion without compromising decidability of type checking.
-It would be interesting to study variants of \oursystem based on explicit casts instead of our finitized fix.
-
-Dependent-object types~\citep{amin2017type} model the core of Scala's type system and include type members and path-dependent types, which are not represented in our formalism.
-Even though they introduce a form of dependency, path-dependent types were not designed for type-level computation, rendering their original goals largely orthogonal to ours.

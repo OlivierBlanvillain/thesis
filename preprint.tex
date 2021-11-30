@@ -1,0 +1,558 @@
+\newcommand{\oursystem}{$\lambda${\tiny $\mathop{\protect\vphantom{X}}^\text{nd}_{<:\{\}}$}\xspace}
+\newcommand\FR{System~FR\xspace}
+\newcommand\singleton[1]{\lbrace #1 \rbrace}
+
+Type-level programming is an increasingly popular way to obtain additional type safety.
+Unfortunately, it remains a second-class citizen in the majority of industrially-used programming languages.
+We propose a new dependently-typed system with subtyping and singleton types whose goal is to enable type-level programming in an accessible style.
+At the heart of our system lies a non-deterministic choice operator.
+We argue that embracing non-determinism is crucial for bringing dependent types to a broader audience of programmers, since real-world programs will inevitably interact with imprecisely-typed, or even impure code.
+Furthermore, we show that singleton types combined with the choice operator can serve as a replacement for many type functions of interest in practice.
+We establish the soundness of our approach using the Coq proof assistant.
+Our soundness approach models non-determinism using additional function arguments to represent choices.
+We represent type-level computation using singleton types and existential types that quantify over choice arguments.
+To demonstrate the practicality of our type system, we present an implementation as a modification of the Scala compiler.
+We provide a case study in which we develop a strongly-typed wrapper for Spark datasets.
+
+\section{Introduction}
+
+Dependent types have been met with considerable interest from the research community in recent years.
+Their primary application so far has been in proof assistants such as Agda~\citep{norell2007towards}, Coq~\citep{bertot2004interactive} and Idris~\citep{brady2013idris}, where they provide a sound and expressive foundation for theorem proving.
+However, dependent types are still largely absent from general-purpose programming languages, despite a long history of lightweight approaches~\citep{xi1998eliminating}.
+In the context of Haskell, much research has gone into extending the language to support computations on types, for instance in the form of functional dependencies~\citep{jones2000type}, type families~\citep{kiselyov2010fun} and promoted datatypes~\citep{yorgey2012giving}.
+These techniques have seen adoption by Haskell programmers, showing that there is a real demand for such mechanisms.
+Furthermore, recent research has explored how dependent types could be added to the language for the same purpose~\citep{eisenberg2016dependent, weirich2017a}.
+In a largely orthogonal direction, inference for dependent refinement types is reaching significant maturity~\citep{vazou2018gradual, vazou2017refinement,vazou2015bounded}.
+
+Dependently-typed languages often rely on a unified syntax to describe both terms and types.
+The simplicity of this approach is unfortunately at odds with the design of most programming languages, where types and terms are expressed using separate syntactic categories.
+Singleton types provide a simple solution to this problem by allowing every term to be represented as a type.
+The singleton type of a term therefore gives us the most precise specification for that term.
+
+In this paper, we report on our attempt at combining an industrial mixed-paradigm language, Scala, with dependent types.
+We offer both a formalization of our type system and a discussion of the challenges faced in a practical implementation.
+It is our hope that the present paper will serve as a guide for other language implementors interested in pushing the limit of their type systems by adding dependent types.
+
+Unlike proof assistants, we do not aim to use types as a general-purpose logic, which would favor designs ensuring totality of functions through termination checks.
+Instead, our focus is on improving type safety by increasing the expressive power of the type system.
+
+We present \oursystem, a dependently-typed calculus with subtyping and singleton types.
+The main novelty of our calculus is a new approach to expressing type-level computation that, at first, seems diametrically opposed to the purity other systems favor.
+A new term is added for non-deterministic choice from a base type, similar to Floyd's choice operator~\citep{floyd1967nondeterministic}.
+Designing a sound system in the presence of non-determinism is challenging.
+Our solution provides systematic translation of non-determinism using additional parameters that are existentially quantified at a syntactically well-defined point.
+Consequently, a term in \oursystem may reduce to different values.
+Our system generalizes the traditional notion of singleton type: when the lifted term $t$ contains a non-deterministic choice, the resulting type $\singleton{t}$ denotes the set of values that $t$ could possibly reduce to.
+As a result, our type system is capable of type computations by manipulating types which are based on terms, but can nonetheless contain more than a single value.
+In combination with subtyping, this allows us to seamlessly integrate with impure, or imprecisely-typed programs.
+
+Our contributions are as follows:
+
+\begin{itemize}
+\item
+  We present our calculus \oursystem, which illustrates the novel elements of our extension to Scala.
+  The type system of \oursystem combines dependent types, subtyping and a generalization of singleton types to non-deterministic terms.
+  We demonstrate how the interplay of these features allows us to leverage term-level programs for type-level computation.
+\item
+  We provide a soundness proof of \oursystem by reusing reducibility semantics of \FR~\citep{hamza2019system}.
+  Using its semantics we prove the soundness of our rules.
+  These proofs are mechanized using the Coq proof assistant~\citep{bertot2004interactive}.
+  The formalization is available in the additional materials.
+\item
+  We show a concrete use-case of our system by implementing it as an extension of Scala (\Cref{sec:extending-scala}), and using it to develop a strongly-typed wrapper for Apache Spark~\citep{zaharia2016apache} (\Cref{sec:use-case}).
+  Thanks to dependent types, we can statically ensure the type safety of database operations such as join and filter.
+  We compare our implementation with an equivalent implicit-based one and show remarkable compilation time savings.
+\end{itemize}
+
+\section{Motivating Examples}
+\label{sec:motivating-example}
+
+We begin by motivating why dependent types are desirable in general purpose programming, and how one might use them to improve type safety.
+In our first example, we design an API that keeps track of database tables' schemas in the type.
+We demonstrate how dependently-typed list operations can be used to compute schemas resulting from join operations at the type level.
+Our second example shows how to build a safer version of the zip operation on lists that only accepts equally-sized arguments.
+The examples in this section are written in our dependently-typed extension of Scala described in \Cref{sec:extending-scala}.
+
+\subsection{Safe Join}
+
+As a first step, we show how our system supports type-level programming in the style of term-level programs.
+Consider the following definition of the list datatype, which is standard Scala up the |dependent| keyword:
+
+\begin{lstlisting}
+sealed trait Lst { (*\text{\dots}*) }
+dependent case class Cons(head: Any, tail: Lst) extends Lst
+dependent case class Nil() extends Lst
+\end{lstlisting}
+
+\noindent
+We can define list concatenation in the usual functional style of Scala\footnote{Our examples use the indentation-based syntax introduced in Scala 3.0.}, that is, using pattern matching and recursion:
+
+\begin{lstlisting}
+sealed trait Lst:
+  dependent def concat(that: Lst) <: Lst =
+    this match
+      case Cons(x, xs) => Cons(x, concat(xs, that))
+      case Nil() => that
+\end{lstlisting}
+
+\noindent
+By annotating a method as |dependent|, the user instructs our system that the result type of |concat| should be as precise as its implementation.
+Effectively, this means that the body of |concat| is lifted to the type level, and will be partially evaluated at every call site to compute a precise result type which \emph{depends} on the given inputs.
+For recursive |dependent| methods such as |concat|, we infer types that include calls to |concat| itself.
+The |<:| annotation lets us provide an upper bound on |concat|'s result type, which will be used while type checking the method's definition.
+Finally, by qualifying the definition of |Cons| and |Nil| as |dependent| we also allow their constructors and extractors to be lifted to the type level.
+Using these definitions, we can now request the precise type whenever we manipulate lists by annotating the new |val| binding with |dependent|:
+
+\begin{lstlisting}
+dependent val l1 = Cons("A", Nil())
+dependent val l2 = Cons("B", Nil())
+dependent val l3 = l1.concat(l2)
+l3.size: { 2 }
+l3: { Cons("A", Cons("B", Nil())) }
+\end{lstlisting}
+
+Enclosing a pure term in braces (|{|~\ldots{}~|}|) denotes the singleton type of that term.
+In the last two lines of this example we are therefore asking our system to prove that |l3| has size 2 and is equivalent to |Cons("A", Cons("B", Nil()))|.
+
+In Scala we often deal with impure or imprecisely-typed code, however.
+To integrate with such terms, we provide the |choose[T]| construct.
+Operationally, we interpret |choose[T]| as a non-deterministic choice from |T|, which can be modeled faithfully on the type level as an existentially quantified inhabitant of |T| in a singleton type.
+Thus, we equate |{ choose[T] }| to |T|, and when typing an impure term such as |Cons(readString(), Nil())| we can assign the precise type |{ Cons(choose[String], Nil()) }|.
+Returning to the previous example, this means that even in the presence of impurity, we can perform useful type-level computation and checking:
+
+\begin{lstlisting}
+dependent val l2 = Cons(readString(), Nil())
+dependent val l3 = l1.concat(l2)
+l3: { Cons("A", Cons(choose[String], Nil())) }
+\end{lstlisting}
+
+In a style similar to |concat|, we can define remove on |Lst|:
+
+\begin{lstlisting}
+sealed trait Lst:
+  dependent def remove(e: String) <: Lst =
+    this match
+      case Cons(head, tail) =>
+        if (e == head) tail
+        else Cons(head, tail.remove(e))
+      case _ => throw new Error("element not found")
+\end{lstlisting}
+
+\noindent
+Removing |"B"| yields the expected result, while trying to remove |"C"| from |l3| leads to a \emph{compilation error}, since the given program will provably fail at runtime.
+
+\begin{lstlisting}
+l3.remove("B"): { Cons("A", Nil()) }
+l3.remove("C") // Error: element not found
+\end{lstlisting}
+
+The lists we defined so far can be used to implement a type-safe interface for database tables.
+
+\begin{lstlisting}
+dependent case class Table(schema: Lst, data: spark.DataFrame):
+  dependent def join(right: Table, col: String) <: Table =
+    val s1 = this.schema.remove(col)
+    val s2 = right.schema.remove(col)
+    val newSchema = Cons(col, s1.concat(s2))
+    val newData = this.data.join(right.data, col)
+    new Table(newSchema, newData)
+\end{lstlisting}
+
+\noindent
+In this example, we wrap a weakly-typed implementation of Spark's |DataFrame| in the |dependent| class |Table|.
+The first argument of this class represents the schema of the table as a precisely-typed list.
+The second argument is the underlying |DataFrame|.
+In the implementation of |join|, we execute the join operation on the underlying tables (|newData|) and compute the resulting schema corresponding to that join (|newSchema|).
+By annotating the |join| method as |dependent|, the resulting schema is reflected in the type:
+
+\begin{lstlisting}
+dependent val schema1 = Cons("age", Cons("name", Nil()))
+dependent val schema2 = Cons("name", Cons("unit", Nil()))
+dependent val table1  = Table(schema1, (*\text{\dots}*))
+dependent val table2  = Table(schema2, (*\text{\dots}*))
+dependent val joined  = table1.join(table2, "name")
+joined: { Table(Cons("name", Cons("age", Cons("unit", Nil()))), choose[DataFrame]) }
+\end{lstlisting}
+
+\noindent
+Reflecting table schemas in types increases type safety over the existing weakly-typed interface.
+For instance, it becomes possible to raise compile-time errors when a user tries to use non-existent columns.
+This is an improvement over the underlying Spark implementation that would instead fail at runtime.
+
+\subsection{Safe Zip}
+\label{safe-zip}
+
+Our first example demonstrated how dependent methods allow inference of precise types.
+Conversely, we can also use singleton types to constrain method parameters further.
+In this example, our goal is to write a safer wrapper for functions like |zip| that should only be applicable to lists of the same length.
+To accomplish this, we can constrain the second parameter of |zip| as follows:
+
+\begin{lstlisting}
+def safeZip(xs: Lst, ys: { sizedLike(xs) }) = unsafeZip(xs, ys)
+\end{lstlisting}
+
+\noindent
+Here we would like |{ sizedLike(xs) }| to be inhabited by all lists of equal length as |xs|, regardless of their elements'values.
+How can this be achieved, given that |sizedLike(xs)| is a term? By exploiting the non-deterministic interpretation of |choose[T]|, we can provide a succinct definition for |sizedLike|:
+
+\begin{lstlisting}
+dependent def sizedLike(xs: Lst) <: Lst =
+  xs match
+    case Nil() => Nil()
+    case Cons(x, ys) => Cons(choose[Any], sizedLike(ys))
+\end{lstlisting}
+
+\noindent
+Consider, for instance, the meaning of |{ sizedLike(xs) }| for |xs = Cons(1, Cons(2, Nil()))|.
+After reduction, we obtain |{ Cons(choose[Any], Cons(choose[Any], Nil())) }|, which is a type that represents all lists of size 2.
+Thus |safeZip| requires that every caller prove that |xs| and |ys| are of the same length, which ensures that the underlying implementation in |unsafeZip| will never fail or truncate elements from one of the lists.
+
+Note that, unlike |concat| and |remove| that can be used both on the term and the type level, |sizedLike| is here intended to be used as a type function, but not at runtime.
+
+\section{Implementation}
+\label{sec:extending-scala}
+
+In this section we give an overview of how we extended Scala with dependent types.
+This development was an experiment to explore the feasibility of adding dependent types in Scala.
+We implemented our prototype as an extension of Dotty, the reference compiler for future versions of the Scala language.
+Our presentation focuses on several facets of the implementation that are not reflected in our formalism.
+
+On a syntactic level, our Scala extension consists of three additions:
+
+\begin{itemize}
+\item
+  the singleton types syntax |{ t }|,
+\item
+  the |dependent| modifier for methods, values and classes,
+\item
+  the |choose[T]| construct.
+\end{itemize}
+
+\noindent
+The newly-introduced singleton type syntax enables a subset of Scala expressions to be used in types.
+This subset approximately corresponds to the core functional subset of Scala, plus the |choose[T]| construct, as illustrated in \oursystem.
+Within this subset, the main differences between our formalism and implementation lie in the handling of pattern matching.
+
+\subsection{Pattern Matching}
+\label{pattern-matching}
+
+Pattern matching in Scala supports a wide range of matching techniques~\citep{emir2007matching}.
+For example, \emph{extractor patterns} rely on user-defined methods to extract values from objects.
+As a result, these custom extractors can contain arbitrary side effects.
+Our implementation limits the kind of patterns available in types to the two simplest forms: decomposition of case classes and the type-tests/type-casts patterns.
+
+During type normalization, our system evaluates pattern matching expressions according to Scala's runtime semantics, that is, patterns are checked top-to-bottom, and type-tests are evaluated using runtime type information available after type erasure.
+
+For example, consider the following pattern matching expression:
+
+\begin{lstlisting}
+s match { case _: T1 => v1 case _: T2 => v2 }
+\end{lstlisting}
+
+\noindent
+When used in a type, this expression reduces to |v1| if the scrutinee's type is a subtype of |T1|.
+In order to reduce to |v2|, type normalization must make sure |T1| and the scrutinee's type are disjoint, namely that the dynamic type of |s| cannot possibly be smaller than |T1|.
+Disjointness proofs are built using static knowledge about the class hierarchy and make use of the guarantees implied by the |sealed| and |final| qualifiers, which are Scala's way of declaring closed-type hierarchies.
+
+\subsection{Two Modes of Type Inference}
+
+In order to retain backwards-compatibility, our system supports two modes of type inference: the precise inference mode which infers singleton types, and the default inference mode that corresponds to Scala's current type-inference algorithm.
+Concretely, users opt into our new inference mode using the |dependent| qualifier on methods, values, and classes.
+
+When inferring the result type of a |dependent| method, our system lifts the method's body into a type.
+This lifting will be precise for the subset of expressions that is representable in types, and approximative for the rest.
+When we encounter an unsupported construct, we compute its type using the default mode, yielding a type |T| which we then integrate in the lifted body as |choose[T]|.
+
+For example, given the following definition:
+
+\begin{lstlisting}
+dependent def getName(personalized: Boolean) =
+  if (personalized) readString() else "Joe"
+\end{lstlisting}
+
+\noindent
+our system infers the following result type:
+
+\begin{lstlisting}
+{ if (personalized) choose[String] else "Joe" }
+\end{lstlisting}
+
+Scala requires recursive methods to have an explicit result type, and this restriction also applies to |dependent| methods.
+However, in the case of a |dependent| method, an explicit result type is only used as an upper bound for the actual precise result type and will only be used to type-check the method's body.
+At other call sites, the (precise) inferred result type is used.
+Bounds of dependent methods are written using a special syntax (|<: T|), which emphasizes the difference from normal result types (|: T|).
+
+\subsection{Approximating Side Effects}
+
+\paragraph{State}
+
+Scala's type system permits uncontrolled side effects in programs.
+Given the absence of an effect system, result types of methods do not convey any information about the potential use of side effects in the method body.
+The situation is analogous for |dependent| methods.
+Thanks to |choose[T]| we can still formulate precise result types when terms depend on the result of side-effectful operations.
+Since we uniformly approximate all side effects, we avoid the situation where a type refers to a value that may be modified during the program execution.
+For instance, if |z| is a mutable integer variable, we will never introduce |z| in a singleton type, but we can still assign a better type than |Lst| to an expression like |Cons(z, Nil())|, that is, |{ Cons(choose[Int], Nil()) }|.
+
+\paragraph{Exceptions}
+
+Similarly to how we model other side effects, exceptions are approximated in types.
+Our type-inference algorithm uses a new error type, |Error(e)|, which we infer when raising an exception with |throw e|.
+Exception handlers are typed imprecisely using the default mode of type-inference.
+Exceptions thrown in statement positions are not reflected in singleton types, since the type of |{e1; e2}| is simply |{ e2 }|.
+However, exceptions thrown in tail positions (such as in remove from \Cref{sec:motivating-example}) can lead to types normalizing to |Error(e)|.
+In these cases, our type system can prove that the program execution will encounter exceptional behavior, and reports a compilation error.
+This approach is conservative in that it might reject programs that recover from exceptions.
+Also note that this is a sanity check, rather than a guarantee of no exceptions occurring at runtime.
+That is, depending on which rules are used during subtyping, it is possible to succeed without entering type normalization, resulting in such errors going undetected.
+Despite these shortcomings, our treatment of exceptions results in a practical way to raise compile-time errors.
+It would be interesting to explore the addition of an effect system to our Scala extension and formalization.
+
+\subsection{Virtual Dispatch}
+
+Our extension does not model virtual dispatch explicitly in singleton types.
+Instead, the result type of a method call |t.m(|\ldots{}|)| is always the result type of |m| in |t|'s static type.
+Consequently, |dependent| methods effectively become |final|, given that only a provably-equivalent implementation could be used to override it.
+
+Special care must be taken when an imprecisely-typed method is overridden with a |dependent| one.
+In this situation, the result type of a method invocation can lose precision depending on type of the receiver.
+Calls to the |equals| methods are a common example of this: |equals| is defined at the top of Scala's type hierarchy as referential equality and can be overridden arbitrarily.
+Given a class Foo with a |dependent| overrides of |equals|, calls to |Foo.equals(Any)| and |Any.equals(Foo)| are not equivalent; the former precisely reflects the equality defined in |Foo| whereas the latter merely returns a |Boolean|.
+
+\subsection{Termination}
+
+We distinguish two important aspects of termination.
+
+The first question is whether type-checked programs are guaranteed to terminate.
+For simplicity, our work side-steps this question, requiring bounds for recursion.
+A more general solution would be to compute or infer such bounds using measure functions, as done in \FR~\citep{hamza2019system}.
+Another approach would be to extend our translation of non-determinism to permit non-termination.
+We consider this aspect orthogonal to the objectives of this paper.
+Our work targets general-purpose programming language whose type safety is defined with regards to its runtime semantics and that may include non-terminating interactive computations.
+
+The second question is termination of our type checker.
+Non-termination of type checking implies that the type checker can give three possible answers, "type correct", "type incorrect" or "do not know" (or timeout).
+Treating "do not know" as "type incorrect" makes the non-termination unproblematic from a soundness perspective.
+A similar argument is made for other dependently-typed languages with unbounded recursion, such as Dependent Haskell~\citep{eisenberg2016dependent} or Cayenne~\citep{augustsson1998cayenne}.
+In practice, our system deals with infinite loops using a fuel mechanism.
+Every evaluation step consumes a unit of fuel, and an error is reported when the compiler runs out of fuel.
+The default fuel limit can be increased via a compiler flag to enable arbitrarily long compilation times.
+
+\section{Use Case}
+\label{sec:use-case}
+
+In this section, we extend the motivating example presented in \Cref{sec:motivating-example} by building a type-safe interface for Spark datasets.
+We use dependent types to implement a simple domain-specific type checker for the SQL-like expressions used in Spark.
+We then compare the compilation time of our dependently-typed interface against an equivalent encoding based on implicits.
+
+\subsection{A Type-Safe Database Interface}
+
+The type-safe interface presented in this section illustrates the expressive power of our system and is implemented purely as a library.
+For brevity, our presentation only covers a small part of Spark's dataset interface, but the approach can be scaled to cover that interface in its entirety.
+The type safety of database queries is a canonical example and has been studied in many different settings~\citep{leijen1999domain, kazerounian2019type, meijer2006linq, chlipala2010ur}.
+
+The example built in \Cref{sec:motivating-example} uses lists of column names to represent schemas.
+A straightforward improvement is to also track the type of columns as part of the schema.
+Instead of using column names directly, we introduce the following |Column| class with a phantom type parameter |T| for the column type, and a field |name| for the column name:
+
+\begin{lstlisting}
+dependent case class Column[T](name: String) { (*\text{\dots}*) }
+\end{lstlisting}
+
+Table schemas become lists of |Column|-s and thereby gain precision.
+The definition of |join| given in \Cref{sec:motivating-example} can be adapted to this new schema encoding to prevent joining two tables that have columns with matching names but different types.
+
+A large proportion of the weakly-typed Spark interface is dedicated to building expressions on table columns.
+Such expressions can currently be built from strings, in a subset of SQL, or using a Scala DSL which is essentially untyped.
+
+The lack of type safety for column expressions can be particularly dangerous when mixing columns of different types.
+The pitfall is caused by Spark's inconsistency: depending on types of columns and operations involved, programs will either crash at runtime, or, more dangerously, data will be silently converted from one type to another.
+
+By keeping track of column types it becomes possible to enforce the well-typedness of column expressions.
+As an example, consider the following Spark program:
+
+\begin{lstlisting}
+table.filter(table.col("a") + table.col("b") === table.col("c"))
+\end{lstlisting}
+
+We would like our interface to enforce the following safety properties:
+
+\begin{itemize}
+\item
+  Columns $a$, $b$ and $c$ are part of the schema of
+  |table|.
+\item
+  Addition is well-defined on columns $a$ and $b$.
+\item
+  The result of adding columns $a$ and $b$ can be compared with
+  column $c$.
+\item
+  The overall column expression yields a |Boolean|, which
+  conforms to filter's argument type.
+\end{itemize}
+
+Automatic conversions during equality checks can be prevented by restricting column equality to expressions of the same type |T|:
+
+\begin{lstlisting}
+dependent case class Column[T](k: String):
+  def ===(that: Column[T]): Column[Boolean] = Column(s"(${this.k} === ${that.k})")
+\end{lstlisting}
+
+Addition in Spark is defined between numeric types and characters.
+The result type of an addition depends on the operand types.
+For numeric types, Spark will pick the larger of the operand types according to the following ordering: |Double > Long > Int > Byte|.
+The situation is quite surprising with characters as any addition involving a |Char| will result in a |Double|.
+
+Dependent types can be used to precisely model these conversions.
+We define a type function to compute the result type of additions:
+
+\begin{lstlisting}
+def addRes(a: Any, b: Any) =
+  (a, b) match
+    case (_: Char, _: Char | Byte | Int  | Long | Double) => choose[Double]
+    case (_: Byte, _: Byte | Int  | Long | Double)        => b
+    case (_: Int,  _: Int  | Long | Double)               => b
+    case (_: Long, _: Long | Double)                      => b
+    case (_: Double, _: Double)                           => choose[Double]
+    case (_: Byte | Int | Long | Double, _)               => addRes(b, a)
+    case _ => throw new Error("incompatible types in addition")
+type AddRes[A, B] = { addRes(choose[A], choose[B]) }
+\end{lstlisting}
+
+Also note the use of recursion in the second-to-last case, to avoid duplicating symmetric cases.
+The |AddRes| type can be used to define a |Column| addition that accurately models Spark's runtime:
+
+\begin{lstlisting}
+dependent case class Column[T] private (k: String):
+  dependent def +[U](that: Column[U]) <: Column[_] =
+    Column[AddRes[T, U]](s"(${this.k} + ${that.k})")
+\end{lstlisting}
+
+Allowing programmers to construct |Column|-s from string literals would defeat the purpose of a type-safe interface.
+Instead, programmers should extract columns from a |Table|'s schema.
+For that purpose, we implement the |col| method on |Table| and annotate the |Column| constructor as private.
+
+\begin{lstlisting}
+dependent case class Table(schema: Lst, data: spark.DataFrame):
+  dependent def col(name: String) <: Column[_] =
+    dependent def find(key: String, list: Lst) <: Any =
+      list match
+        case Cons(head: Column[_], tail) =>
+          if (head.k == key) head else find(key, tail)
+        case _ => throw new Error("column not found in schema")
+    find(name, schema)
+  dependent def filter(predicate: Column[Boolean]) <: Table =
+    new Table(this.schema, this.data.filter(predicate.k))
+\end{lstlisting}
+
+The |col| method is implemented using a nested dependent method to find the column corresponding to the given name.
+Thanks to the dependent annotation, the type-checker is able to statically evaluate calls to |col|.
+Assuming the table's schema contains a column |a| of type |Int| and columns |b| and |c| of type |Long|, the compiler will be able to infer types as follows:
+
+\begin{lstlisting}
+val pred = (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("a") \phantom{.} }*) + (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("b") \phantom{.}\phantom{.} }*) === (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("c") \phantom{.}\phantom{.} }*)
+// Infers: (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Int]("a") \}}}*)   (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Long]("b") \}}}*)     (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Long]("c") \}}}*)
+\end{lstlisting}
+
+\noindent
+Given our definitions of column addition and equality, the overall |pred| expression is typed as |Column[Boolean]|.
+All the safety properties stated above are therefore enforced by the dependently-typed interface presented in this section.
+
+\subsection{Comparison to an Existing Technique}
+
+% \measurements{Comparing the compilation times of two implementations of list concatenation and join, log.\ scale.}
+% TODO OLIVIER
+
+Programmers have managed to find clever encodings that circumvent the lack of first-class support for type-level programming in many languages.
+These encodings can be very cumbersome, as they often entail poor error reporting and a negative impact on compilation times~\citep{mcbride2002faking},~\citep{kiselyov2004strongly}.
+In Scala, implicits are the primary mechanism by which programmers implement type-level programming~\citep{odersky2018simplicitly}.
+
+Frameless~\citep{blanvillain2016frameless} is a Scala library that implements a type-safe interface for Spark by making heavy use of implicits.
+Most type-level computations in this library are performed on the heterogeneous lists provided by Shapeless~\citep{sabin2011shapeless}.
+
+We compared the dependently-typed Spark interface presented in this section against the implicit-based implementation of Frameless.
+To do so, we isolated the implicit-based implementation of the |join| operation on table schemas, and compared its compilation time against the dependently-typed version presented in this section.
+To evaluate the scalability of both approaches we generated test cases with varying schema sizes and compiled each test case in isolation.
+A similar comparison is done for list concatenation, which constitutes a building block of |join|.
+
+% \Cref{measurements} shows that, in both benchmarks, the dependently-typed implementation compiles faster than the version with implicits, and compilation time scales better with the size of the input.
+% TODO OLIVIER
+In the join benchmark, we see that the implicit-based implementation exceeds 30 seconds of compilation time around the 200 columns mark, and continues to grow quadratically.
+This can be explained by the nature of implicit resolution, which might backtrack during its search.
+The compilation time of the dependently-typed implementation grows linearly and stays below one second until the 350 columns mark.
+We were able to observe similar trends in the concatenation benchmark.
+These measurements were obtained by averaging 120 compilations on a warm compiler, and have been performed on an i7-7700K Processor running Oracle JVM 1.8.0 on Linux.
+
+\section{Related Work}
+
+As of today, Haskell is perhaps closest to becoming dependently-typed among the general-purpose programming languages used in industry.
+Haskell's type families~\citep{kiselyov2010fun} provide a direct way to express type-level computations.
+Other language extensions such as functional dependencies~\citep{jones2000type} and promoted datatypes~\citep{yorgey2012giving} are also moving Haskell towards dependent types.
+Nevertheless, programming in Haskell remains significantly different from using full-spectrum dependently-typed languages.
+A significant difference is that Haskell imposes a strict separation between terms and types.
+As a result, writing dependently-typed programs in Haskell often involves code duplication between types and terms.
+These redundancies can be somewhat avoided using the singletons package~\citep{eisenberg2012dependently}, which uses meta-programming to automatically generate types from datatypes and function definitions.
+
+In the context of Haskell, Eisenberg's work on Dependent Haskell~\citep{eisenberg2016dependent} is closest to ours, in that it adds first-class support for dependent types to an established language, in a backwards-compatible way.
+Dependent Haskell supports general recursion without termination checks, which makes it less suitable for theorem proving.
+While we share similar goals, our work is differentiated by the contrasting paradigms of Scala and Haskell.
+Like many object-oriented languages, Scala is primarily built around subtyping and does not restrict the use of side effects.
+Furthermore, Eisenberg's system provides control over the relevance of values and type parameters.
+In contrast, our system does not support any erasure annotations and simply follows Scala's canonical erasure strategy: types are systematically erased to JVM types, and terms are left untouched.
+Weirich established a fully mechanized type safety proof for the core of Dependent Haskell using the Coq proof assistant~\citep{weirich2017a}.
+
+Cayenne is a Haskell-like language with dependent types introduced in 1998 by Augustsson~\citep{augustsson1998cayenne}.
+Like Dependent Haskell, it resembles our system in its treatment of termination, and differs by being a purely functional programming language.
+Cayenne's treatment of erasure is similar to Scala's: types are systematically erased.
+Augustsson proves that Cayenne's erasure is semantics-preserving, but does not provide any other metatheoretical results.
+
+Adding dependent types to object-oriented languages is a remarkably under-explored area of research.
+A notable exception is the recent work of Kazerounian et al.~on adding dependent types to Ruby~\citep{kazerounian2019type}.
+Their goals are very much aligned with ours: using type-level programming to increase program safety.
+Given the extremely dynamic nature of Ruby, it is unsurprising that their solution greatly differs from ours.
+In their work, type checking happens entirely at runtime and has to be performed at every function invocation to account for possible changes in function definitions.
+Safety is obtained by inserting dynamic checks, similarly to gradual typing.
+
+The work of Campos and Vasconcelos on DOL (Dependent Object-oriented Language)~\citep{campos2018dependent} shares similar goals but is limited to inequality constraints on integer parameters (in the style of~\citep{xi1998eliminating}).
+
+Dependently-typed lambda calculi with subtyping were described at least as far back as 1988 by Cardelli~\citep{cardelli1988structural}.
+His type system is much more expressive than ours and allows bounded quantification over both types and terms using the notion of a |Type| type and power types.
+Unlike our system, which is designed with the concrete evaluation of types in mind, Cardelli does not provide semantics for his system and leaves the equivalence relation among types unspecified.
+
+In~\citep{aspinall1994singleton} Aspinall introduces ${\lambda}_{\leq}{}$, a dependently-typed system with subtyping \emph{and} singleton types that resembles ours in its type language.
+His equivalence relation on types is more powerful and is not syntax-directed, unlike our type evaluation relation.
+Furthermore, singleton types in his work are indexed by the type through which equality is "viewed", thereby enabling a form of polymorphism beyond ours.
+Aspinall's system also has primitive types and allows for atomic subtyping among them, but no congruence rules, hence partially-widened forms cannot be represented.
+
+System ${\lambda}P_{\leq}$~\citep{aspinall1996subtyping} combines subtyping and dependent types in the Edinburgh Logical Framework.
+In this work, Aspinall et al.~propose a type-checking algorithm for ${\lambda}P_{\leq}$ which they show to be complete and terminating.
+Their system uses a kinding relation to ensure well-formedness of type applications.
+A kind system is not required in \oursystem as we emulate type applications inside singleton types.
+
+In~\citep{stone2000deciding}, Stone and Harper describe a dependently-typed calculus with singleton kinds and subkinding.
+Their type-and-kind system is similar to Aspinall's ${\lambda}_{\leq}{}$ term-and-type system, but operates one level up the hierarchy.
+
+More recently, Courant~\citep{courant2003strong} developed a variant of Aspinall's ${\lambda}_{\leq}{}$ with a type-inference algorithm that he proves to be sound and complete.
+The main takeaway from Courant's work is the inclusion of a coercion rule in delta reduction.
+These coercions are used to "tag" variables with their declared type, which prevents these types from being lost during substitution.
+Our formalism resembled Courant's system, it shares the \textsc{SubSing} subtyping rule (SUB/SINGL in Courant's work), and $\beta\delta$-reduction.
+
+Pure Type Systems~\citep{barendregt1991introduction} provide a unified presentation of systems of dependently-typed $\lambda$-calculus by using a single syntactic category for both terms and types.
+
+In~\citep{zwanenburg1999pure}, Zwanenburg defines an extension of pure type systems that include both subtyping and bounded quantification.
+A central design decision of his system is that subtyping rules do not depend on typing rules.
+The absence of circularity simplifies both the theory and the metatheory, at the cost of having to define subtyping on pseudoterms rather than only well-typed terms.
+Another limitation of Zwanenburg's theory is that it cannot be extended with a Top-type.
+
+Pure Subtype Systems~\citep{hutchins2010pure} is another framework with unified syntax; it differs from traditional approaches in that it uses a single relation, subtyping, that subsumes typing, subtyping, and type evaluation as found in our system.
+Their system allows for partially-widened types similar to ours and also enables the computation with different levels of precision.
+For instance, it can conclude that Int + 5 can be approximated as Int.
+The paper presents a partial investigation of the metatheory, but the proof of soundness remains incomplete.
+Nevertheless, Hutchins reports that he has not been able to construct a counter-example, even with the addition of fixpoints.
+
+In~\citep{yang2017unifying}, Yang and Oliveira propose a dependently-typed generalization of System $F_{\leq}$ with unified syntax and a single relation that subsumes typing and subtyping.
+In their system, type computations are driven by cast operators: each reduction or expansion step requires an annotation to explicitly instruct the type checker to take a step.
+Explicit casts make it possible to allow general recursion without compromising decidability of type checking.
+It would be interesting to study variants of \oursystem based on explicit casts instead of our finitized fix.
+
+Dependent-object types~\citep{amin2017type} model the core of Scala's type system and include type members and path-dependent types, which are not represented in our formalism.
+Even though they introduce a form of dependency, path-dependent types were not designed for type-level computation, rendering their original goals largely orthogonal to ours.

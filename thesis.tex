@@ -70,7 +70,7 @@ While this small DSL is obviously too simplistic to be of any practical use, it 
 I was delighted with my solution!
 Denys, however, was not impressed.
 I attribute this apathy to his dislike of implicits.
-Despite their widespread usage, implicits are notorious for their complexity~\citep{filip2019implicits}.
+Despite their widespread usage, implicits are notorious for their complexity~\citep{kvrikava2019scala}.
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
 To give the reader a glance of this pattern, we show the definition of the |free| method on |Context|:
 
@@ -97,7 +97,7 @@ Instead using pattern matching and functions, implicits require algorithm to be 
 \emph{Can we do better?} This is the question that motivates the work presented in dissertation.
 
 % 3. State the Background Information
-Dependently-typed programming languages, such as Coq~\citep{bertot2004interactive}, Agda~\citep{norell2007towards}, and Idris~\citep{brady2015idris}, make no distinction between terms and types, and thus naturally support type-level programming.
+Dependently-typed programming languages, such as Coq~\citep{bertot2004interactive}, Agda~\citep{norell2007towards}, and Idris~\citep{brady2014idris}, make no distinction between terms and types, and thus naturally support type-level programming.
 Scala, on the other hand, has a clear separation between its term and type language.
 
 % When terms are types are unified, the distinction between programming and type-level programming blurs out since value-level computations can be performed during type checking.
@@ -144,7 +144,7 @@ Since that definition has type |Int|, the compiler resolves the method call by p
 
 \subsubsection{The type class pattern}
 
-Implicits can be used to implement type classes~\citep{wadler1989howto} as a design pattern~\citep{oliveira2010type}.
+Implicits can be used to implement type classes~\citep{wadler1989how} as a design pattern~\citep{oliveira2010type}.
 We give an example of an implementation of the |Ordering| type class.
 This example consists of three parts:
 
@@ -269,15 +269,15 @@ We can use a "negative" implicit evidence to simplify the definition of |NotIn| 
 
 \subsection{Implicit Priorities}
 
-While details of the language specification are outside of the scope of this dissertation, type-level \citep{odersky2006scala} \citep{odersky2009arrays}
+While details of the language specification are outside of the scope of this dissertation, type-level \citep{odersky2006scala} \citep{odersky2009scala}
 
 \removeAllWithPriority
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}
 \subsection*{Attribution}
-\citep{shmid2020coming}
-\lipsum[1]
+\citep{schmid2020coming}
+\input{preprint.tex}
 
 \chapter{Match Types}
 \label{chap:match-types}

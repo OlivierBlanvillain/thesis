@@ -1,7 +1,3 @@
-\newcommand{\oursystem}{$\lambda${\tiny $\mathop{\protect\vphantom{X}}^\text{nd}_{<:\{\}}$}\xspace}
-\newcommand\FR{System~FR\xspace}
-\newcommand\singleton[1]{\lbrace #1 \rbrace}
-
 Type-level programming is an increasingly popular way to obtain additional type safety.
 Unfortunately, it remains a second-class citizen in the majority of industrially-used programming languages.
 We propose a new dependently-typed system with subtyping and singleton types whose goal is to enable type-level programming in an accessible style.
@@ -449,9 +445,11 @@ Thanks to the dependent annotation, the type-checker is able to statically evalu
 Assuming the table's schema contains a column |a| of type |Int| and columns |b| and |c| of type |Long|, the compiler will be able to infer types as follows:
 
 \begin{lstlisting}
-val pred = (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("a") \phantom{.} }*) + (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("b") \phantom{.}\phantom{.} }*) === (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("c") \phantom{.}\phantom{.} }*)
-// Infers: (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Int]("a") \}}}*)   (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Long]("b") \}}}*)     (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Long]("c") \}}}*)
+val pred =    table.col("a")    +    table.col("b")    ===   table.col("c")
+// Infers: { Column[Int]("a") }   { Column[Long]("b") }   { Column[Long]("c") }
 \end{lstlisting}
+% val pred = (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("a") \phantom{.} }*) + (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("b") \phantom{.}\phantom{.} }*) === (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{ \phantom{.} table.col("c") \phantom{.}\phantom{.} }*)
+% // Infers: (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Int]("a") \}}}*)   (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Long]("b") \}}}*)     (*\setlength{\fboxrule}{-1pt}\fcolorbox{light-gray}{light-gray}{\textit{\{ Column[Long]("c") \}}}*)
 
 \noindent
 Given our definitions of column addition and equality, the overall |pred| expression is typed as |Column[Boolean]|.
@@ -459,8 +457,7 @@ Thus, the dependently-typed interface presented in this section successfully enf
 
 \subsection{Comparison to an Existing Technique}
 
-% \measurements{Comparing the compilation times of two implementations of list concatenation and join, log.\ scale.}
-% TODO OLIVIER
+\dependentVsImplicitBenchmarks{Comparing the compilation times of two implementations of list concatenation and join, logarithmic scale.}
 
 Programmers have managed to find clever encodings that circumvent the lack of first-class support for type-level programming in many languages.
 These encodings can be very cumbersome, as they often entail poor error reporting and a negative impact on compilation times~\citep{mcbride2002faking},~\citep{kiselyov2004strongly}.
@@ -474,8 +471,8 @@ To do so, we isolated the implicit-based implementation of the |join| operation 
 To evaluate the scalability of both approaches we generated test cases with varying schema sizes and compiled each test case in isolation.
 A similar comparison is done for list concatenation, which constitutes a building block of |join|.
 
-% \Cref{measurements} shows that, in both benchmarks, the dependently-typed implementation compiles faster than the version with implicits, and compilation time scales better with the size of the input.
-% TODO OLIVIER
+\Cref{fig:dependentVsImplicitBenchmarks} shows that, in both benchmarks, the dependently-typed implementation compiles faster than the version with implicits, and compilation time scales better with the size of the input.
+
 In the join benchmark, we see that the implicit-based implementation exceeds 30 seconds of compilation time around the 200 columns mark, and continues to grow quadratically.
 This can be explained by the nature of implicit resolution, which might backtrack during its search.
 The compilation time of the dependently-typed implementation grows linearly and stays below one second until the 350 columns mark.

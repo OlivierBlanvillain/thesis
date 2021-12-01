@@ -349,16 +349,6 @@
       { \Γ \⊢ \S_s~\match ~\hl{[\X]} \{ \U_i \⇒ \S_i \} \otherwise~\S_d \<: \\
          \hphantom{\Γ \⊢~} \T_s~\match ~\hl{[\X]} \{ \U_i \⇒ \T_i \} \otherwise~\T_d \hphantom{\<:}}
 
-     % \halfA
-     % \infrule[BS-Cov]
-     %   {\Γ \⊢ \S \<: \T  \andalso  \B \text{ is covariant}}
-     %   {\Γ \⊢ \B~\S \<: \B~\T}
-     % \halfB
-     % \infrule[BS-Con]
-     %   {\Γ \⊢ \T \<: \S  \andalso  \B \text{ is contravariant}}
-     %   {\Γ \⊢ \B~\S \<: \B~\T}
-     % \halfC
-
     \textit{Typing} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     \infrule[BT-Match]
@@ -452,4 +442,21 @@
     { (\C, \hl{[\X \↦ \U]} \C_n) \∈ \Ψ  \andalso
       \∀m<n.\,\hl{\∀\T.}~(\C, \hl{[\X \↦ \T]} \C_m) \∉ \Ψ}
     { \new \C~\match ~\hl{[\X]} \{ \x_i \: \C_i \⇒ \t_i\} \otherwise~\t_d \⟶ \hl{[\X \↦ \U]}[\x_n \↦ \new \C]\t_n }
+}
+
+\newcommand\dependentVsImplicitBenchmarks[1]{
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/concat-graph.tex}
+    \end{subfigure}%
+    \hspace{-20pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/join-graph.tex}
+    \end{subfigure}
+    \caption{#1}
+    \label{fig:dependentVsImplicitBenchmarks}
+  \end{figure}
 }

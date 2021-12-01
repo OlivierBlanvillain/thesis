@@ -25,7 +25,6 @@
 \usepackage{fourier}
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{subfig}
 \usepackage{booktabs}
 \usepackage{lipsum}
 \usepackage[final]{microtype}
@@ -390,6 +389,17 @@
 \newtheorem*{definition*}{Definition}
 
 \lstMakeShortInline{|}
-\input{figures.tex}
+\input{figures/figures.tex}
 \input{scala/code-sections.tex}
 \hfuzz=0.5pt
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% TypeOf paper headers %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\oursystem}{$\lambda${\tiny $\mathop{\protect\vphantom{X}}^\text{nd}_{<:\{\}}$}\xspace}
+\newcommand\FR{System~FR\xspace}
+\newcommand\singleton[1]{\lbrace #1 \rbrace}
+\usepackage{xfrac}
+\usepackage{caption}
+\usepackage{subcaption}

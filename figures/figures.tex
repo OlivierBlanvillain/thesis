@@ -132,7 +132,8 @@
 }
 
 \newcommand\FMTypingRules[1]{
-  \newpage\thispagestyle{empty}
+  \clearpage%
+  \thispagestyle{empty}%
   \begin{figure}%
   \vspace{-25pt}%
   \begin{framed}%
@@ -277,6 +278,7 @@
   \vspace{-32pt}%
   \label{fig:FMTypingRules}%
   \end{figure}%
+  \clearpage%
 }
 
 \newcommand\FMExtension[1]{

@@ -47,7 +47,7 @@ def reshape[T, From <: Shape, To <: Shape](arr: NDArray[T, From], newshape: To)
 
 import scala.compiletime.ops.int.+
 // start section reduceType
-type Reduce[S <: Shape, Axes <: None | Shape] <: Shape =
+type ReduceAxes[S <: Shape, Axes <: None | Shape] <: Shape =
   Axes match {
     case None => Ø
     case Shape => Loop[S, Axes, 0]
@@ -85,5 +85,5 @@ type Remove[From <: Shape, Value <: Int & Singleton] <: Shape = From match {
 }
 
 // start section npmeanDef
-def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, Reduce[S, A]] = ???
+def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, ReduceAxes[S, A]] = ???
 // end section npmeanDef

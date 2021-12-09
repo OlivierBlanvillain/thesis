@@ -1,3 +1,5 @@
+object ImplicitTutorial {
+
 object explicit {
 // start section explicitModulo
 val modulo: Int = 3
@@ -37,5 +39,7 @@ implicit def listOrdering[T](implicit ev: Ordering[T]): Ordering[List[T]] =
         case (_, Nil) => false
         case (Nil, _) => true
 // end section ordListExample
+
+}
 
 }

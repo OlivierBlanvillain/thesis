@@ -1,3 +1,5 @@
+object NumpyMatchTypes {
+
 sealed trait Shape
 final case class #:[H <: Int & Singleton, T <: Shape](head: H, tail: T) extends Shape
 case object Ø extends Shape
@@ -87,3 +89,5 @@ type Remove[From <: Shape, Value <: Int & Singleton] <: Shape = From match {
 // start section npmeanDef
 def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, ReduceAxes[S, A]] = ???
 // end section npmeanDef
+
+}

@@ -1,4 +1,4 @@
-package foo
+object SafeImplicits {
 
 // start section hlistEnumDefinition
 enum HList:
@@ -149,5 +149,7 @@ addEventListener("mouseover", myHandler)(
   Remove.casetail(Remove.casetail(Remove.casehead))
 )
 // end section addEventListenerImplicitCall
+
+}
 
 }

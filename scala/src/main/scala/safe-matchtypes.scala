@@ -1,4 +1,5 @@
-package bar
+object SafeMatchTypes {
+
 import scala.util.NotGiven
 
 sealed trait HList
@@ -45,3 +46,5 @@ def main(ctx: Context[HNil]): Context[HNil] =
      .free("mem")
      .free("bool")
 // end section memMatchtypeMain
+
+}

@@ -13,7 +13,7 @@ object Contains {
   type Aux[Haystack <: Shape, Needle <: Int, O <: Boolean] =
     Contains[Haystack, Needle] { type Out = O }
 
-  def instance: Nothing = (new Contains {}).asInstanceOf
+  val instance: Nothing = (new Contains {}).asInstanceOf
 
   implicit def caseNil[Needle <: Int]
     : Aux[Ø, Needle, false] = instance
@@ -29,7 +29,7 @@ object Contains {
 trait Remove[From <: Shape, Value <: Int] { type Out <: Shape }
 
 object Remove {
-  def instance: Nothing = (new Remove {}).asInstanceOf
+  val instance: Nothing = (new Remove {}).asInstanceOf
 
   type Aux[From <: Shape, Value <: Int, O <: Shape] =
     Remove[From, Value] { type Out = O }
@@ -48,7 +48,7 @@ object Remove {
 trait ReduceAxes[S <: Shape, Axes <: None | Shape] { type Out <: Shape }
 
 object ReduceAxes {
-  def instance: Nothing = (new ReduceAxes {}).asInstanceOf
+  val instance: Nothing = (new ReduceAxes {}).asInstanceOf
 
   type Aux[S <: Shape, Axes <: None | Shape, O <: Shape] =
     ReduceAxes[S, Axes] { type Out = O }
@@ -62,7 +62,7 @@ object ReduceAxes {
 trait Loop[S <: Shape, Axes <: Shape, I <: Int] { type Out <: Shape }
 
 object Loop {
-  def instance: Nothing = (new Loop {}).asInstanceOf
+  val instance: Nothing = (new Loop {}).asInstanceOf
 
   type Aux[S <: Shape, Axes <: Shape, I <: Int, O <: Shape] =
     Loop[S, Axes, I] { type Out = O }

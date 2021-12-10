@@ -1,0 +1,3 @@
+[submodule "dscala"]
+	path = dscala
+	url = git@github.com:dotty-staging/dotty.git

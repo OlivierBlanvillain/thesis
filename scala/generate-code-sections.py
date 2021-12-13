@@ -29,10 +29,6 @@ for input_file in input_files:
             if end_match:
                 finishes[end_match.group(1)] = (input_file, i) # minted end is exclusive
 
-    if len(starts) == 0:
-        print(f"No sections defined in {input_file}!")
-        sys.exit(1)
-
 def dict_zip(*dicts):
     return {k: [d[k] for d in dicts] for k in dicts[0].keys()}
 

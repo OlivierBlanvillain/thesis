@@ -21,17 +21,9 @@ object ConcatDependent {
       )
     } = ???
 
-    def l2: {
-      Cons(2, //X
-        Cons(42,
-          Nil
-        )
-      )
-    } = ???
+    dependent def l2 = concat(l1, l1)
 
-    dependent def l3 = concat(l1, l2)
-
-    def result: {
+    def l3: {
       Cons(1, //X
         Cons(42,
           Cons(2, //X
@@ -41,6 +33,6 @@ object ConcatDependent {
           ) //X
         )
       ) //X
-    } = l3
+    } = l2
   }
 }

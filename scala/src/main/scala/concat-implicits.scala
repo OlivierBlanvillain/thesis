@@ -30,18 +30,13 @@ object ConcatImplicits {
       42 ::
       HNil = ???
 
-    val l2:
-      2 :: //X
-      42 ::
-      HNil = ???
+    val l2 = concat(l1, l1)
 
-    val l3 = concat(l1, l2)
-
-    val l4:
+    val l3:
       1 :: //X
       42 ::
-      2 :: //X
+      1 :: //X
       42 ::
-      HNil = l3
+      HNil = l2
   }
 }

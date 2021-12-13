@@ -46,18 +46,21 @@ object JoinImplicits {
       = new Join[X, Y, V] { type Out = V :: Rxy }
   }
 
-  object Bench {
-    def the[T](implicit ev: T): ev.type = ev
-    type S1 =
-      1 :: //X
-      42 ::
-      HNil
+  def join[S1 <: HList, S2 <: HList, X <: Singleton]
+    (s1: S1, s2: S2, x: X)
+    (implicit ev: Join[S1, S2, X])
+    : ev.Out = ???
 
-    the[Join[S1, S1, 42]]: Join[S1, S1, 42] { type Out =
+  object Bench {
+    val s1:
+      1 :: //X
+      42 ::
+      HNil = ???
+
+    join(s1, s1, 42):
       42 ::
       1 :: //X
       1 :: //X
       HNil
-    }
   }
 }

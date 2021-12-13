@@ -90,11 +90,15 @@ type Remove[From <: Shape, Value <: Int & Singleton] <: Shape = From match {
 def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, ReduceAxes[S, A]] = ???
 // end section npmeanDef
 
-// object Bench {
-//   type S =
+object Bench {
+  type A = (
+    0 #: //X
+    Ø
+  )
 
-//   type Axes =
+  type Reduced = ReduceAxes[A, A]
 
-//   type Reduced = ReduceAxes
-// }
+  implicitly[Reduced =:= Ø]
+}
+
 }

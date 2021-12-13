@@ -10,21 +10,21 @@ object JoinImplicitsTests {
   the[Concat    [HNil, HNil]]
     : Concat.Aux[HNil, HNil, HNil]
 
-  the[Remove[1, 1 :: 2 :: 3 :: 4 :: HNil]]
-    : Remove.Aux[1, 1 :: 2 :: 3 :: 4 :: HNil, 2 :: 3 :: 4 :: HNil]
-  the[Remove[2, 1 :: 2 :: 3 :: 4 :: HNil]]
-    : Remove.Aux[2, 1 :: 2 :: 3 :: 4 :: HNil, 1 :: 3 :: 4 :: HNil]
-  the[Remove[3, 1 :: 2 :: 3 :: 4 :: HNil]]
-    : Remove.Aux[3, 1 :: 2 :: 3 :: 4 :: HNil, 1 :: 2 :: 4 :: HNil]
-  the[Remove[4, 1 :: 2 :: 3 :: 4 :: HNil]]
-    : Remove.Aux[4, 1 :: 2 :: 3 :: 4 :: HNil, 1 :: 2 :: 3 :: HNil]
+  the[Remove[1 :: 2 :: 3 :: 4 :: HNil, 1]]
+    : Remove.Aux[1 :: 2 :: 3 :: 4 :: HNil, 1, 2 :: 3 :: 4 :: HNil]
+  the[Remove[1 :: 2 :: 3 :: 4 :: HNil, 2]]
+    : Remove.Aux[1 :: 2 :: 3 :: 4 :: HNil, 2, 1 :: 3 :: 4 :: HNil]
+  the[Remove[1 :: 2 :: 3 :: 4 :: HNil, 3]]
+    : Remove.Aux[1 :: 2 :: 3 :: 4 :: HNil, 3, 1 :: 2 :: 4 :: HNil]
+  the[Remove[1 :: 2 :: 3 :: 4 :: HNil, 4]]
+    : Remove.Aux[1 :: 2 :: 3 :: 4 :: HNil, 4, 1 :: 2 :: 3 :: HNil]
 
-  the[Join[2, 1 :: 2 :: 3 :: HNil, 4 :: 2 :: 5 :: HNil]]
-    : Join[2, 1 :: 2 :: 3 :: HNil, 4 :: 2 :: 5 :: HNil] { type Out = 2 :: 1 :: 3 :: 4 :: 5 :: HNil }
-  the[Join[2, 1 :: 3 :: 2 :: HNil, 2 :: 4 :: 5 :: HNil]]
-    : Join[2, 1 :: 3 :: 2 :: HNil, 2 :: 4 :: 5 :: HNil] { type Out = 2 :: 1 :: 3 :: 4 :: 5 :: HNil }
-  the[Join[1, 1 :: HNil, 1 :: HNil]]
-    : Join[1, 1 :: HNil, 1 :: HNil] { type Out = 1 :: HNil }
+  the[Join[1 :: 2 :: 3 :: HNil, 4 :: 2 :: 5 :: HNil, 2]]
+    : Join[1 :: 2 :: 3 :: HNil, 4 :: 2 :: 5 :: HNil, 2] { type Out = 2 :: 1 :: 3 :: 4 :: 5 :: HNil }
+  the[Join[1 :: 3 :: 2 :: HNil, 2 :: 4 :: 5 :: HNil, 2]]
+    : Join[1 :: 3 :: 2 :: HNil, 2 :: 4 :: 5 :: HNil, 2] { type Out = 2 :: 1 :: 3 :: 4 :: 5 :: HNil }
+  the[Join[1 :: HNil, 1 :: HNil, 1]]
+    : Join[1 :: HNil, 1 :: HNil, 1] { type Out = 1 :: HNil }
 }
 
 object NumpyImplicitsTests {

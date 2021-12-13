@@ -26,7 +26,7 @@ object ConcatDependent {
     def l3: {
       Cons(1, //X
         Cons(42,
-          Cons(2, //X
+          Cons(1, //X
             Cons(42,
               Nil
             )

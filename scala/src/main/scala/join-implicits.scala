@@ -19,31 +19,31 @@ object JoinImplicits {
       : Aux[Xh :: Xt, Y, Xh :: O] = instance
   }
 
-  trait Remove[V, L <: HList] { type Out <: HList }
+  trait Remove[L <: HList, V] { type Out <: HList }
 
   object Remove {
-    type Aux[V, L <: HList, O <: HList] =
-      Remove[V, L] { type Out = O }
+    type Aux[L <: HList, V, O <: HList] =
+      Remove[L, V] { type Out = O }
 
     val instance: Nothing = (new Remove {}).asInstanceOf
 
-    implicit def caseMatch[V, Lt <: HList]: Aux[V, V :: Lt, Lt] = instance
+    implicit def caseMatch[Lt <: HList, V]: Aux[V :: Lt, V, Lt] = instance
 
-    implicit def caseCons[V, Lh, Lt <: HList, O <: HList]
-      (implicit ev: Aux[V, Lt, O])
-      : Aux[V, Lh :: Lt, Lh :: O] = instance
+    implicit def caseCons[Lh, Lt <: HList, V, O <: HList]
+      (implicit ev: Aux[Lt, V, O])
+      : Aux[Lh :: Lt, V, Lh :: O] = instance
   }
 
-  trait Join[V, X <: HList, Y <: HList] { type Out <: HList }
+  trait Join[X <: HList, Y <: HList, V] { type Out <: HList }
 
   object Join {
-    implicit def instance[V, X <: HList, Y <: HList, Rx <: HList, Ry <: HList, Rxy <: HList]
+    implicit def instance[X <: HList, Y <: HList, V, Rx <: HList, Ry <: HList, Rxy <: HList]
       (implicit
-        i1: Remove.Aux[V, X, Rx],
-        i2: Remove.Aux[V, Y, Ry],
+        i1: Remove.Aux[X, V, Rx],
+        i2: Remove.Aux[Y, V, Ry],
         i3: Concat.Aux[Rx, Ry, Rxy]
-      ): Join[V, X, Y] { type Out = V :: Rxy }
-      = new Join[V, X, Y] { type Out = V :: Rxy }
+      ): Join[X, Y, V] { type Out = V :: Rxy }
+      = new Join[X, Y, V] { type Out = V :: Rxy }
   }
 
   object Bench {
@@ -53,15 +53,10 @@ object JoinImplicits {
       42 ::
       HNil
 
-    type S2 =
-      2 :: //X
-      42 ::
-      HNil
-
-    the[Join[42, S1, S2]]: Join[42, S1, S2] { type Out =
+    the[Join[S1, S1, 42]]: Join[S1, S1, 42] { type Out =
       42 ::
       1 :: //X
-      2 :: //X
+      1 :: //X
       HNil
     }
   }

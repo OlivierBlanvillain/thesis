@@ -5,15 +5,15 @@ object RemoveMatchTypes {
   type HNil = HNil.type
 
   type Remove[From <: HList, X] <: HList = From match {
-    case HNil => HNil
     case head :: tail => head match {
-      case X => Remove[tail, X]
+      case X => tail
       case _ => head :: Remove[tail, X]
     }
+    case HNil => HNil
   }
 
-  def remove[X <: Singleton, L1 <: HList]
-    (x: X, l2: L1)
+  def remove[L1 <: HList, X <: Singleton]
+    (l2: L1, x: X)
     : Remove[L1, X] = ???
 
   object Bench {
@@ -23,7 +23,7 @@ object RemoveMatchTypes {
         -1 ::
         HNil = ???
 
-      val l2 = remove(-1, l1)
+      val l2 = remove(l1, -1)
 
       val l3:
         0 :: //X

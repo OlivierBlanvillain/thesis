@@ -5,17 +5,16 @@ object JoinMatchTypes {
   type HNil = HNil.type
 
   type Concat[X <: HList, Y <: HList] <: HList = X match {
-    case HNil => Y
     case h :: t => h :: Concat[t, Y]
+    case HNil => Y
   }
 
-
   type Remove[From <: HList, X] <: HList = From match {
-    case HNil => HNil
     case head :: tail => head match {
-      case X => Remove[tail, X]
+      case X => tail
       case _ => head :: Remove[tail, X]
     }
+    case HNil => HNil
   }
 
   type Join[L1 <: HList, L2 <: HList, X] =

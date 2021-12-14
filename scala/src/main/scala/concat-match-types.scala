@@ -5,8 +5,8 @@ object ConcatMatchTypes {
   type HNil = HNil.type
 
   type Concat[X <: HList, Y <: HList] = X match {
-    case HNil => Y
     case h :: t => h :: Concat[t, Y]
+    case HNil => Y
   }
 
   def concat[L1 <: HList, L2 <: HList]

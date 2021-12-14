@@ -19,8 +19,8 @@ object RemoveImplicits {
       : Aux[Lh :: Lt, V, Lh :: O] = instance
   }
 
-  def remove[X <: Singleton, L1 <: HList]
-    (x: X, l1: L1)
+  def remove[L1 <: HList, X <: Singleton]
+    (l1: L1, x: X)
     (implicit ev: Remove[L1, X])
     : ev.Out = ???
 
@@ -31,7 +31,7 @@ object RemoveImplicits {
         -1 ::
         HNil = ???
 
-      val s2 = remove(-1, s1)
+      val s2 = remove(s1, -1)
 
       val s3:
         0 :: //X

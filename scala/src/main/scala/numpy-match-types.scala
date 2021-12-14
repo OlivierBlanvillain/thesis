@@ -1,7 +1,7 @@
 object NumpyMatchTypes {
 
 sealed trait Shape
-final case class #:[H <: Int & Singleton, T <: Shape](head: H, tail: T) extends Shape
+final case class #:[+H <: Int, +T <: Shape](head: H, tail: T) extends Shape
 case object Ø extends Shape
 
 // cheating a little bit here, but there's a footnote to explain it!
@@ -71,19 +71,19 @@ type Loop[S <: Shape, Axes <: Shape, I <: Int] <: Shape =
 // end section reduceLoop
 
 type Contains[Haystack <: Shape, Needle <: Int] <: Boolean = Haystack match {
-  case Ø => false
   case head #: tail => head match {
     case Needle => true
     case _ => Contains[tail, Needle]
   }
+  case Ø => false
 }
 
-type Remove[From <: Shape, Value <: Int & Singleton] <: Shape = From match {
-  case Ø => Ø
+type Remove[From <: Shape, Value <: Int] <: Shape = From match {
   case head #: tail => head match {
-    case Value => Remove[tail, Value]
+    case Value => tail
     case _ => head #: Remove[tail, Value]
   }
+  case Ø => Ø
 }
 
 // start section npmeanDef
@@ -92,7 +92,7 @@ def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, Red
 
 object Bench {
   def main(args: Array[String]): Unit = {
-    type ::[A <: Int & Singleton, B <: Shape] = #:[A, B]
+    type ::[A <: Int, B <: Shape] = #:[A, B]
 
     type A = (
       0 :: //X

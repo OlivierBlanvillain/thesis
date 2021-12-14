@@ -14,18 +14,20 @@ object ConcatMatchTypes {
     : Concat[L1, L2] = ???
 
   object Bench {
-    val l1:
-      0 :: //X
-      42 ::
-      HNil = ???
+    def main(args: Array[String]): Unit = {
+      val l1:
+        0 :: //X
+        -1 ::
+        HNil = ???
 
-    val l2 = concat(l1, l1)
+      val l2 = concat(l1, l1)
 
-    val l3:
-      0 :: //X
-      42 ::
-      0 :: //X
-      42 ::
-      HNil = l2
+      val l3:
+        0 :: //X
+        -1 ::
+        0 :: //X
+        -1 ::
+        HNil = l2
+    }
   }
 }

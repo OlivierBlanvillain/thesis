@@ -84,13 +84,15 @@ object NumpyImplicits {
   }
 
   object Bench {
-    type S = (
-      0 :: //X
-      Ø
-    )
+    def main(args: Array[String]): Unit = {
+      type S = (
+        0 :: //X
+        Ø
+      )
 
-    def the[T](implicit x: T): x.type = x
-    val reduced = the[ReduceAxes[S, S]]
-    implicitly[reduced.Out =:= Ø]
+      def the[T](implicit x: T): x.type = x
+      val reduced = the[ReduceAxes[S, S]]
+      implicitly[reduced.Out =:= Ø]
+    }
   }
 }

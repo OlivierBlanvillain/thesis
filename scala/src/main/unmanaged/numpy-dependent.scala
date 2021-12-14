@@ -46,13 +46,15 @@ object NumpyMatchTypes {
     }
 
   object Bench {
-    def s: {
-      0 :: //X
-      HNil
-    } = ???
+    def main(args: Array[String]): Unit = {
+      def s: {
+        0 :: //X
+        HNil
+      } = ???
 
-    dependent def out = reduceAxes(s, s)
+      dependent def out = reduceAxes(s, s)
 
-    def result: { HNil } = out
+      def result: { HNil } = out
+    }
   }
 }

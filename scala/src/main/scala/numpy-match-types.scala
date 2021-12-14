@@ -91,16 +91,18 @@ def mean[T, S <: Shape, A <: Shape](arr: NDArray[T, S], axes: A): NDArray[T, Red
 // end section npmeanDef
 
 object Bench {
-  type ::[A <: Int & Singleton, B <: Shape] = #:[A, B]
+  def main(args: Array[String]): Unit = {
+    type ::[A <: Int & Singleton, B <: Shape] = #:[A, B]
 
-  type A = (
-    0 :: //X
-    Ø
-  )
+    type A = (
+      0 :: //X
+      Ø
+    )
 
-  type Reduced = ReduceAxes[A, A]
+    type Reduced = ReduceAxes[A, A]
 
-  implicitly[Reduced =:= Ø]
+    implicitly[Reduced =:= Ø]
+  }
 }
 
 }

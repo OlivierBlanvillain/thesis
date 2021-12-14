@@ -33,18 +33,20 @@ object JoinDependent {
   }
 
   object Bench {
-    def l1: {
-      0 :: //X
-      42 :: HNil
-    } = ???
+    def main(args: Array[String]): Unit = {
+      def l1: {
+        0 :: //X
+        -1 :: HNil
+      } = ???
 
-    dependent def joined = join(l1, l1, 42)
+      dependent def joined = join(l1, l1, -1)
 
-    def results: {
-      42 ::
-      0 :: //X
-      0 :: //X
-      HNil
-    } = joined
+      def results: {
+        -1 ::
+        0 :: //X
+        0 :: //X
+        HNil
+      } = joined
+    }
   }
 }

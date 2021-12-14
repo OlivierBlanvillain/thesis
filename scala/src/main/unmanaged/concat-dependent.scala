@@ -16,20 +16,22 @@ object ConcatDependent {
     }
 
   object Bench {
-    def l1: {
-      0 :: //X
-      42 ::
-      HNil
-    } = ???
+    def main(args: Array[String]): Unit = {
+      def l1: {
+        0 :: //X
+        -1 ::
+        HNil
+      } = ???
 
-    dependent def l2 = concat(l1, l1)
+      dependent def l2 = concat(l1, l1)
 
-    def l3: {
-      0 :: //X
-      42 ::
-      0 :: //X
-      42 ::
-      HNil
-    } = l2
+      def l3: {
+        0 :: //X
+        -1 ::
+        0 :: //X
+        -1 ::
+        HNil
+      } = l2
+    }
   }
 }

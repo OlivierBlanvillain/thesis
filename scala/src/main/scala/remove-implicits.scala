@@ -25,15 +25,17 @@ object RemoveImplicits {
     : ev.Out = ???
 
   object Bench {
-    val s1:
-      0 :: //X
-      42 ::
-      HNil = ???
+    def main(args: Array[String]): Unit = {
+      val s1:
+        0 :: //X
+        -1 ::
+        HNil = ???
 
-    val s2 = remove(42, s1)
+      val s2 = remove(-1, s1)
 
-    val s3:
-      0 :: //X
-      HNil = s2
+      val s3:
+        0 :: //X
+        HNil = s2
+    }
   }
 }

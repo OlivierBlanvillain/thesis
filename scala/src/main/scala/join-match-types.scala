@@ -26,15 +26,17 @@ object JoinMatchTypes {
     : Join[S1, S2, X] = ???
 
   object Bench {
-    val s1:
-      0 :: //X
-      42 ::
-      HNil = ???
+    def main(args: Array[String]): Unit = {
+      val s1:
+        0 :: //X
+        -1 ::
+        HNil = ???
 
-    join(s1, s1, 42):
-      42 ::
-      0 :: //X
-      0 :: //X
-      HNil
+      join(s1, s1, -1):
+        -1 ::
+        0 :: //X
+        0 :: //X
+        HNil
+    }
   }
 }

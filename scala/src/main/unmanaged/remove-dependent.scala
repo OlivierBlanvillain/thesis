@@ -18,17 +18,19 @@ object RemoveDependent {
     }
 
   object Bench {
-    def l1: {
-      0 :: //X
-      42 ::
-      HNil
-    } = ???
+    def main(args: Array[String]): Unit = {
+      def l1: {
+        0 :: //X
+        -1 ::
+        HNil
+      } = ???
 
-    dependent def l2 = remove(l1, 42)
+      dependent def l2 = remove(l1, -1)
 
-    def result: {
-      0 :: //X
-      HNil
-    } = l2
+      def result: {
+        0 :: //X
+        HNil
+      } = l2
+    }
   }
 }

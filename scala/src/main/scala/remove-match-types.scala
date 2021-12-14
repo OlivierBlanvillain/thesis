@@ -17,17 +17,18 @@ object RemoveMatchTypes {
     : Remove[L1, X] = ???
 
   object Bench {
-    val l1:
-      0 :: //X
-      42 ::
-      HNil = ???
+    def main(args: Array[String]): Unit = {
+      val l1:
+        0 :: //X
+        -1 ::
+        HNil = ???
 
-    val l2 = remove(42, l1)
+      val l2 = remove(-1, l1)
 
-    val l3:
-      0 :: //X
-      HNil = l2
+      val l3:
+        0 :: //X
+        HNil = l2
+    }
   }
-
 }
 

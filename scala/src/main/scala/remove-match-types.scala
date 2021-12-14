@@ -18,14 +18,14 @@ object RemoveMatchTypes {
 
   object Bench {
     val l1:
-      1 :: //X
+      0 :: //X
       42 ::
       HNil = ???
 
     val l2 = remove(42, l1)
 
     val l3:
-      1 :: //X
+      0 :: //X
       HNil = l2
   }
 

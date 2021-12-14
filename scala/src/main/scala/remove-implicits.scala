@@ -26,14 +26,14 @@ object RemoveImplicits {
 
   object Bench {
     val s1:
-      1 :: //X
+      0 :: //X
       42 ::
       HNil = ???
 
     val s2 = remove(42, s1)
 
     val s3:
-      1 :: //X
+      0 :: //X
       HNil = s2
   }
 }

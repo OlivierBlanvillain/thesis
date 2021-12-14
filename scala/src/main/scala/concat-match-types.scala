@@ -15,16 +15,16 @@ object ConcatMatchTypes {
 
   object Bench {
     val l1:
-      1 :: //X
+      0 :: //X
       42 ::
       HNil = ???
 
     val l2 = concat(l1, l1)
 
     val l3:
-      1 :: //X
+      0 :: //X
       42 ::
-      1 :: //X
+      0 :: //X
       42 ::
       HNil = l2
   }

@@ -53,14 +53,14 @@ object JoinImplicits {
 
   object Bench {
     val s1:
-      1 :: //X
+      0 :: //X
       42 ::
       HNil = ???
 
     join(s1, s1, 42):
       42 ::
-      1 :: //X
-      1 :: //X
+      0 :: //X
+      0 :: //X
       HNil
   }
 }

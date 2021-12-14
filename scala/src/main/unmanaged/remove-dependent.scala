@@ -1,35 +1,34 @@
 import java.lang.{IllegalArgumentException => IAE}
 
 object RemoveDependent {
-  sealed trait HList
-  dependent case class Cons(head: Int, tail: HList) extends HList
-  dependent case object Nil extends HList
+  sealed trait HList {
+    dependent def ::(head: Int): HList = new ::(head, this)
+  }
+  dependent case class ::(head: Int, tail: HList) extends HList
+  dependent case object HNil extends HList
 
   dependent def remove(l: HList, e: Int): HList =
-    if (l.isInstanceOf[Cons]) {
-      val head = l.asInstanceOf[Cons].head
-      val tail = l.asInstanceOf[Cons].tail
+    if (l.isInstanceOf[::]) {
+      val head = l.asInstanceOf[::].head
+      val tail = l.asInstanceOf[::].tail
       if (e == head) tail
-      else Cons(head, remove(tail, e))
+      else head :: remove(tail, e)
     } else {
       throw new IAE(s"$e not found in $l")
     }
 
   object Bench {
     def l1: {
-      Cons(1, //X
-        Cons(42,
-          Nil
-        )
-      )
+      0 :: //X
+      42 ::
+      HNil
     } = ???
 
     dependent def l2 = remove(l1, 42)
 
     def result: {
-      Cons(1, //X
-        Nil
-      ) //X
+      0 :: //X
+      HNil
     } = l2
   }
 }

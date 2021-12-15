@@ -1,0 +1,156 @@
+[0m[[0m[0minfo[0m] [0m[0mLoading settings for project ddotty-build-build from build.sbt ...[0m
+[0m[[0m[0minfo[0m] [0m[0mLoading project definition from /home/olivier/workspace/thesis/ddotty/project/project[0m
+[0m[[0m[0minfo[0m] [0m[0mLoading settings for project ddotty-build from build.sbt,plugins.sbt ...[0m
+[0m[[0m[0minfo[0m] [0m[0mLoading project definition from /home/olivier/workspace/thesis/ddotty/project[0m
+[0m[[0m[0minfo[0m] [0m[0mLoading settings for project dotty from build.sbt ...[0m
+[0m[[0m[0minfo[0m] [0m[0mLoading settings for project dotty-semanticdb-input from build.sbt ...[0m
+[0m[[0m[0minfo[0m] [0m[0mResolving key references (14593 settings) ...[0m
+[0m[[0m[0minfo[0m] [0m[0mSet current project to dotty (in build file:/home/olivier/workspace/thesis/ddotty/)[0m
+[0m[[0m[33mwarn[0m] [0m[0mMultiple main classes detected.  Run 'show discoveredMainClasses' to see the list[0m
+[0m[[0m[0minfo[0m] [0m[0mRunning (fork) dotty.tools.benchmarks.Bench 60 60 1 /home/olivier/workspace/thesis/scala/target/generated/join-dependent.scala.233.scala[0m
+# JMH version: 1.19
+# VM version: JDK 1.8.0_212, VM 25.212-b01
+# VM invoker: /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+# VM options: -Xms2G -Xmx2G -Xss4M
+# Warmup: 60 iterations, 1 s each
+# Measurement: 60 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: dotty.tools.benchmarks.Worker.compile
+
+# Run progress: 0.00% complete, ETA 00:02:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 2052.316 ms/op
+# Warmup Iteration   2: 415.618 ms/op
+# Warmup Iteration   3: 252.496 ms/op
+# Warmup Iteration   4: 182.738 ms/op
+# Warmup Iteration   5: 145.119 ms/op
+# Warmup Iteration   6: 123.237 ms/op
+# Warmup Iteration   7: 111.909 ms/op
+# Warmup Iteration   8: 115.090 ms/op
+# Warmup Iteration   9: 108.520 ms/op
+# Warmup Iteration  10: 115.347 ms/op
+# Warmup Iteration  11: 107.264 ms/op
+# Warmup Iteration  12: 106.825 ms/op
+# Warmup Iteration  13: 106.080 ms/op
+# Warmup Iteration  14: 103.487 ms/op
+# Warmup Iteration  15: 101.753 ms/op
+# Warmup Iteration  16: 101.900 ms/op
+# Warmup Iteration  17: 100.499 ms/op
+# Warmup Iteration  18: 97.670 ms/op
+# Warmup Iteration  19: 98.295 ms/op
+# Warmup Iteration  20: 97.792 ms/op
+# Warmup Iteration  21: 97.092 ms/op
+# Warmup Iteration  22: 94.464 ms/op
+# Warmup Iteration  23: 94.898 ms/op
+# Warmup Iteration  24: 95.377 ms/op
+# Warmup Iteration  25: 92.317 ms/op
+# Warmup Iteration  26: 93.997 ms/op
+# Warmup Iteration  27: 92.725 ms/op
+# Warmup Iteration  28: 120.467 ms/op
+# Warmup Iteration  29: 93.821 ms/op
+# Warmup Iteration  30: 91.470 ms/op
+# Warmup Iteration  31: 91.357 ms/op
+# Warmup Iteration  32: 90.829 ms/op
+# Warmup Iteration  33: 90.967 ms/op
+# Warmup Iteration  34: 91.454 ms/op
+# Warmup Iteration  35: 91.102 ms/op
+# Warmup Iteration  36: 91.629 ms/op
+# Warmup Iteration  37: 90.393 ms/op
+# Warmup Iteration  38: 91.000 ms/op
+# Warmup Iteration  39: 90.384 ms/op
+# Warmup Iteration  40: 90.134 ms/op
+# Warmup Iteration  41: 89.333 ms/op
+# Warmup Iteration  42: 89.697 ms/op
+# Warmup Iteration  43: 89.699 ms/op
+# Warmup Iteration  44: 89.075 ms/op
+# Warmup Iteration  45: 90.325 ms/op
+# Warmup Iteration  46: 88.359 ms/op
+# Warmup Iteration  47: 88.494 ms/op
+# Warmup Iteration  48: 88.473 ms/op
+# Warmup Iteration  49: 88.674 ms/op
+# Warmup Iteration  50: 88.433 ms/op
+# Warmup Iteration  51: 87.561 ms/op
+# Warmup Iteration  52: 86.224 ms/op
+# Warmup Iteration  53: 85.802 ms/op
+# Warmup Iteration  54: 86.691 ms/op
+# Warmup Iteration  55: 86.601 ms/op
+# Warmup Iteration  56: 85.871 ms/op
+# Warmup Iteration  57: 86.254 ms/op
+# Warmup Iteration  58: 86.791 ms/op
+# Warmup Iteration  59: 85.150 ms/op
+# Warmup Iteration  60: 86.129 ms/op
+Iteration   1: 85.844 ms/op
+Iteration   2: 85.304 ms/op
+Iteration   3: 86.279 ms/op
+Iteration   4: 85.029 ms/op
+Iteration   5: 85.479 ms/op
+Iteration   6: 85.529 ms/op
+Iteration   7: 85.034 ms/op
+Iteration   8: 85.007 ms/op
+Iteration   9: 85.259 ms/op
+Iteration  10: 85.604 ms/op
+Iteration  11: 84.601 ms/op
+Iteration  12: 86.801 ms/op
+Iteration  13: 85.124 ms/op
+Iteration  14: 85.311 ms/op
+Iteration  15: 84.719 ms/op
+Iteration  16: 84.923 ms/op
+Iteration  17: 84.647 ms/op
+Iteration  18: 84.130 ms/op
+Iteration  19: 85.044 ms/op
+Iteration  20: 86.171 ms/op
+Iteration  21: 84.653 ms/op
+Iteration  22: 85.475 ms/op
+Iteration  23: 84.921 ms/op
+Iteration  24: 85.046 ms/op
+Iteration  25: 83.953 ms/op
+Iteration  26: 83.860 ms/op
+Iteration  27: 83.161 ms/op
+Iteration  28: 83.161 ms/op
+Iteration  29: 83.149 ms/op
+Iteration  30: 83.280 ms/op
+Iteration  31: 83.408 ms/op
+Iteration  32: 83.525 ms/op
+Iteration  33: 84.743 ms/op
+Iteration  34: 83.742 ms/op
+Iteration  35: 83.225 ms/op
+Iteration  36: 83.178 ms/op
+Iteration  37: 83.657 ms/op
+Iteration  38: 83.061 ms/op
+Iteration  39: 84.372 ms/op
+Iteration  40: 84.772 ms/op
+Iteration  41: 83.358 ms/op
+Iteration  42: 82.880 ms/op
+Iteration  43: 82.798 ms/op
+Iteration  44: 82.782 ms/op
+Iteration  45: 82.791 ms/op
+Iteration  46: 84.430 ms/op
+Iteration  47: 82.886 ms/op
+Iteration  48: 82.881 ms/op
+Iteration  49: 82.543 ms/op
+Iteration  50: 82.666 ms/op
+Iteration  51: 82.842 ms/op
+Iteration  52: 82.911 ms/op
+Iteration  53: 84.545 ms/op
+Iteration  54: 83.608 ms/op
+Iteration  55: 82.433 ms/op
+Iteration  56: 82.492 ms/op
+Iteration  57: 82.963 ms/op
+Iteration  58: 82.867 ms/op
+Iteration  59: 82.600 ms/op
+Iteration  60: 83.084 ms/op
+
+
+Result "dotty.tools.benchmarks.Worker.compile":
+  84.076 ±(99.9%) 0.512 ms/op [Average]
+  (min, avg, max) = (82.433, 84.076, 86.801), stdev = 1.146
+  CI (99.9%): [83.563, 84.588] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:02:07
+
+Benchmark       Mode  Cnt   Score   Error  Units
+Worker.compile  avgt   60  84.076 ± 0.512  ms/op
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 130 s, completed Dec 15, 2021 8:16:41 AM[0m

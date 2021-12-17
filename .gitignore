@@ -18,3 +18,4 @@ target/
 *.lof
 *.toc
 *.bsp/
+concat-inc.eps

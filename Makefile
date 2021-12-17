@@ -2,7 +2,7 @@
 .PHONY: FORCE
 all: thesis.pdf
 
-thesis.pdf: FORCE proofs/structure.pdf scala/code-sections.tex
+thesis.pdf: FORCE proofs/structure.pdf scala/code-sections.tex figures/concat.eps
 	- latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out thesis.tex
 	- cp latex.out/thesis.pdf thesis.pdf
 	- echo && ./pplatex -b -i latex.out/thesis.log
@@ -24,6 +24,10 @@ publish: FORCE
 
 scala/code-sections.tex: scala/generate-code-sections.py $(shell find scala -name "*.scala")
 	python3 scala/generate-code-sections.py $(shell find scala -name "*.scala")
+
+%.tex %.eps %.pdf: %.gnu
+	- gnuplot $*.gnu
+	- epstopdf $*.eps --outfile=$*.pdf
 
 %.pdf: %.dot
 	- dot -Tpdf $< -o $@.pdf # dot from the graphviz package

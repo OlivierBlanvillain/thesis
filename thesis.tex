@@ -301,12 +301,33 @@ While details of the language specification are outside of the scope of this dis
 \chapter{Performance-Based Evaluation}
 \label{chap:performance-based-evaluation}
 
+\begin{figure}
+\input{figures/concat.tex}
+\end{figure}
+
+\begin{table*}
+  \centering
+  \caption{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
+  \label{tab:bytecode}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{@{}lrrr@{}}
+  \toprule & Implicits & Generalized Singletons & Match Types \\
+  \midrule
+  Concat     & 6  & 0 & 0 \\
+  Remove     & 6  & 0 & 0 \\
+  ReduceAxes & 12 & 0 & 0 \\
+  Join       & 18 & 0 & 0 \\
+  \bottomrule
+  \end{tabular}
+\end{table*}
+
 \begin{enumerate}
   \item Concat
   \item Remove
   \item Join
   \item ReduceAxes
 \end{enumerate}
+
 
 \lipsum[1]
 

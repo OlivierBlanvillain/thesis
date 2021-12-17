@@ -1,16 +1,15 @@
 #!/bin/sh
 
 set -eu
-
-BASEDIR=$(realpath "$(dirname "$0")")
+test "$(pwd)" = "$(realpath "$(dirname "$0")")" || (echo "wrong dir"; exit 1)
 
 # Generate sources:
-# rm -rf "$BASEDIR/scala/target/generated/"
-# mkdir -p "$BASEDIR/scala/target/generated/"
+# rm -rf "scala/target/generated/"
+# mkdir -p "scala/target/generated/"
 # git grep --name-only //X" | grep scala | while read s; do
-#   cp "$s" "$BASEDIR/scala/target/generated/"
+#   cp "$s" "scala/target/generated/"
 # done
-# find "$BASEDIR/scala/target/generated/" -name "*.scala" | while read s; do
+# find "scala/target/generated/" -name "*.scala" | while read s; do
 #   seq -w 1 8 256 | while read i; do
 #     replacement=$(seq 0 $(expr $i - 1) | xargs -i printf "{} :: ")
 #     echo "$s.$i.scala"
@@ -22,7 +21,7 @@ BASEDIR=$(realpath "$(dirname "$0")")
 # Mesure bytecode size:
 # rm -f bytecode-size.log
 # rm -f *.class *.tasty
-# find "$BASEDIR/scala/target/generated/" -name "*.scala" | sort | while read s; do
+# find "scala/target/generated/" -name "*.scala" | sort | while read s; do
 #   if echo "$s" | grep -q "dependent"; then
 #     /usr/bin/time -f "%e" -o "/tmp/time" $HOME/workspace/thesis/bin/dotc -J-Xss4m "$s"
 #   else
@@ -33,10 +32,21 @@ BASEDIR=$(realpath "$(dirname "$0")")
 # done
 
 # Mesure compilation times:
-find "$BASEDIR/scala/target/generated/" -name "*.scala" | sort | while read s; do
-  if echo "$s" | grep -q "dependent"; then
-    (cd "$BASEDIR/ddotty/" && sbt "dotty-bench/jmh:run 60 60 1 $s" | tee "$s.log")
-  else
-    (cd "$HOME/workspace/dotty-master/" && sbt "scala3-bench/jmh:run 60 60 1 $s" | tee "$s.log")
-  fi
+# find "scala/target/generated/" -name "*.scala" | sort | while read s; do
+#   if echo "$s" | grep -q "dependent"; then
+#     (cd "ddotty/" && sbt "dotty-bench/jmh:run 60 60 1 $s" | tee "$s.log")
+#   else
+#     (cd "$HOME/workspace/dotty-master/" && sbt "scala3-bench/jmh:run 60 60 1 $s" | tee "$s.log")
+#   fi
+# done
+
+# Generate CSV:
+rm -rf figures/*.csv
+find "scala/target/generated/" -name "*.log" | sort | while read l; do
+  r=$(grep "±(99.9%)" "$l")
+  avg=$(echo "$r" | grep -oP '\d+.\d+(?=.*99.9)')
+  err=$(echo "$r" | grep -oP '(?<= )\d+.\d+(?= ms/op)')
+  bench=$(echo "$l" | grep -oP '(?<=generated/)[^.]+(?=.scala)')
+  size=$(echo "$l" | grep -oP '\d+')
+  echo "$size,$avg,$err" >> "figures/$bench.csv"
 done

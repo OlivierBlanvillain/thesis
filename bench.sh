@@ -4,19 +4,19 @@ set -eu
 test "$(pwd)" = "$(realpath "$(dirname "$0")")" || (echo "wrong dir"; exit 1)
 
 # Generate sources:
-# rm -rf "scala/target/generated/"
-# mkdir -p "scala/target/generated/"
-# git grep --name-only //X" | grep scala | while read s; do
-#   cp "$s" "scala/target/generated/"
-# done
-# find "scala/target/generated/" -name "*.scala" | while read s; do
-#   seq -w 1 8 256 | while read i; do
-#     replacement=$(seq 0 $(expr $i - 1) | xargs -i printf "{} :: ")
-#     echo "$s.$i.scala"
-#     cat $s | sed "s#0 :: //X#$replacement#g" > "$s.$i.scala"
-#   done
-#   rm $s
-# done
+rm -rf "scala/target/generated/"
+mkdir -p "scala/target/generated/"
+git grep --name-only "//X" | grep scala | while read s; do
+  cp "$s" "scala/target/generated/"
+done
+find "scala/target/generated/" -name "*.scala" | while read s; do
+  seq -w 1 8 256 | while read i; do
+    replacement=$(seq 0 $(expr $i - 1) | xargs -i printf "{} :: ")
+    echo "$s.$i.scala"
+    cat $s | sed "s#0 :: //X#$replacement#g" > "$s.$i.scala"
+  done
+  rm $s
+done
 
 # Mesure bytecode size:
 # rm -f bytecode-size.log
@@ -41,12 +41,12 @@ test "$(pwd)" = "$(realpath "$(dirname "$0")")" || (echo "wrong dir"; exit 1)
 # done
 
 # Generate CSV:
-rm -rf figures/*.csv
-find "scala/target/generated/" -name "*.log" | sort | while read l; do
-  r=$(grep "±(99.9%)" "$l")
-  avg=$(echo "$r" | grep -oP '\d+.\d+(?=.*99.9)')
-  err=$(echo "$r" | grep -oP '(?<= )\d+.\d+(?= ms/op)')
-  bench=$(echo "$l" | grep -oP '(?<=generated/)[^.]+(?=.scala)')
-  size=$(echo "$l" | grep -oP '\d+')
-  echo "$size,$avg,$err" >> "figures/$bench.csv"
-done
+# rm -rf figures/*.csv
+# find "scala/target/generated/" -name "*.log" | sort | while read l; do
+#   r=$(grep "±(99.9%)" "$l")
+#   avg=$(echo "$r" | grep -oP '\d+.\d+(?=.*99.9)')
+#   err=$(echo "$r" | grep -oP '(?<= )\d+.\d+(?= ms/op)')
+#   bench=$(echo "$l" | grep -oP '(?<=generated/)[^.]+(?=.scala)')
+#   size=$(echo "$l" | grep -oP '\d+')
+#   echo "$size,$avg,$err" >> "figures/$bench.csv"
+# done

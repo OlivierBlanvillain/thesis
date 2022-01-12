@@ -1,3 +1,5 @@
+*.gex
+*.eps
 *.zip
 *.aux
 *.bbl
@@ -18,4 +20,3 @@ target/
 *.lof
 *.toc
 *.bsp/
-concat-inc.eps

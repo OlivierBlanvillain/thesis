@@ -1,35 +1,34 @@
 load "figures/4x4.gnu"
-set output "figures/concat.gex"
-set ylabel "Compilation time (sec)"
-set xlabel "Input size"
+set output "figures/remove.gex"
 # set xlabel "~"
+set xlabel "Input size"
+set ylabel "~"
 
 plot                        \
-  "concat-implicits.csv"    \
+  "remove-implicits.csv"    \
   u 1:($2/1000)             \
   w lines lw 3 dt 2         \
-  title "implicits concat"  \
+  title "implicits remove"  \
 ,                           \
-  "concat-dependent.csv"    \
+  "remove-dependent.csv"    \
   u 1:($2/1000)             \
   w lines lw 3              \
-  title "singletons concat" \
+  title "singletons remove" \
 ,                           \
-  "concat-match-types.csv"  \
+  "remove-match-types.csv"  \
   u 1:($2/1000)             \
   w lines lw 3              \
-  title "match types concat"
+  title "match types remove"
 
-set output "figures/concat-2.gex"
-set ylabel "Compilation time (ms)"
+set output "figures/remove-2.gex"
 
 plot                        \
-  "concat-dependent.csv"    \
+  "remove-dependent.csv"    \
   u 1:($2)                  \
   w lines lw 3              \
-  title "singletons concat" \
+  title "singletons remove" \
 ,                           \
-  "concat-match-types.csv"  \
+  "remove-match-types.csv"  \
   u 1:($2)                  \
   w lines lw 3              \
-  title "match types concat"
+  title "match types remove"

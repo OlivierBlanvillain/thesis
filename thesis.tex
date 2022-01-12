@@ -302,8 +302,57 @@ While details of the language specification are outside of the scope of this dis
 \label{chap:performance-based-evaluation}
 
 \begin{figure}
-\input{figures/concat.tex}
+  \centering
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/concat.gex}
+  \end{subfigure}%
+  \hspace{-20pt}
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/remove.gex}
+  \end{subfigure}
+
+  \vspace{-2pt}
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/join.gex}
+  \end{subfigure}%
+  \hspace{-20pt}
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/numpy.gex}
+  \end{subfigure}
+  % \caption{#1}
+  % \label{fig:dependentVsImplicitBenchmarks}
 \end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/concat-2.gex}
+  \end{subfigure}%
+  \hspace{-20pt}
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/remove-2.gex}
+  \end{subfigure}
+
+  \vspace{-2pt}
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/join-2.gex}
+  \end{subfigure}%
+  \hspace{-20pt}
+  \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/numpy-2.gex}
+  \end{subfigure}
+  % \caption{#1}
+  % \label{fig:dependentVsImplicitBenchmarks}
+\end{figure}
+
 
 \begin{table*}
   \centering

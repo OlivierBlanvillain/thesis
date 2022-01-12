@@ -1,35 +1,33 @@
 load "figures/4x4.gnu"
-set output "figures/concat.gex"
-set ylabel "Compilation time (sec)"
+set output "figures/numpy.gex"
 set xlabel "Input size"
-# set xlabel "~"
+set ylabel "~"
 
 plot                        \
-  "concat-implicits.csv"    \
+  "numpy-implicits.csv"     \
   u 1:($2/1000)             \
   w lines lw 3 dt 2         \
-  title "implicits concat"  \
+  title "implicits reduce"  \
 ,                           \
-  "concat-dependent.csv"    \
+  "numpy-dependent.csv"     \
   u 1:($2/1000)             \
   w lines lw 3              \
-  title "singletons concat" \
+  title "singletons reduce" \
 ,                           \
-  "concat-match-types.csv"  \
+  "numpy-match-types.csv"   \
   u 1:($2/1000)             \
   w lines lw 3              \
-  title "match types concat"
+  title "match types reduce"
 
-set output "figures/concat-2.gex"
-set ylabel "Compilation time (ms)"
+set output "figures/numpy-2.gex"
 
 plot                        \
-  "concat-dependent.csv"    \
+  "numpy-dependent.csv"     \
   u 1:($2)                  \
   w lines lw 3              \
-  title "singletons concat" \
+  title "singletons reduce" \
 ,                           \
-  "concat-match-types.csv"  \
+  "numpy-match-types.csv"   \
   u 1:($2)                  \
   w lines lw 3              \
-  title "match types concat"
+  title "match types reduce"

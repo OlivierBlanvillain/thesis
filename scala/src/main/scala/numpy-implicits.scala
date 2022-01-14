@@ -43,26 +43,24 @@ object NumpyImplicits {
 
   trait Loop[S <: Shape, Axes <: Shape, I <: Int] { type Out <: Shape }
 
-  trait LoopLowPrio {
-    val instance: Nothing = (new Loop {}).asInstanceOf
-
+  object Loop {
     type Aux[S <: Shape, Axes <: Shape, I <: Int, O <: Shape] =
       Loop[S, Axes, I] { type Out = O }
 
+    val instance: Nothing = (new Loop {}).asInstanceOf
+
     implicit def caseNil[I <: Int]: Aux[Ø, Ø, I, Ø] = instance
 
-    implicit def caseConsFalse[Sh <: Int, St <: Shape, Axes <: Shape, I <: Int, RemoveOut <: Shape, Out <: Shape]
-      (implicit
-        lo: Aux[St, Axes, Succ[I], Out]
-      ): Aux[Sh :: St, Axes, I, Sh :: Out] = instance
-  }
-
-  object Loop extends LoopLowPrio {
     implicit def caseConsTrue[Sh <: Int, St <: Shape, Axes <: Shape, I <: Int, RemoveOut <: Shape, Out <: Shape]
       (implicit
         rm: Remove.Aux[Axes, I, RemoveOut],
         lo: Aux[St, RemoveOut, Succ[I], Out]
       ): Aux[Sh :: St, Axes, I, Out] = instance
+
+    implicit def caseConsFalse[Sh <: Int, St <: Shape, Axes <: Shape, I <: Int, Out <: Shape]
+      (implicit
+        lo: Aux[St, Axes, Succ[I], Out]
+      ): Aux[Sh :: St, Axes, I, Sh :: Out] = instance
   }
 
   object Bench {

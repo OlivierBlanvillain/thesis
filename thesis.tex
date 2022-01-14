@@ -269,20 +269,12 @@ We can use a "negative" implicit evidence to simplify the definition of |NotIn| 
 
 \subsection{Implicit Priorities}
 
-When looking for implicits, the Scala compiler visits
-
-scopes of ** scopes.
-
-The resolution algorithm looks for implicits in the current scope and in the companion objects of all classes associated with the query type.
-
-the order of scope visits is deterministic, and programmers can make use of it to \emph{prioritize} implicits.
-
-Concretely, implicits is the most inner scope (with respect to the implicit search) are considered first. The compiler then "walk backwards" and considers implicit definitions in the
-
-The Scala compiler rejects programs with \emph{ambiguous} implicit definition.
-For instance, if we write two identically-typed implicit definitions in the same scope, the compiler will consider them ambiguous and report an error:
-
-While details of the language specification are outside of the scope of this dissertation, type-level \citep{odersky2006scala} \citep{odersky2009scala}
+When looking for implicits, the Scala compiler visits scopes sequentially, in a precisely defined order.
+At any point in the search, if the implicits defined in the subset of scopes considered so far can fulfill the implicit query, the search succeeds and immediately terminates.
+This incremental process has two consequences.
+First, it allows the compiler to efficiently look for implicits by naturally pruning some of the search space.
+Second, it provides an ad-hoc mechanism to disambiguate implicits.
+Scala programmer can artificially partition their implicit definition into multiple scopes to implement a priority system.
 
 \removeAllWithPriority
 

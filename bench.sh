@@ -9,7 +9,7 @@ mkdir -p "scala/target/generated/"
 git grep --name-only "//X" | grep scala | while read s; do
   cp "$s" "scala/target/generated/"
 done
-find "scala/target/generated/" -name "*.scala" | while read s; do
+find "$(pwd)/scala/target/generated/" -name "*.scala" | while read s; do
   seq -w 1 8 256 | while read i; do
     replacement=$(seq 0 $(expr $i - 1) | xargs -i printf "{} :: ")
     echo "$s.$i.scala"
@@ -21,7 +21,7 @@ done
 # Mesure bytecode size:
 # rm -f bytecode-size.log
 # rm -f *.class *.tasty
-# find "scala/target/generated/" -name "*.scala" | sort | while read s; do
+# find "$(pwd)/scala/target/generated/" -name "*.scala" | sort | while read s; do
 #   if echo "$s" | grep -q "dependent"; then
 #     /usr/bin/time -f "%e" -o "/tmp/time" $HOME/workspace/thesis/bin/dotc -J-Xss4m "$s"
 #   else
@@ -32,7 +32,7 @@ done
 # done
 
 # Mesure compilation times:
-# find "scala/target/generated/" -name "*.scala" | sort | while read s; do
+# find "$(pwd)/scala/target/generated/" -name "*.scala" | sort | while read s; do
 #   if echo "$s" | grep -q "dependent"; then
 #     (cd "ddotty/" && sbt "dotty-bench/jmh:run 60 60 1 $s" | tee "$s.log")
 #   else
@@ -42,7 +42,7 @@ done
 
 # Generate CSV:
 # rm -rf figures/*.csv
-# find "scala/target/generated/" -name "*.log" | sort | while read l; do
+# find "$(pwd)/scala/target/generated/" -name "*.log" | sort | while read l; do
 #   r=$(grep "±(99.9%)" "$l")
 #   avg=$(echo "$r" | grep -oP '\d+.\d+(?=.*99.9)')
 #   err=$(echo "$r" | grep -oP '(?<= )\d+.\d+(?= ms/op)')

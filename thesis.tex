@@ -92,8 +92,9 @@ When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool"::"mem"::
 
 In retrospect, I have to agree with Denys' judgment at the time: this style of programming is convoluted, to say the least.
 Aesthetics and pragmatism aside, programming with implicits requires a complete paradigm shift.
-Instead using pattern matching and functions, implicits require algorithm to be expressed using relations and constraints, which makes the task harder than it should be.
+Instead using pattern matching and functions, implicits require algorithms to be expressed using relations and constraints, which makes the task harder than it should be.
 
+% 8. State Research Objectives
 \emph{Can we do better?} This is the question that motivates the work presented in dissertation.
 
 % 3. State the Background Information
@@ -103,8 +104,6 @@ Scala, on the other hand, has a clear separation between its term and type langu
 % When terms are types are unified, the distinction between programming and type-level programming blurs out since value-level computations can be performed during type checking.
 
 TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunately, many of the techniques developed in the context of Haskell are not directly applicable to other programming languages. In particular, subtying ...
-
-% 8. State Research Objectives
 
 % 9. Create an Outline
 % - (Ab)Using Implicits
@@ -274,9 +273,26 @@ At any point in the search, if the implicits defined in the subset of scopes con
 This incremental process has two consequences.
 First, it allows the compiler to efficiently look for implicits by naturally pruning some of the search space.
 Second, it provides an ad-hoc mechanism to disambiguate implicits.
-Scala programmer can artificially partition their implicit definition into multiple scopes to implement a priority system.
+Scala programmer can artificially partition their implicit definitions into multiple scopes to implement a priority system.
 
-\removeAllWithPriority
+Let us consider an example of operation on |HList| whose implementation uses implicit priorities.
+|RemoveAll| is a generalization of |Remove| that removes every occurrence of the given element instead of the first occurrence.
+The implicit-based implementation takes the form of a trait with 3 type parameters: 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the elements removed):
+
+\removeAllDefinition
+
+From an algorithmic standpoint, we can implement |RemoveAll| as a recursive function with 3 cases, a base case for the empty list (|casenil|), a recursive case for when the head of the list matches the element to remove (|casematch|), and another recursive case for when the head doesn't match (|casedoesnt|):
+
+\removeAllBroken
+
+This direct implementation of |RemoveAll| using implicit definitions is, unfortunately, incorrect.
+The issue is that the |casematch| and |casedoesnt| definitions are ambiguous when the head of the list matches the element to remove.
+To work around that ambiguity, we split those definitions into two different scopes, so that the compiler always tries to apply the more specialized case (|casematch|) before considering the less specialized case (|casedoesnt|).
+Concretely, we define the low priority implicit in a trait, the high priority implicits in |RemoveAll|'s companion object, and have the object extend that trait:
+
+\removeAllPrioritized
+
+\section{Conclusion}
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}

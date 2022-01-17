@@ -3,7 +3,7 @@ object SafeImplicits {
 // start section hlistEnumDefinition
 enum HList:
   case HNil()
-  case ::[H, T <: HList](head: H, tail: T)
+  case ::[+H, +T <: HList](head: H, tail: T)
 // end section hlistEnumDefinition
 import HList._
 
@@ -47,26 +47,67 @@ implicit def casecons[V, Ph, Pt <: HList]
 // end section memImplicitNotGiven
 }
 
-// start section removeAllWithPriority
-trait RemoveAll[V, Ps <: HList] { type Out <: HList }
+// start section removeAllDefinition
+trait RemoveAll[V, Ps <: HList, Out <: HList]
+// end section removeAllDefinition
 
-trait RemoveAllLowPrio:
-  type Aux[V, Ps <: HList, Out <: HList] = RemoveAll[V, Ps] { type Out }
-
-  implicit def casediff[V, Ph, Pt <: HList, Out <: HList]
-    (implicit ev: Aux[Ph, Pt, Out])
-    : Aux[V, Ph :: Pt, Ph :: Out] = new RemoveAll {}
-
-object RemoveAll extends RemoveAllLowPrio:
+object RemoveBroken {
+// start section removeAllBroken
+object RemoveAll:
   implicit def casenil[V]
-    : Aux[V, HNil, HNil] = new RemoveAll {}
+    : RemoveAll[V, HNil, HNil] = new RemoveAll {}
 
   implicit def casematch[V, Ps <: HList, Out <: HList]
-    (implicit ev: Aux[V, Ps, Out])
-    : Aux[V, V :: Ps, Out] = new RemoveAll {}
-// end section removeAllWithPriority
+    (implicit ev: RemoveAll[V, Ps, Out])
+    : RemoveAll[V, V :: Ps, Out] = new RemoveAll {}
 
-val removeAllTest = implicitly[RemoveAll.Aux[1, 1 :: 2 :: 1 :: 3 :: HNil, 2 :: 3 :: HNil]]
+  implicit def casedoesnt[V, Ph, Pt <: HList, Out <: HList]
+    (implicit ev: RemoveAll[V, Pt, Out])
+    : RemoveAll[V, Ph :: Pt, Ph :: Out] = new RemoveAll {}
+// end section removeAllBroken
+}
+
+// start section removeAllPrioritized
+trait RemoveAllLowPrio:
+  implicit def casenil[V]
+    : RemoveAll[V, HNil, HNil] = new RemoveAll {}
+
+  implicit def casedoesnt[V, Ph, Pt <: HList, Out <: HList]
+    (implicit ev: RemoveAll[V, Pt, Out])
+    : RemoveAll[V, Ph :: Pt, Ph :: Out] = new RemoveAll {}
+
+object RemoveAll extends RemoveAllLowPrio:
+  implicit def casematch[V, Ps <: HList, Out <: HList]
+    (implicit ev: RemoveAll[V, Ps, Out])
+    : RemoveAll[V, V :: Ps, Out] = new RemoveAll {}
+// end section removeAllPrioritized
+
+def rmAll[V <: Singleton, Ps <: HList, Out <: HList](v: V, ps: Ps)
+  (implicit ra: RemoveAll[V, Ps, Out]): Out = ???
+
+trait RemoveAllSlow[V, Ps <: HList, Out <: HList]
+trait RemoveAllSlowLowPrio:
+  implicit def casenil[V]
+    : RemoveAllSlow[V, HNil, HNil] = new RemoveAllSlow {}
+
+  implicit def casedoesnt[V, Ph, Pt <: HList, Out <: HList]
+    (implicit ev: RemoveAllSlow[V, Pt, Out])
+    : RemoveAllSlow[V, Ph :: Pt, Ph :: Out] = new RemoveAllSlow {}
+
+object RemoveAllSlow extends RemoveAllSlowLowPrio:
+  implicit def casematch[V, Ps <: HList, Out <: HList]
+    (implicit ev: RemoveAllSlow[V, Ps, Out])
+    : RemoveAllSlow[V, V :: Ps, Out] = new RemoveAllSlow {}
+
+
+val lst: 1 :: 2 :: 1 :: 3 :: HNil = null
+val removeAllTest1 = rmAll(1, lst)
+val removeAllTest2 = rmAll(2, lst)
+val removeAllTest3 = rmAll(3, lst)
+println(removeAllTest1: 2 :: 3 :: HNil)
+println(removeAllTest2: 1 :: 1 :: 3 :: HNil)
+println(removeAllTest3: 1 :: 2 :: 1 :: HNil)
+
 
 // start section memImplicitContextFree
 trait Context[Ps <: HList]:

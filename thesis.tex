@@ -116,7 +116,11 @@ TLP isn't new. GHC' Haskell is leading the charge with the numerous language ext
 \chapter{(Ab)Using Implicits}
 \label{chap:ab-using-implicits}
 
-In this chapter...
+Scala's implicit parameters have outgrown their roots as a simple syntactic construct to the extent that they provide basic support for type-level programming.
+In this chapter, we present techniques for implicit-based type-level programming in Scala.
+In particular, through extended examples, we show how to exploit Scala's implicit resolution mechanism to \emph{compute} types,  by the means of relations and constraints, in a style that resembles logic programming.
+
+We explore the compromises involved in simulating variations on the theme of the dependent function space in an attempt to help programmers put dependent types to work.
 
 \subsection*{Attribution}
 \citep{odersky2018simplicitly}
@@ -264,8 +268,6 @@ We can use a "negative" implicit evidence to simplify the definition of |NotIn| 
 
 \memImplicitNotGiven
 
-% We presented
-
 \subsection{Implicit Priorities}
 
 When looking for implicits, the Scala compiler visits scopes sequentially, in a precisely defined order.
@@ -288,9 +290,11 @@ From an algorithmic standpoint, we can implement |RemoveAll| as a recursive func
 This direct implementation of |RemoveAll| using implicit definitions is, unfortunately, incorrect.
 The issue is that the |casematch| and |casedoesnt| definitions are ambiguous when the head of the list matches the element to remove.
 To work around that ambiguity, we split those definitions into two different scopes, so that the compiler always tries to apply the more specialized case (|casematch|) before considering the less specialized case (|casedoesnt|).
-Concretely, we define the low priority implicit in a trait, the high priority implicits in |RemoveAll|'s companion object, and have the object extend that trait:
+Concretely, we define low priority implicits in a separate trait, and have |RemoveAll|'s companion object extend that trait:
 
 \removeAllPrioritized
+
+We presented implicit prioritization, another tool in the implicit programmer arsenal that allows to work around implicit ambiguities.
 
 \section{Conclusion}
 

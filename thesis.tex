@@ -8,6 +8,7 @@
 
 \chapter{Acknowledgements}
 \lipsum[1-2]
+Miles Sabin has been a invaluable help, not only for his work on Shapeless but also for invaluable contribution
 
 \bigskip
 \noindent\textit{Lausanne, \today}
@@ -118,12 +119,13 @@ TLP isn't new. GHC' Haskell is leading the charge with the numerous language ext
 
 Scala's implicit parameters have outgrown their roots as a simple syntactic construct to the extent that they provide basic support for type-level programming.
 In this chapter, we present techniques for implicit-based type-level programming in Scala.
-In particular, through extended examples, we show how to exploit Scala's implicit resolution mechanism to \emph{compute} types,  by the means of relations and constraints, in a style that resembles logic programming.
-
-We explore the compromises involved in simulating variations on the theme of the dependent function space in an attempt to help programmers put dependent types to work.
+In particular, through extended examples, we show how to use Scala's implicit resolution mechanism to \emph{compute} types, in a style that resembles logic programming.
 
 \subsection*{Attribution}
-\citep{odersky2018simplicitly}
+
+The first section of this chapter is based on the introduction to implicits from \citep{odersky2018simplicitly}, which was written in collaboration with Martin Odersky, Fengyun Liu, Aggelos Biboudis, Heather Miller and Sandro Stucki, and published in POPL'18.
+
+Code samples for the remaining of this chapter are based on the implementation of heterogeneous lists from the Shapeless library \citep{sabin2011shapeless}.
 
 \section{Implicit Parameters: Overview}
 
@@ -294,9 +296,13 @@ Concretely, we define low priority implicits in a separate trait, and have |Remo
 
 \removeAllPrioritized
 
-We presented implicit prioritization, another tool in the implicit programmer arsenal that allows to work around implicit ambiguities.
-
 \section{Conclusion}
+
+In this chapter, we presented several techniques to program at the type-level with implicits.
+This style of programing is, unfortunately, quite cumbersome.
+In addition to the heavy syntax, type-level programing with implicits also requires a deep understanding of the implicit resolution algorithm.
+As we will see in \Cref{chap:performance-based-evaluation}, the usability of those techniques also suffers from the massive impact they have on compilation time.
+Yet, despite those shortcoming, Scala programmers have...
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}
@@ -306,8 +312,18 @@ We presented implicit prioritization, another tool in the implicit programmer ar
 
 \chapter{Match Types}
 \label{chap:match-types}
+
+Type-level programming is becoming more and more popular in the realm of functional programming.
+However, the combination of type-level programming and subtyping remains largely unexplored in practical programming languages.
+This chapter presents \emph{match types}, a type-level equivalent of pattern matching.
+Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
+We formalize the feature of match types in a calculus based on \SystemFsub and prove its soundness.
+We practically evaluate our system by implementing match types in the Scala 3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
+
 \subsection*{Attribution}
-\citep{blanvillain2022type}
+
+This chapter is based on \citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer and Martin Odersky, and published in POPL'22.
+
 \input{article.tex}
 
 \chapter{Performance-Based Evaluation}

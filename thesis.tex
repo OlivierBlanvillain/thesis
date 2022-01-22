@@ -123,9 +123,9 @@ In particular, through extended examples, we show how to use Scala's implicit re
 
 \subsection*{Attribution}
 
-The first section of this chapter is based on the introduction to implicits from \citep{odersky2018simplicitly}, which was written in collaboration with Martin Odersky, Fengyun Liu, Aggelos Biboudis, Heather Miller and Sandro Stucki, and published in POPL'18.
+The first section of this chapter is based on the introduction to implicits from~\citep{odersky2018simplicitly}, which was written in collaboration with Martin Odersky, Fengyun Liu, Aggelos Biboudis, Heather Miller and Sandro Stucki, and published in POPL'18.
 
-Code samples for the remaining of this chapter are based on the implementation of heterogeneous lists from the Shapeless library \citep{sabin2011shapeless}.
+Code samples for the remaining of this chapter are based on the implementation of heterogeneous lists from the Shapeless library~\citep{sabin2011shapeless}.
 
 \section{Implicit Parameters: Overview}
 
@@ -298,11 +298,11 @@ Concretely, we define low priority implicits in a separate trait, and have |Remo
 
 \section{Conclusion}
 
-In this chapter, we presented several techniques to program at the type-level with implicits.
-This style of programing is, unfortunately, quite cumbersome.
-In addition to the heavy syntax, type-level programing with implicits also requires a deep understanding of the implicit resolution algorithm.
-As we will see in \Cref{chap:performance-based-evaluation}, the usability of those techniques also suffers from the massive impact they have on compilation time.
-Yet, despite those shortcoming, Scala programmers have...
+In this chapter, we presented several techniques for type-level programming with implicits.
+This style of programming is, unfortunately, quite cumbersome.
+In addition to the heavy syntax, type-level programming with implicits also requires a deep understanding of the implicit resolution algorithm.
+As we will see in \Cref{chap:performance-based-evaluation}, those techniques come at a high cost in terms of compilation time, which hinders their usability on a large scale.
+Yet, despite those shortcomings, Scala programmers have shown a persistent interest in this style of programming, as demonstrated by its popularity in the open-source community~\citep{sabin2011shapeless, pilquist2013scodecs, blanvillain2016frameless}.
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}
@@ -322,7 +322,7 @@ We practically evaluate our system by implementing match types in the Scala 3 re
 
 \subsection*{Attribution}
 
-This chapter is based on \citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer and Martin Odersky, and published in POPL'22.
+This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer and Martin Odersky, and published in POPL'22.
 
 \input{article.tex}
 

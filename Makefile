@@ -8,6 +8,7 @@ deps += figures/concat.eps
 deps += figures/remove.eps
 deps += figures/join.eps
 deps += figures/numpy.eps
+deps += figures/2early2late.eps
 
 thesis.pdf: FORCE $(deps)
 	latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out thesis.tex

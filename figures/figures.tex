@@ -462,3 +462,77 @@
     \label{fig:dependentVsImplicitBenchmarks}
   \end{figure}
 }
+
+\newcommand\timingGraphsZoomedOut[1]{
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/concat.gex}
+    \end{subfigure}%
+    \hspace{-20pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/remove.gex}
+    \end{subfigure}
+
+    \vspace{-2pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/join.gex}
+    \end{subfigure}%
+    \hspace{-20pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/numpy.gex}
+    \end{subfigure}
+    \caption{#1}
+    \label{fig:fourXComparisonZoomedOut}
+  \end{figure}
+}
+
+\newcommand\timingGraphsZoomedIn[1]{
+  \begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/concat-2.gex}
+    \end{subfigure}%
+    \hspace{-20pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/remove-2.gex}
+    \end{subfigure}
+
+    \vspace{-2pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/join-2.gex}
+    \end{subfigure}%
+    \hspace{-20pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \input{figures/numpy-2.gex}
+    \end{subfigure}
+    \caption{#1}
+    \label{fig:timingGraphsZoomedIn}
+  \end{figure}
+}
+
+\newcommand\bytecodeSizeTable[1]{
+  \begin{table*}
+    \centering
+    \caption{#1}
+    \label{tab:bytecode}
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{@{}lrrr@{}}
+    \toprule & Implicits & Generalized Singletons & Match Types \\
+    \midrule
+    Concat     & 6  & 0 & 0 \\
+    Remove     & 6  & 0 & 0 \\
+    ReduceAxes & 12 & 0 & 0 \\
+    Join       & 18 & 0 & 0 \\
+    \bottomrule
+    \end{tabular}
+  \end{table*}
+}

@@ -329,74 +329,13 @@ This chapter is based on~\citep{blanvillain2022type}, which was written in colla
 \chapter{Performance-Based Evaluation}
 \label{chap:performance-based-evaluation}
 
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/concat.gex}
-  \end{subfigure}%
-  \hspace{-20pt}
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/remove.gex}
-  \end{subfigure}
+In this Chapter...
 
-  \vspace{-2pt}
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/join.gex}
-  \end{subfigure}%
-  \hspace{-20pt}
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/numpy.gex}
-  \end{subfigure}
-  % \caption{#1}
-  % \label{fig:dependentVsImplicitBenchmarks}
-\end{figure}
+\section{}
 
-\begin{figure}
-  \centering
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/concat-2.gex}
-  \end{subfigure}%
-  \hspace{-20pt}
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/remove-2.gex}
-  \end{subfigure}
-
-  \vspace{-2pt}
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/join-2.gex}
-  \end{subfigure}%
-  \hspace{-20pt}
-  \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/numpy-2.gex}
-  \end{subfigure}
-  % \caption{#1}
-  % \label{fig:dependentVsImplicitBenchmarks}
-\end{figure}
-
-
-\begin{table*}
-  \centering
-  \caption{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
-  \label{tab:bytecode}
-  \renewcommand{\arraystretch}{1.2}
-  \begin{tabular}{@{}lrrr@{}}
-  \toprule & Implicits & Generalized Singletons & Match Types \\
-  \midrule
-  Concat     & 6  & 0 & 0 \\
-  Remove     & 6  & 0 & 0 \\
-  ReduceAxes & 12 & 0 & 0 \\
-  Join       & 18 & 0 & 0 \\
-  \bottomrule
-  \end{tabular}
-\end{table*}
+\timingGraphsZoomedOut{Caption}
+\timingGraphsZoomedIn{Caption}
+\bytecodeSizeTable{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
 
 \begin{enumerate}
   \item Concat
@@ -404,9 +343,6 @@ This chapter is based on~\citep{blanvillain2022type}, which was written in colla
   \item Join
   \item ReduceAxes
 \end{enumerate}
-
-
-\lipsum[1]
 
 \chapter{Conclusion}
 \label{chap:conclusion}

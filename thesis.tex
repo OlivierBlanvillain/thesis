@@ -96,7 +96,7 @@ Aesthetics and pragmatism aside, programming with implicits requires a complete 
 Instead using pattern matching and functions, implicits require algorithms to be expressed using relations and constraints, which makes the task harder than it should be.
 
 % 8. State Research Objectives
-\emph{Can we do better?} This is the question that motivates the work presented in dissertation.
+\emph{Can we do better?} This is the question that motivates the work presented in this dissertation.
 
 % 3. State the Background Information
 Dependently-typed programming languages, such as Coq~\citep{bertot2004interactive}, Agda~\citep{norell2007towards}, and Idris~\citep{brady2014idris}, make no distinction between terms and types, and thus naturally support type-level programming.
@@ -331,19 +331,36 @@ This chapter is based on~\citep{blanvillain2022type}, which was written in colla
 
 In this Chapter...
 
-\section{}
+\section{Method}
 
-\timingGraphsZoomedOut{Caption}
-\timingGraphsZoomedIn{Caption}
-\timingGraphsTooEarlyTooLate{Caption}
-\bytecodeSizeTable{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
+We evaluate the performance of the various type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
+Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
+
+We run the experiments presented in this chapter using an i7-7700K processor running OpenJDK~1.8.0\_212 on Linux.
+For the implicit and match type benchmarks, we use the latest Scala~3 release (version~3.1.2 at the time of writting).
+For the generalized singleton benchmarks, we use our prototype implementation, which is based on * and available online\footnote{To obtain  this branch, use the following command: \\\texttt{git clone git@github.com:dotty-staging/dotty.git -b add-transparent-7}}.
+
+\subsubsection{concat}
+\subsubsection{remove}
+\subsubsection{join}
+\subsubsection{reduce}
 
 \begin{enumerate}
   \item Concat
   \item Remove
   \item Join
-  \item ReduceAxes
+  \item Reduce
 \end{enumerate}
+
+\section{Binary size}
+\bytecodeSizeTable{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
+
+\section{Compilation time}
+\timingGraphsZoomedOut{Caption}
+\timingGraphsZoomedIn{Caption}
+
+\section{The Timing of Match Type Reduction}
+\timingGraphsTooEarlyTooLate{Caption}
 
 \chapter{Conclusion}
 \label{chap:conclusion}

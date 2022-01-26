@@ -28,7 +28,11 @@ publish: FORCE
 	git clean -fdX
 	make
 	cp thesis.pdf docs
-	git add -f docs/thesis.pdf
+	rm -rf docs/benchmarks.zip
+	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py)
+	rm -rf docs/sources.zip
+	zip docs/sources.zip -- $$(git ls-files)
+	git add -f docs/*
 	git commit -m "Publish snapshot to GitHub pages"
 
 scala/code-sections.tex: scala/generate-code-sections.py $(shell find scala -name "*.scala")

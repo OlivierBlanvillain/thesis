@@ -492,7 +492,7 @@
 }
 
 \newcommand\timingGraphsZoomedIn[1]{
-  \begin{figure}
+  \begin{figure}[!ht]
     \centering
     \begin{subfigure}[t]{0.5\textwidth}
         \centering
@@ -538,12 +538,12 @@
     \label{fig:bytecodeSizeTable}
     \renewcommand{\arraystretch}{1.2}
     \begin{tabular}{@{}lrrr@{}}
-    \toprule & Implicits & Generalized Singletons & Match Types \\
+    \toprule & Implicits & Singletons & Match Types \\
     \midrule
-    Concat     & 6  & 0 & 0 \\
-    Remove     & 6  & 0 & 0 \\
-    ReduceAxes & 12 & 0 & 0 \\
-    Join       & 18 & 0 & 0 \\
+    Concat & 6  & 0 & 0 \\
+    Remove & 6  & 0 & 0 \\
+    Reduce & 12 & 0 & 0 \\
+    Join   & 18 & 0 & 0 \\
     \bottomrule
     \end{tabular}
   \end{table*}

@@ -330,20 +330,21 @@ This chapter is based on~\citep{blanvillain2022type}, which was written in colla
 \label{chap:performance-based-evaluation}
 
 In this Chapter...
+\lipsum[1-1]
 
 \section{Method}
 
 We evaluate the performance of the various type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
 Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
 
-These benchmarks are inspired by code examples used throughout this dissertation. They all follow a similar pattern of a single function call whose result type is computed at the type level. We code generated variations of each benchmark with increasing input size, from 1 to 256, in +8 increments.
+These benchmarks are inspired by code examples used throughout this dissertation. They all follow a similar pattern of a single function call whose result type is computed at the type level. We code generated variations of each benchmark with increasing input size, from 1 to 256, in increments of 8.
 The source code of our benchmarks is available in the supplementary material of this dissertation\footnote{\texttt{https://olivierblanvillain.github.io/thesis/benchmarks.zip}}, alongside instructions on how to reproduce our experiments.
 
-We briefly describe the 4 benchmarks used in this chapter:
+Here is a brief description of our benchmark suite:
 
 \begin{enumerate}
   \item \textbf{concat}\quad
-  Concatenates a heterogeneous list with itself, resulting in a list twice as long.
+  Concatenates a heterogeneous list with itself.
 
   \item \textbf{remove}\quad
   Removes the last element of a heterogeneous list (\Cref{sec:hlists-remove}).
@@ -369,21 +370,34 @@ These results imply that implicits are ill-suited for large scale type-level com
 
 \timingGraphsZoomedIn{A comparison of the compilation time of generalized singletons and match types for our benchmark set (lower is better).}
 
-The same measurements are shown in \Cref{fig:timingGraphsZoomedIn}, but with millisecond y-axes to center the comparison on the non-implicit curves.
+The same measurements are shown in \Cref{fig:timingGraphsZoomedIn}, but with millisecond y-axes, to focus on the comparison of non-implicit curves.
 Each graph follows a similar trend, with singleton-based implementations outperforming their match-type-based counterparts by about a factor of two.
 We speculate that this difference is due to the overhead of subtyping, which in inherent to the design of match type.
 Our prototype for generalized singletons uses a dedicated type evaluation procedure that is specialized for the task and thus faster.
 
-
+We obtained the data points of \Cref{fig:timingGraphsZoomedOut} and~\ref{fig:timingGraphsZoomedIn} using Java Microbenchmark Harness (JMH) with 60 seconds of warmup, 60 seconds of measurement and a single JVM fork.
+As a result, the resulting measurements are precise (99.9\% confidence intervals vary between $\pm$ 0.5 and $\pm$ 2 milliseconds), but subject to variations caused by the unpredictability of the JVM's just in time compiler, which explains the bumps visible in \Cref{fig:timingGraphsZoomedIn}.
 
 \section{Binary size}
 
-\Cref{fig:bytecodeSizeTable}
-\bytecodeSizeTable{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
+\bytecodeSizeTable{Additional JVM Bytecode generated per benchmark size increment (in Bytes).}
 
-\clearpage
+In \Cref{fig:bytecodeSizeTable}, we show the amount of additional JVM Bytecode generated per benchmark size increment.
+The binary sizes for singleton- and match-type-based implementations are stable with respect to benchmark input size, which is expected given that our benchmarks consist of type-level-only operations.
+The implicit-based implementation come with an
+
+type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
+
+
+All our 4 benchmarks are type-level-only
+
 \section{The Timing of Match Type Reduction}
+
 \timingGraphsTooEarlyTooLate{Caption}
+
+\lipsum[1-2]
+\Cref{fig:timingGraphsTooEarlyTooLate}
+\lipsum[1-2]
 
 \chapter{Conclusion}
 \label{chap:conclusion}

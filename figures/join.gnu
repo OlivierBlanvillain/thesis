@@ -8,13 +8,13 @@ plot                         \
   u 1:($2/1000) w lines lt 3 \
   title "implicits join"     \
 ,                            \
-  "join-match-types.csv"     \
-  u 1:($2/1000) w lines lt 1 \
-  title "match types join"   \
-,                            \
   "join-dependent.csv"       \
   u 1:($2/1000) w lines lt 2 \
   title "singletons join"    \
+,                            \
+  "join-match-types.csv"     \
+  u 1:($2/1000) w lines lt 1 \
+  title "match types join"   \
 
 set output "figures/join-2.gex"
 set ylabel "Compilation time (ms)"

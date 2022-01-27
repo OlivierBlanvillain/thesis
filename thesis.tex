@@ -361,22 +361,21 @@ For the generalized singleton benchmarks, we use our prototype implementation, w
 
 \section{Compilation time}
 
-We evaluate the performance of the various type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
+\timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark set (lower is better).}
 
 \Cref{fig:timingGraphsZoomedOut} compares the compilation time of implicits, generalized singletons and match types on our benchmark sets.
 The compilation time of implicit-based benchmarks dominates the graphs on each figures, and suggests a quadratic complexity.
-These results insinuate that implicits are ill-suited for large scale, type-level computations: spending tens of seconds to compile a single operation is clearly out of the question for any practical use case.
-
-\Cref{fig:timingGraphsZoomedIn} shows those same results rescaled, with implicits
-
-We obtained the data points of this figure by running
-
-
-\timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark set (lower is better).}
+These results imply that implicits are ill-suited for large scale type-level computations: spending tens of seconds on a single operation is clearly out of the question for practical applications.
 
 \timingGraphsZoomedIn{A comparison of the compilation time of generalized singletons and match types for our benchmark set (lower is better).}
 
-\clearpage
+The same measurements are shown in \Cref{fig:timingGraphsZoomedIn}, but with millisecond y-axes to center the comparison on the non-implicit curves.
+Each graph follows a similar trend, with singleton-based implementations outperforming their match-type-based counterparts by about a factor of two.
+We speculate that this difference is due to the overhead of subtyping, which in inherent to the design of match type.
+Our prototype for generalized singletons uses a dedicated type evaluation procedure that is specialized for the task and thus faster.
+
+
+
 \section{Binary size}
 
 \Cref{fig:bytecodeSizeTable}

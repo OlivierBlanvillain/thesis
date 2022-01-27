@@ -9,11 +9,11 @@ plot                         \
   title "implicits reduce"   \
 ,                            \
   "numpy-dependent.csv"      \
-  u 1:($2/1000) w lines lt 1 \
+  u 1:($2/1000) w lines lt 2 \
   title "singletons reduce"  \
 ,                            \
   "numpy-match-types.csv"    \
-  u 1:($2/1000) w lines lt 2 \
+  u 1:($2/1000) w lines lt 1 \
   title "match types reduce" \
 
 set output "figures/numpy-2.gex"

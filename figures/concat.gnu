@@ -10,11 +10,11 @@ plot                         \
   title "implicits concat"   \
 ,                            \
   "concat-dependent.csv"     \
-  u 1:($2/1000) w lines lt 1 \
+  u 1:($2/1000) w lines lt 2 \
   title "singletons concat"  \
 ,                            \
   "concat-match-types.csv"   \
-  u 1:($2/1000) w lines lt 2 \
+  u 1:($2/1000) w lines lt 1 \
   title "match types concat" \
 
 set output "figures/concat-2.gex"

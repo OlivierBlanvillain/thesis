@@ -10,11 +10,11 @@ plot                         \
   title "implicits remove"   \
 ,                            \
   "remove-dependent.csv"     \
-  u 1:($2/1000) w lines lt 1 \
+  u 1:($2/1000) w lines lt 2 \
   title "singletons remove"  \
 ,                            \
   "remove-match-types.csv"   \
-  u 1:($2/1000) w lines lt 2 \
+  u 1:($2/1000) w lines lt 1 \
   title "match types remove" \
 
 set output "figures/remove-2.gex"

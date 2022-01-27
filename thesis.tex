@@ -337,40 +337,52 @@ We evaluate the performance of the various type-level programming techniques pre
 Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
 
 These benchmarks are inspired by code examples used throughout this dissertation. They all follow a similar pattern of a single function call whose result type is computed at the type level. We code generated variations of each benchmark with increasing input size, from 1 to 256, in +8 increments.
-The source code of our benchmarks, along side instructions on how to reproduce our experiments
-in the supplementary material of this dissertation\footnote{\texttt{https://olivierblanvillain.github.io/thesis/benchmarks.zip}}
+The source code of our benchmarks is available in the supplementary material of this dissertation\footnote{\texttt{https://olivierblanvillain.github.io/thesis/benchmarks.zip}}, alongside instructions on how to reproduce our experiments.
 
-We briefly describe each benchmark
+We briefly describe the 4 benchmarks used in this chapter:
 
+\begin{enumerate}
+  \item \textbf{concat}\quad
+  Concatenates a heterogeneous list with itself, resulting in a list twice as long.
 
-\subsubsection{concat}
-\subsubsection{remove}
-\subsubsection{join}
-\subsubsection{reduce}
+  \item \textbf{remove}\quad
+  Removes the last element of a heterogeneous list (\Cref{sec:hlists-remove}).
+
+  \item \textbf{join}\quad
+  Computes the resulting schema after performing a self-join along the last column of a database table (\Cref{sec:safe-join}).
+
+  \item \textbf{reduce}\quad
+  Computes the dimension of a multidimensional array after dimensional reduction along all axes (\Cref{subsubsec:reduction}).
+\end{enumerate}
 
 We run the experiments presented in this chapter on an i7-7700K processor running OpenJDK~1.8.0\_212 and Linux.
 For the implicit and match type benchmarks, we use the latest Scala~3 release (version~3.1.2 at the time of writing).
 For the generalized singleton benchmarks, we use our prototype implementation, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
 
 \section{Compilation time}
-\timingGraphsZoomedOut{Caption}
-\timingGraphsZoomedIn{Caption}
 
-\subsubsection{concat}
-\subsubsection{remove}
-\subsubsection{join}
-\subsubsection{reduce}
+We evaluate the performance of the various type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
 
-\begin{enumerate}
-  \item Concat
-  \item Remove
-  \item Join
-  \item Reduce
-\end{enumerate}
+\Cref{fig:timingGraphsZoomedOut} compares the compilation time of implicits, generalized singletons and match types on our benchmark sets.
+The compilation time of implicit-based benchmarks dominates the graphs on each figures, and suggests a quadratic complexity.
+These results insinuate that implicits are ill-suited for large scale, type-level computations: spending tens of seconds to compile a single operation is clearly out of the question for any practical use case.
 
+\Cref{fig:timingGraphsZoomedIn} shows those same results rescaled, with implicits
+
+We obtained the data points of this figure by running
+
+
+\timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark set (lower is better).}
+
+\timingGraphsZoomedIn{A comparison of the compilation time of generalized singletons and match types for our benchmark set (lower is better).}
+
+\clearpage
 \section{Binary size}
+
+\Cref{fig:bytecodeSizeTable}
 \bytecodeSizeTable{Additional JVM Bytecode generated\\per benchmark size increment (in Bytes)}
 
+\clearpage
 \section{The Timing of Match Type Reduction}
 \timingGraphsTooEarlyTooLate{Caption}
 

@@ -21,6 +21,9 @@ clean: FORCE
 	rm -rf latex.out/*
 	rm -rf figures/*.eps
 
+cleanfigures: FORCE
+	rm -rf figures/*.eps
+
 watch: FORCE
 	git ls-files | entr make
 

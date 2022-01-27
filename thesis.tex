@@ -181,7 +181,7 @@ This is where the (type-level) fun begins!
 \subsubsection{Heterogeneous lists}
 
 A heterogeneous list, or |HList| for short~\citep{kiselyov2004strongly}, is a datatype capable of storing data of different types.
-In Scala 3, we can define the |HList| datatype as follows:
+In Scala~3, we can define the |HList| datatype as follows:
 
 \hlistEnumDefinition
 
@@ -224,7 +224,7 @@ Instead of specifying that constraint in the documentation, we can represent the
 
 \noindent
 The |Singleton| type bound is a marker that instructs type inference to preserve literal singleton types (by default, the compiler widens those types).
-The "|?|" type is Scala 3's new syntax for wildcard types~\citep{dotty2014wildcard}.
+The "|?|" type is Scala~3's new syntax for wildcard types~\citep{dotty2014wildcard}.
 
 With this updated signature, the compiler is able to detect invalid event types at compile time.
 When given a valid event type |E|, the compiler synthesizes an implicit evidence of type |Remove[E,EventTypes,?]| which witnesses |E|'s validity.
@@ -264,7 +264,7 @@ We use the |NotIn| operation to constrain the allocation method, |malloc|, to pr
 
 \memImplicitContextMalloc
 
-Scala 3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep{dotty2014given}.
+Scala~3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep{dotty2014given}.
 The compiler will synthesize an implicit parameter of type |NotGiven[T]|, if and only if there is no implicit value of type |T| in scope.
 We can use a "negative" implicit evidence to simplify the definition of |NotIn| by removing the ambiguous implicits and changing |casecons| to the following:
 
@@ -318,11 +318,11 @@ However, the combination of type-level programming and subtyping remains largely
 This chapter presents \emph{match types}, a type-level equivalent of pattern matching.
 Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
 We formalize the feature of match types in a calculus based on \SystemFsub and prove its soundness.
-We practically evaluate our system by implementing match types in the Scala 3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
+We practically evaluate our system by implementing match types in the Scala~3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
 
 \subsection*{Attribution}
 
-This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer and Martin Odersky, and published in POPL'22.
+This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer, and Martin Odersky, and published in POPL'22. \Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface in Scala, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models. Maxime also contributed to the Scala~3 compiler by adding support for arithmetic computations at the type level. Jonathan single-handedly mechanized \SystemFm's type safety proof, and provided invaluable help and guidance with redaction. Martin and I collaborated on the implementation of match types in the Scala 3 compiler, which is now actively used by the Scala community.
 
 \input{article.tex}
 

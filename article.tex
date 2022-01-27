@@ -47,7 +47,7 @@ In summary, this chapter makes the following contributions:
 
   \item We describe our implementation of match types in the Scala compiler, discuss challenges, and relate the implementation to our formalization (\Cref{sec:implementation}).
 
-  \item We evaluate match types in a case study, presenting a type-safe version of the NumPy library (\Cref{sec:evaluation}).
+  \item We evaluate match types in a case study, presenting a type-safe version of the NumPy library (\Cref{sec:case-study-shape-safe-num-py}).
 
   \item We motivate the design of our formalization relative to prior work, we review the extensive related work on type families in Haskell, and discuss the unsoundness of conditional types in TypeScript (\Cref{sec:related-work}).
 \end{itemize}
@@ -589,7 +589,7 @@ In terms of lines of code, our match type implementation is a relatively modest 
 % https://github.com/lampepfl/dotty/pull/8024 +87
 
 \section{Case Study: Shape-Safe NumPy}
-\label{sec:evaluation}
+\label{sec:case-study-shape-safe-num-py}
 
 In this section, we present a case study to show how match types can be used to express complex type constraints, which in turn can prevent certain programming errors at compile time.
 To this end, we outline the type-level implementation of a library for multidimensional arrays which mimics the NumPy API~\citep{harris2020array}.

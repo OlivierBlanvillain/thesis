@@ -383,8 +383,14 @@ As a result, the resulting measurements are precise (99.9\% confidence intervals
 \bytecodeSizeTable{Additional JVM Bytecode generated per benchmark size increment (in Bytes).}
 
 In \Cref{fig:bytecodeSizeTable}, we show the amount of additional JVM Bytecode generated per benchmark size increment.
-The binary sizes for singleton- and match-type-based implementations are stable with respect to benchmark input size, which is expected given that our benchmarks consist of type-level-only operations.
-The implicit-based implementation come with an
+The binary sizes of singleton- and match-type-based implementations are stable with respect to benchmark input size, which is expected given that our benchmarks consist of type-level-only operations.
+The binary sizes of implicit-based implementations grows linearly with the input size, by 6 bytes per input size for smaller benchmarks (Concat \& Remove), and by 12 and 18 bytes for the larger benchmarks (Reduce \& Join).
+To put that in perspective, those increments represent
+
+concat-implicits.scala.001.scala: 16223
+join-implicits.scala.001.scala: 22485
+numpy-implicits.scala.001.scala: 22215
+remove-implicits.scala.001.scala: 16321
 
 type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
 

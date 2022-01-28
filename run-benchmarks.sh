@@ -21,16 +21,16 @@ find "$(pwd)/scala/target/generated/" -name "*.scala" | while read s; do
   rm $s
 done
 
-# Mesure bytecode size:
+# Mesure bytecode sizes:
 rm -f bytecode-size.log
 rm -f *.class *.tasty
 find "$(pwd)/scala/target/generated/" -name "*.scala" | sort | while read s; do
   if echo "$s" | grep -q "dependent"; then
-    /usr/bin/time -f "%e" -o "/tmp/time" $HOME/workspace/thesis/bin/dotc -J-Xss4m "$s"
+    ddotty/bin/dotc -J-Xss4m "$s"
   else
-    /usr/bin/time -f "%e" -o /tmp/time $HOME/workspace/dotty-master/bin/scalac -J-Xss4m "$s"
+    dotty/bin/scalac -J-Xss4m "$s"
   fi
-  echo "$s: $(cat *.class | wc -c) ($(cat /tmp/time)s)" | tee -a bytecode-size.log
+  echo "$s: $(cat *.class | wc -c)" | tee -a bytecode-size.log
   rm -f *.class *.tasty
 done
 
@@ -43,7 +43,7 @@ find "$(pwd)/scala/target/generated/" -name "*.scala" | sort | while read s; do
   fi
 done
 
-# Generate CSV:
+# Generate CSV files:
 rm -rf figures/*.csv
 find "$(pwd)/scala/target/generated/" -name "*.log" | sort | while read l; do
   r=$(grep "±(99.9%)" "$l")

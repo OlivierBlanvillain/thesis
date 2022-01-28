@@ -1,3 +1,6 @@
 [submodule "ddotty"]
 	path = ddotty
 	url = git@github.com:dotty-staging/dotty.git
+[submodule "dotty"]
+	path = dotty
+	url = git@github.com:lampepfl/dotty.git

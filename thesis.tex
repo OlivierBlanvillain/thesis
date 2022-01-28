@@ -380,22 +380,16 @@ As a result, the resulting measurements are precise (99.9\% confidence intervals
 
 \section{Binary size}
 
-\bytecodeSizeTable{Additional JVM Bytecode generated per benchmark size increment (in Bytes).}
+\bytecodeSizeTable{Additional JVM Bytecode generated per input size increment (in bytes).}
 
 In \Cref{fig:bytecodeSizeTable}, we show the amount of additional JVM Bytecode generated per benchmark size increment.
 The binary sizes of singleton- and match-type-based implementations are stable with respect to benchmark input size, which is expected given that our benchmarks consist of type-level-only operations.
-The binary sizes of implicit-based implementations grows linearly with the input size, by 6 bytes per input size for smaller benchmarks (Concat \& Remove), and by 12 and 18 bytes for the larger benchmarks (Reduce \& Join).
-To put that in perspective, those increments represent
 
-concat-implicits.scala.001.scala: 16223
-join-implicits.scala.001.scala: 22485
-numpy-implicits.scala.001.scala: 22215
-remove-implicits.scala.001.scala: 16321
-
-type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
-
-
-All our 4 benchmarks are type-level-only
+The binary sizes of implicit-based implementations grow linearly with the input size, by 6 bytes per input size increment for smaller benchmarks (Concat and Remove), and by 12 and 18 bytes for the larger benchmarks (Reduce and Join, respectively).
+To put those numbers in perspective, they represent an overall binary size increase of 9\%, 9\%, 12\%, and 20\%, when comparing the size-1 instantiation to the size-256 instantiation of Concat, Remove, Reduce, and Join, respectively.
+These increases in binary size are caused by the implicit evidences synthesized by the compiler during implicit resolution.
+In our benchmarks, those evidences have no runtime purpose and are simply an artifact of the mechanism in play.
+Other applications, such as those supported by the Shapeless library~\citep{sabin2011shapeless}, take advantage of implicit evidence synthesis to provide additional runtime functionalities.
 
 \section{The Timing of Match Type Reduction}
 

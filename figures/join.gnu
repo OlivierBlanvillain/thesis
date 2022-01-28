@@ -6,15 +6,15 @@ set ylabel "Compilation time (sec)"
 plot                         \
   "join-implicits.csv"       \
   u 1:($2/1000) w lines lt 3 \
-  title "implicits join"     \
+  title "Implicits Join"     \
 ,                            \
   "join-dependent.csv"       \
   u 1:($2/1000) w lines lt 2 \
-  title "singletons join"    \
+  title "Singletons Join"    \
 ,                            \
   "join-match-types.csv"     \
   u 1:($2/1000) w lines lt 1 \
-  title "match types join"   \
+  title "Match types Join"   \
 
 set output "figures/join-2.gex"
 set ylabel "Compilation time (ms)"
@@ -22,8 +22,8 @@ set ylabel "Compilation time (ms)"
 plot                         \
   "join-match-types.csv"     \
   u 1:($2) w lines           \
-  title "match types join"   \
+  title "Match types Join"   \
 ,                            \
   "join-dependent.csv"       \
   u 1:($2) w lines           \
-  title "singletons join"    \
+  title "Singletons Join"    \

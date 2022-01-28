@@ -343,16 +343,16 @@ The source code of our benchmarks is available in the supplementary material of 
 Here is a brief description of our benchmark suite:
 
 \begin{enumerate}
-  \item \textbf{concat}\quad
+  \item \textbf{Concat}\quad
   Concatenates a heterogeneous list with itself.
 
-  \item \textbf{remove}\quad
+  \item \textbf{Remove}\quad
   Removes the last element of a heterogeneous list (\Cref{sec:hlists-remove}).
 
-  \item \textbf{join}\quad
+  \item \textbf{Join}\quad
   Computes the resulting schema after performing a self-join along the last column of a database table (\Cref{sec:safe-join}).
 
-  \item \textbf{reduce}\quad
+  \item \textbf{Reduce}\quad
   Computes the dimension of a multidimensional array after dimensional reduction along all axes (\Cref{subsubsec:reduction}).
 \end{enumerate}
 
@@ -362,13 +362,13 @@ For the generalized singleton benchmarks, we use our prototype implementation, w
 
 \section{Compilation time}
 
-\timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark set (lower is better).}
+\timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark suite (lower is better).}
 
-\Cref{fig:timingGraphsZoomedOut} compares the compilation time of implicits, generalized singletons and match types on our benchmark sets.
+\Cref{fig:timingGraphsZoomedOut} compares the compilation time of implicits, generalized singletons and match types on our benchmark suite.
 The compilation time of implicit-based benchmarks dominates the graphs on each figures, and suggests a quadratic complexity.
 These results imply that implicits are ill-suited for large scale type-level computations: spending tens of seconds on a single operation is clearly out of the question for practical applications.
 
-\timingGraphsZoomedIn{A comparison of the compilation time of generalized singletons and match types for our benchmark set (lower is better).}
+\timingGraphsZoomedIn{A comparison of the compilation time of generalized singletons and match types for our benchmark suite (lower is better).}
 
 The same measurements are shown in \Cref{fig:timingGraphsZoomedIn}, but with millisecond y-axes, to focus on the comparison of non-implicit curves.
 Each graph follows a similar trend, with singleton-based implementations outperforming their match-type-based counterparts by about a factor of two.
@@ -393,9 +393,17 @@ Other applications, such as those supported by the Shapeless library~\citep{sabi
 
 \section{The Timing of Match Type Reduction}
 
-\lipsum[1-2]
-\Cref{fig:timingGraphsTooEarlyTooLate}
-\lipsum[1-2]
+In \Cref{chap:match-types}, we describe the match type reduction algorithm by adding new subtyping rules to \SystemFsub (\Cref{subsec:matches}).
+The resulting system is entirely declarative: it doesn't specify \emph{when} to apply those rules.
+In this section, we discuss how the timing of match type reduction impacts compilation times.
+
+A correct type system implementation must attempt to reduce match types \emph{as late as possible}, during subtyping.
+Indeed, failing to do so could lead to incorrect results in cases where a match type is reducible in the context of the subtyping query but is not reducible in any prior context.
+Each early attempt of early match type reduction is thus a trade-off: it can be either an overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used only once, or an optimization, if the reduction succeeds and the result is used more than once.
+Laziness does not solve that problem straight out because caches for match type reductions are context-dependent.
+
+In \Cref{fig:timingGraphsTooEarlyTooLate}, we compare the compilation times of the match type Reduce benchmark with two different match type reduction strategies.
+The first strategy (S1), attempts to reduce match types twice, once right after creation, and once during subtyping. The second strategy (S2) extends S1 with additional reduction attempts before type substitution.
 
 \timingGraphsTooEarlyTooLate{Caption}
 

@@ -7,15 +7,15 @@ set xlabel "Input size"
 plot                         \
   "concat-implicits.csv"     \
   u 1:($2/1000) w lines lt 3 \
-  title "implicits concat"   \
+  title "Implicits Concat"   \
 ,                            \
   "concat-dependent.csv"     \
   u 1:($2/1000) w lines lt 2 \
-  title "singletons concat"  \
+  title "Singletons Concat"  \
 ,                            \
   "concat-match-types.csv"   \
   u 1:($2/1000) w lines lt 1 \
-  title "match types concat" \
+  title "Match types Concat" \
 
 set output "figures/concat-2.gex"
 set ylabel "Compilation time (ms)"
@@ -23,8 +23,8 @@ set ylabel "Compilation time (ms)"
 plot                         \
   "concat-match-types.csv"   \
   u 1:($2) w lines           \
-  title "match types concat" \
+  title "Match types Concat" \
 ,                            \
   "concat-dependent.csv"     \
   u 1:($2) w lines           \
-  title "singletons concat"  \
+  title "Singletons Concat"  \

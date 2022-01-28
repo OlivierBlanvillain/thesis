@@ -6,23 +6,23 @@ set ylabel "~"
 plot                         \
   "numpy-implicits.csv"      \
   u 1:($2/1000) w lines lt 3 \
-  title "implicits reduce"   \
+  title "Implicits Reduce"   \
 ,                            \
   "numpy-dependent.csv"      \
   u 1:($2/1000) w lines lt 2 \
-  title "singletons reduce"  \
+  title "Singletons Reduce"  \
 ,                            \
   "numpy-match-types.csv"    \
   u 1:($2/1000) w lines lt 1 \
-  title "match types reduce" \
+  title "Match types Reduce" \
 
 set output "figures/numpy-2.gex"
 
 plot                         \
   "numpy-match-types.csv"    \
   u 1:($2) w lines           \
-  title "match types reduce" \
+  title "Match types Reduce" \
 ,                            \
   "numpy-dependent.csv"      \
   u 1:($2) w lines           \
-  title "singletons reduce"  \
+  title "Singletons Reduce"  \

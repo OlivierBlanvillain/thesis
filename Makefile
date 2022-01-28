@@ -7,7 +7,7 @@ deps += scala/code-sections.tex
 deps += figures/concat.eps
 deps += figures/remove.eps
 deps += figures/join.eps
-deps += figures/numpy.eps
+deps += figures/reduce.eps
 deps += figures/2early2late.eps
 
 thesis.pdf: FORCE $(deps)

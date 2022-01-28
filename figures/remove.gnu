@@ -7,23 +7,23 @@ set ylabel "~"
 plot                         \
   "remove-implicits.csv"     \
   u 1:($2/1000) w lines lt 3 \
-  title "Implicits Remove"   \
+  title "Implicits remove"   \
 ,                            \
   "remove-dependent.csv"     \
   u 1:($2/1000) w lines lt 2 \
-  title "Singletons Remove"  \
+  title "Singletons remove"  \
 ,                            \
   "remove-match-types.csv"   \
   u 1:($2/1000) w lines lt 1 \
-  title "Match types Remove" \
+  title "Match types remove" \
 
 set output "figures/remove-2.gex"
 
 plot                         \
   "remove-match-types.csv"   \
   u 1:($2) w lines           \
-  title "Match types Remove" \
+  title "Match types remove" \
 ,                            \
   "remove-dependent.csv"     \
   u 1:($2) w lines           \
-  title "Singletons Remove"  \
+  title "Singletons remove"  \

@@ -401,8 +401,28 @@ A correct type system implementation must attempt to reduce match types \emph{as
 Indeed, failing to do so could lead to incorrect results in cases where a match type is reducible in the context of the subtyping query but is not reducible in any prior context.
 In addition to the reductions attempted during subtyping, the compiler can try to reduce match types earlier in the pipeline, essentially at any point in time.
 Doing so is always be correct, since the types before and after reduction are mutually subtypes of each other.
-Early attempts of match type reduction are trade-off: they can be either an small overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used exactly once, or an optimization, if the reduction succeeds and the result is used more than once.
-Note that this trade-off is laziness does not
+Each early attempt of match type reduction is trade-off: it can either be a small overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used exactly once, or an optimization, if the reduction succeeds and the result is used more than once.
+
+The following example illustrates the benefits of early reduction attempts:
+
+// GEQ[X, Y] compiles if X is greater than Y
+type GEQ[A <: Int, B <: Int] = A match {
+  case B => true
+  case _ => GEQ[A, B + 1]
+}
+
+// GEQ[5, 1] compiles, because 5 is greater than 1
+5 <: 1? no
+5 <: 1+1? no
+5 <: 1+1+1? no
+5 <: 1+1+1+1? no
+5 <: 1+1+1+1+1? yes
+
+The issue with this code is we try to normalize B + 1 first too early, and then too late. We normalize type at creating, but at that point B is abstract and B + 1 cannot be normalized. Then, we normalize during subtyping, but that's a bit late. Here are the queries that will be sent to type comparer for GEQ[5, 1]:
+
+Which results in a quadratic number of additions being computer... The solution is to normalize types when doing substitution, so that each addition is computed once and for all at each set of the recursion.
+
+Note that laziness does not this trade-off is laziness does not
 
 Laziness does not solve that problem straight out because caches for match type reductions are context-dependent.
 

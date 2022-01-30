@@ -1,4 +1,4 @@
-object ImplicitTutorial {
+object Tutorial {
 
 object explicit {
 // start section explicitModulo
@@ -39,6 +39,18 @@ implicit def listOrdering[T](implicit ev: Ordering[T]): Ordering[List[T]] =
         case (_, Nil) => false
         case (Nil, _) => true
 // end section ordListExample
+
+import scala.compiletime.ops.int.+
+
+// start section geqDefinition
+// GEQ[X, Y] compiles if X is greater than Y
+type GEQ[A <: Int, B <: Int] = A match {
+  case B => true
+  case _ => GEQ[A, B + 1]
+}
+// end section geqDefinition
+
+type A = GEQ[5, 1]
 
 }
 

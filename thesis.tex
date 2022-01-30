@@ -399,13 +399,18 @@ In this section, we discuss how the timing of match type reduction impacts compi
 
 A correct type system implementation must attempt to reduce match types \emph{as late as possible}, during subtyping.
 Indeed, failing to do so could lead to incorrect results in cases where a match type is reducible in the context of the subtyping query but is not reducible in any prior context.
-Each early attempt of early match type reduction is thus a trade-off: it can be either an overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used only once, or an optimization, if the reduction succeeds and the result is used more than once.
+In addition to the reductions attempted during subtyping, the compiler can try to reduce match types earlier in the pipeline, essentially at any point in time.
+Doing so is always be correct, since the types before and after reduction are mutually subtypes of each other.
+Early attempts of match type reduction are trade-off: they can be either an small overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used exactly once, or an optimization, if the reduction succeeds and the result is used more than once.
+Note that this trade-off is laziness does not
+
 Laziness does not solve that problem straight out because caches for match type reductions are context-dependent.
 
 In \Cref{fig:timingGraphsTooEarlyTooLate}, we compare the compilation times of the match type Reduce benchmark with two different match type reduction strategies.
 The first strategy (S1), attempts to reduce match types twice, once right after creation, and once during subtyping. The second strategy (S2) extends S1 with additional reduction attempts before type substitution.
+The first strategy fails...
 
-\timingGraphsTooEarlyTooLate{Caption}
+\timingGraphsTooEarlyTooLate{A comparison of the compilation time of the match type Reduce benchmark with two different match type reduction strategies. S1 reduces match types after creation and during subtyping. S2 extends S1 by also reducing before type substitution.}
 
 \chapter{Conclusion}
 \label{chap:conclusion}

@@ -391,7 +391,7 @@ These increases in binary size are caused by the implicit evidences synthesized 
 In our benchmarks, those evidences have no runtime purpose and are simply an artifact of the mechanism in play.
 Other applications, such as those supported by the Shapeless library~\citep{sabin2011shapeless}, take advantage of implicit evidence synthesis to provide additional runtime functionalities.
 
-\section{The Timing of Match Type Reduction}
+\section{The Timing of Match Type Reductions}
 
 In \Cref{chap:match-types}, we describe the match type reduction algorithm by adding new subtyping rules to \SystemFsub (\Cref{subsec:matches}).
 The resulting system is entirely declarative: it doesn't specify \emph{when} to apply those rules.
@@ -399,38 +399,30 @@ In this section, we discuss how the timing of match type reduction impacts compi
 
 A correct type system implementation must attempt to reduce match types \emph{as late as possible}, during subtyping.
 Indeed, failing to do so could lead to incorrect results in cases where a match type is reducible in the context of the subtyping query but is not reducible in any prior context.
+
 In addition to the reductions attempted during subtyping, the compiler can try to reduce match types earlier in the pipeline, essentially at any point in time.
-Doing so is always be correct, since the types before and after reduction are mutually subtypes of each other.
-Each early attempt of match type reduction is trade-off: it can either be a small overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used exactly once, or an optimization, if the reduction succeeds and the result is used more than once.
+Doing so is always correct, since the types before and after reduction are mutually subtypes of each other.
+Each early attempt of match type reduction is a trade-off: it can either be a small overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used exactly once, or an optimization, if the reduction succeeds and the result is used more than once.
+Note that reducing match types in a lazy fashion would not be a replacement for early reduction attempts, because the subtyping and disjointness checks are context-dependent (\Cref{subsec:caching}).
 
-The following example illustrates the benefits of early reduction attempts:
+Let us consider an example that illustrates the benefits of early reduction attempts:
 
-// GEQ[X, Y] compiles if X is greater than Y
-type GEQ[A <: Int, B <: Int] = A match {
-  case B => true
-  case _ => GEQ[A, B + 1]
-}
+\geqDefinition
 
-// GEQ[5, 1] compiles, because 5 is greater than 1
-5 <: 1? no
-5 <: 1+1? no
-5 <: 1+1+1? no
-5 <: 1+1+1+1? no
-5 <: 1+1+1+1+1? yes
+\noindent
+Without any early reductions, this definition will result in a quadratic number of additions. For example, here is the sequence of subtyping queries issued while compiling |GEQ[5,1]|:
 
-The issue with this code is we try to normalize B + 1 first too early, and then too late. We normalize type at creating, but at that point B is abstract and B + 1 cannot be normalized. Then, we normalize during subtyping, but that's a bit late. Here are the queries that will be sent to type comparer for GEQ[5, 1]:
+\geqExample
 
-Which results in a quadratic number of additions being computer... The solution is to normalize types when doing substitution, so that each addition is computed once and for all at each set of the recursion.
+\noindent
+The first instance of |1+1| comes from the right-hand-side of the first |GEQ| call (with |B=1|), but that type is used in all the subsequent subtyping queries. As a result, reducing |1+1| to |2| once and for all leads to a speed-up in compilation.
 
-Note that laziness does not this trade-off is laziness does not
+Our Scala~3 implementation reduces match types at multiple points during compilation, including right after creating types, during subtyping, and after instantiating parameters of type applications.
+This last point is essential to avoid the quadratic behavior of the |GEQ| example.
+In \Cref{fig:timingGraphsTooEarlyTooLate}, we show the impact of this optimization on our Reduce benchmark.
+In this figure, we compare the compilation times of the match type Reduce benchmark with (S1) and without (S2) the reduction of match types after type parameter instantiation.
 
-Laziness does not solve that problem straight out because caches for match type reductions are context-dependent.
-
-In \Cref{fig:timingGraphsTooEarlyTooLate}, we compare the compilation times of the match type Reduce benchmark with two different match type reduction strategies.
-The first strategy (S1), attempts to reduce match types twice, once right after creation, and once during subtyping. The second strategy (S2) extends S1 with additional reduction attempts before type substitution.
-The first strategy fails...
-
-\timingGraphsTooEarlyTooLate{A comparison of the compilation time of the match type Reduce benchmark with two different match type reduction strategies. S1 reduces match types after creation and during subtyping. S2 extends S1 by also reducing before type substitution.}
+\timingGraphsTooEarlyTooLate{A comparison of the compilation time of the match type Reduce benchmark with two different match type reduction strategies. S1 is the reduction strategy we implemented in the Scala~3 compiler. S2 is a variation of that strategy where we disabled the reduction of match types after type parameter instantiation.}
 
 \chapter{Conclusion}
 \label{chap:conclusion}

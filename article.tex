@@ -568,6 +568,7 @@ Furthermore, typing match expressions as match types is not enabled by default i
 Instead, explicit type annotations must be provided.
 
 \subsection{Caching}
+\label{subsec:caching}
 
 Scala's type-checking algorithm makes heavy use of caching to improve its performance.
 Special care must be taken when caching the result of match type reduction, given that the subtyping and disjointness checks are context-dependent.

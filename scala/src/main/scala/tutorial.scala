@@ -43,7 +43,7 @@ implicit def listOrdering[T](implicit ev: Ordering[T]): Ordering[List[T]] =
 import scala.compiletime.ops.int.+
 
 // start section geqDefinition
-// GEQ[X, Y] compiles if X is greater than Y
+// GEQ[A, B] compiles if A is greater than B
 type GEQ[A <: Int, B <: Int] = A match {
   case B => true
   case _ => GEQ[A, B + 1]
@@ -51,6 +51,16 @@ type GEQ[A <: Int, B <: Int] = A match {
 // end section geqDefinition
 
 type A = GEQ[5, 1]
+
+/*
+// start section geqExample
+5 <: 1? no
+5 <: 1+1? no
+5 <: 1+1+1? no
+5 <: 1+1+1+1? no
+5 <: 1+1+1+1+1? yes
+// end section geqExample
+*/
 
 }
 

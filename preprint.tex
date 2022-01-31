@@ -168,7 +168,9 @@ dependent val schema2 = Cons("name", Cons("unit", Nil()))
 dependent val table1  = Table(schema1, (*\text{\dots}*))
 dependent val table2  = Table(schema2, (*\text{\dots}*))
 dependent val joined  = table1.join(table2, "name")
-joined: { Table(Cons("name", Cons("age", Cons("unit", Nil()))), choose[DataFrame]) }
+joined: { Table(
+            Cons("name", Cons("age", Cons("unit", Nil()))),
+            choose[DataFrame]) }
 \end{lstlisting}
 
 \noindent

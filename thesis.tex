@@ -223,7 +223,7 @@ Instead of specifying that constraint in the documentation, we can represent the
 
 \noindent
 The |Singleton| type bound is a marker that instructs type inference to preserve literal singleton types (by default, the compiler widens those types).
-The "|?|" type is Scala~3's new syntax for wildcard types~\citep{dotty2014wildcard}.
+The "|?|" type is Scala~3's new syntax for wildcard types~\citep[Wildcard Arguments in Types]{odersky2013scala}.
 
 With this updated signature, the compiler is able to detect invalid event types at compile time.
 When given a valid event type |E|, the compiler synthesizes an implicit evidence of type |Remove[E,EventTypes,?]| which witnesses |E|'s validity.
@@ -263,7 +263,7 @@ We use the |NotIn| operation to constrain the allocation method, |malloc|, to pr
 
 \memImplicitContextMalloc
 
-Scala~3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep{dotty2014given}.
+Scala~3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep[Given Instances]{odersky2013scala}.
 The compiler will synthesize an implicit parameter of type |NotGiven[T]|, if and only if there is no implicit value of type |T| in scope.
 We can use a "negative" implicit evidence to simplify the definition of |NotIn| by removing the ambiguous implicits and changing |casecons| to the following:
 
@@ -468,7 +468,7 @@ In this figure, we compare the compilation times of the match type Reduce benchm
 \backmatter
 \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
-\bibliographystyle{apalike}
+\bibliographystyle{apalik}
 \bibliography{bibliography}
 
 \cleardoublepage

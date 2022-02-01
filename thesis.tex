@@ -8,7 +8,6 @@
 
 \chapter{Acknowledgements}
 \lipsum[1-2]
-Miles Sabin has been a invaluable help, not only for his work on Shapeless but also for invaluable contribution
 
 \bigskip
 \noindent\textit{Lausanne, \today}
@@ -306,8 +305,20 @@ Yet, despite those shortcomings, Scala programmers have shown a persistent inter
 
 \chapter{Generalizing Scala's Singleton Types}
 \label{chap:generalizing-scala-s-singleton-types}
+
+Type-level programming is an increasingly popular way to obtain additional type safety.
+Unfortunately, it remains a second-class citizen in the majority of industrially-used programming languages.
+We propose a new dependently-typed system with subtyping and singleton types whose goal is enabling type-level programming in an accessible style.
+To this end, we have prototyped our system as an extension of the Scala programming language.
+We demonstrate the practicality of our system with a case study in which we develop a strongly-typed wrapper for Spark datasets.
+Through our formalization and implementation in the context of an industrial-strength compiler, we hope to provide a reference point for other language designers interested in adding dependent types.
+
 \subsection*{Attribution}
-\citep{schmid2020coming}
+
+This chapter is based on~\citep{schmid2020coming}, which was written in collaboration with Georg Schmid, Jad Hamza, and Viktor Kuncak.
+Georg and I worked hand-in-hand on this project: we collaborated with countless whiteboard discussions and pair programming sessions, which resulted in shared first authorship of the implementation and most of the text.
+The idea of viewing "types in terms" as a non-deterministic choice is attributed to Georg, and forms the basis of the formalization presented in~\citep{schmid2020coming}, which is beyond the scope of this dissertation.
+
 \input{preprint.tex}
 
 \chapter{Match Types}
@@ -322,7 +333,7 @@ We practically evaluate our system by implementing match types in the Scala~3 re
 
 \subsection*{Attribution}
 
-This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer, and Martin Odersky, and published in POPL'22. \Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface in Scala, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models. Maxime also contributed to the Scala~3 compiler by adding support for arithmetic computations at the type level. Jonathan single-handedly mechanized \SystemFm's type safety proof, and provided invaluable help and guidance with redaction. Martin and I collaborated on the implementation of match types in the Scala 3 compiler, which is now actively used by the Scala community.
+This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer, and Martin Odersky, and published in POPL'22. \Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface in Scala, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models. Maxime also contributed to the Scala~3 compiler by adding support for arithmetic computations at the type level. Jonathan mechanized the soundness proof for \SystemFm, and provided invaluable help and guidance with redaction. Martin and I collaborated on the implementation of match types in the Scala 3 compiler, which is now actively used by the Scala community.
 
 \input{article.tex}
 

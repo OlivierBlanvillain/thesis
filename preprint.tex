@@ -1,14 +1,9 @@
 Type-level programming is an increasingly popular way to obtain additional type safety.
 Unfortunately, it remains a second-class citizen in the majority of industrially-used programming languages.
-We propose a new dependently-typed system with subtyping and singleton types whose goal is to enable type-level programming in an accessible style.
-At the heart of our system lies a non-deterministic choice operator.
-We argue that embracing non-determinism is crucial for bringing dependent types to a broader audience of programmers, since real-world programs will inevitably interact with imprecisely-typed, or even impure code.
-Furthermore, we show that singleton types combined with the choice operator can serve as a replacement for many type functions of interest in practice.
-We establish the soundness of our approach using the Coq proof assistant.
-Our soundness approach models non-determinism using additional function arguments to represent choices.
-We represent type-level computation using singleton types and existential types that quantify over choice arguments.
-To demonstrate the practicality of our type system, we present an implementation as a modification of the Scala compiler.
-We provide a case study in which we develop a strongly-typed wrapper for Spark datasets.
+We propose a new dependently-typed system with subtyping and singleton types whose goal is enabling type-level programming in an accessible style.
+To this end, we have prototyped our system as an extension of the Scala programming language.
+We demonstrate the practicality of our system with a case study in which we develop a strongly-typed wrapper for Spark datasets.
+Through our formalization and implementation in the context of an industrial-strength compiler, we hope to provide a reference point for other language designers interested in adding dependent types.
 
 \section{Introduction}
 
@@ -18,13 +13,12 @@ However, dependent types are still largely absent from general-purpose programmi
 In the context of Haskell, much research has gone into extending the language to support computations on types, for instance in the form of functional dependencies~\citep{jones2000type}, type families~\citep{kiselyov2010fun} and promoted datatypes~\citep{yorgey2012giving}.
 These techniques have seen adoption by Haskell programmers, showing that there is a real demand for such mechanisms.
 Furthermore, recent research has explored how dependent types could be added to the language for the same purpose~\citep{eisenberg2016dependent, weirich2017a}.
-In a largely orthogonal direction, inference for dependent refinement types is reaching significant maturity~\citep{vazou2018gradual, vazou2017refinement,vazou2015bounded}.
 
 Dependently-typed languages often rely on a unified syntax to describe both terms and types.
 The simplicity of this approach is unfortunately at odds with the design of most programming languages, where types and terms are expressed using separate syntactic categories.
-Singleton types provide a simple solution to this problem by allowing every term to be represented as a type.
-The singleton type of a term therefore gives us the most precise specification for that term.
+Singleton types provide a simple solution to this problem by allowing terms to be represented as types.
 
+XXXX
 In this paper, we report on our attempt at combining an industrial mixed-paradigm language, Scala, with dependent types.
 We offer both a formalization of our type system and a discussion of the challenges faced in a practical implementation.
 It is our hope that the present paper will serve as a guide for other language implementors interested in pushing the limit of their type systems by adding dependent types.
@@ -32,33 +26,37 @@ It is our hope that the present paper will serve as a guide for other language i
 Unlike proof assistants, we do not aim to use types as a general-purpose logic, which would favor designs ensuring totality of functions through termination checks.
 Instead, our focus is on improving type safety by increasing the expressive power of the type system.
 
-We present \oursystem, a dependently-typed calculus with subtyping and singleton types.
-The main novelty of our calculus is a new approach to expressing type-level computation that, at first, seems diametrically opposed to the purity other systems favor.
-A new term is added for non-deterministic choice from a base type, similar to Floyd's choice operator~\citep{floyd1967nondeterministic}.
-Designing a sound system in the presence of non-determinism is challenging.
-Our solution provides systematic translation of non-determinism using additional parameters that are existentially quantified at a syntactically well-defined point.
-Consequently, a term in \oursystem may reduce to different values.
 Our system generalizes the traditional notion of singleton type: when the lifted term $t$ contains a non-deterministic choice, the resulting type $\singleton{t}$ denotes the set of values that $t$ could possibly reduce to.
 As a result, our type system is capable of type computations by manipulating types which are based on terms, but can nonetheless contain more than a single value.
 In combination with subtyping, this allows us to seamlessly integrate with impure, or imprecisely-typed programs.
 
-Our contributions are as follows:
+With these goals in mind, we extended Scala's type system to lift programs and partially evaluate them as part of type-checking.
+Users can manipulate dependent types either directly, using new syntactic forms in Scala's type language, or have them inferred automat
+ically using an additional keyword.
+This effectively allows users to execute programs involving functions and pattern matching to the type level.
+
+We implemented our type system on top of Dotty, the next-generation compiler of Scala.
+Working in the context of a production compiler we designed our implementation with backward-compatibility and interoperability in mind
+.
+Our system is backward-compatible in the sense that all existing programs continue to compile, but also interoperable, in that existing
+code can be used from dependently-typed programs and vice versa.
+As we will see, subtyping plays a key role in achieving interoperability.
+
+
+The remaining of the chapter is organized as follows:
 
 \begin{itemize}
 \item
-  We present our calculus \oursystem, which illustrates the novel elements of our extension to Scala.
-  The type system of \oursystem combines dependent types, subtyping and a generalization of singleton types to non-deterministic terms.
-  We demonstrate how the interplay of these features allows us to leverage term-level programs for type-level computation.
+  We begin by motivating why dependent types are desirable and how one might use them to improve type safety (\Cref{sec:motivating-example}). Our example demonstrates how to design a strongly-typed API in a functional style accessible to programmers.
 \item
-  We provide a soundness proof of \oursystem by reusing the reducibility semantics of \FR \citep{hamza2019system}.
-  Using its semantics we prove the soundness of our rules.
-  These proofs are mechanized using the Coq proof assistant~\citep{bertot2004interactive}.
-  The formalization is available in the additional materials.
+  We describe how we extended Scala with dependent types (\Cref{sec:extending-scala}). This practical introduction would be of interest to any Scala programmer willing to learn how to use our system, as well as programming language designers interested in adding dependent types to their language with subtyping.
 \item
-  We show a concrete use-case of our system by implementing it as an extension of Scala (\Cref{sec:extending-scala}), and using it to develop a strongly-typed wrapper for Apache Spark~\citep{zaharia2016apache} (\Cref{sec:use-case}).
+  We show a concrete use-case of our system by implementing a strongly-typed wrapper for Apache Spark~\citep{zaharia2016apache} (\Cref{sec:use-case}).
   Thanks to dependent types, we can statically ensure the type safety of database operations such as join and filter.
   We compare our implementation with an equivalent implicit-based one and show remarkable compilation time savings.
 \end{itemize}
+
+Our formalization is out of the scope of this thesis...
 
 \section{Motivating Examples}
 \label{sec:motivating-example}
@@ -178,42 +176,12 @@ Reflecting table schemas in types increases type safety over the existing weakly
 For instance, it becomes possible to raise compile-time errors when a user tries to use non-existent columns.
 This is an improvement over the underlying Spark implementation that would instead fail at runtime.
 
-\subsection{Safe Zip}
-\label{safe-zip}
-
-Our first example demonstrated how dependent methods allow inference of precise types.
-Conversely, we can also use singleton types to constrain method parameters further.
-In this example, our goal is to write a safer wrapper for functions like |zip| that should only be applicable to lists of the same length.
-To accomplish this, we can constrain the second parameter of |zip| as follows:
-
-\begin{lstlisting}
-def safeZip(xs: Lst, ys: { sizedLike(xs) }) = unsafeZip(xs, ys)
-\end{lstlisting}
-
-\noindent
-Here we would like |{ sizedLike(xs) }| to be inhabited by all lists of equal length as |xs|, regardless of their elements'values.
-How can this be achieved, given that |sizedLike(xs)| is a term? By exploiting the non-deterministic interpretation of |choose[T]|, we can provide a succinct definition for |sizedLike|:
-
-\begin{lstlisting}
-dependent def sizedLike(xs: Lst) <: Lst =
-  xs match
-    case Nil() => Nil()
-    case Cons(x, ys) => Cons(choose[Any], sizedLike(ys))
-\end{lstlisting}
-
-\noindent
-Consider, for instance, the meaning of |{ sizedLike(xs) }| for |xs = Cons(1, Cons(2, Nil()))|.
-After reduction, we obtain |{ Cons(choose[Any], Cons(choose[Any], Nil())) }|, which is a type that represents all lists of size 2.
-Thus |safeZip| requires that every caller prove that |xs| and |ys| are of the same length, which ensures that the underlying implementation in |unsafeZip| will never fail or truncate elements from one of the lists.
-
-Note that, unlike |concat| and |remove| that can be used both on the term and the type level, |sizedLike| is here intended to be used as a type function, but not at runtime.
-
 \section{Implementation}
 \label{sec:extending-scala}
 
 In this section we give an overview of how we extended Scala with dependent types.
 This development was an experiment to explore the feasibility of adding dependent types in Scala.
-We implemented our prototype as an extension of Dotty, the reference compiler for future versions of the Scala language.
+We implemented our prototype as an extension of Dotty, the reference Scala~3 compiler.
 Our presentation focuses on several facets of the implementation that are not reflected in our formalism.
 
 On a syntactic level, our Scala extension consists of three additions:

@@ -109,7 +109,7 @@ TLP isn't new. GHC' Haskell is leading the charge with the numerous language ext
 % - (Ab)Using Implicits
 % - Generalizing Scala's Singleton Types
 % - Match Types
-% - Performance-Based Evaluation
+% - Performance Evaluation
 
 \lipsum[1]
 
@@ -300,7 +300,7 @@ Concretely, we define low priority implicits in a separate trait, and have |Remo
 In this chapter, we presented several techniques for type-level programming with implicits.
 This style of programming is, unfortunately, quite cumbersome.
 In addition to the heavy syntax, type-level programming with implicits also requires a deep understanding of the implicit resolution algorithm.
-As we will see in \Cref{chap:performance-based-evaluation}, those techniques come at a high cost in terms of compilation time, which hinders their usability on a large scale.
+As we will see in \Cref{chap:performance-evaluation}, those techniques come at a high cost in terms of compilation time, which hinders their usability on a large scale.
 Yet, despite those shortcomings, Scala programmers have shown a persistent interest in this style of programming, as demonstrated by its popularity in the open-source community~\citep{sabin2011shapeless, pilquist2013scodecs, blanvillain2016frameless}.
 
 \chapter{Generalizing Scala's Singleton Types}
@@ -317,7 +317,7 @@ Through our formalization and implementation in the context of an industrial-str
 
 This chapter is based on~\citep{schmid2020coming}, which was written in collaboration with Georg Schmid, Jad Hamza, and Viktor Kuncak.
 Georg and I worked hand-in-hand on this project: we collaborated with countless whiteboard discussions and pair programming sessions, which resulted in shared first authorship of the implementation and most of the text.
-The idea of viewing "types in terms" as a non-deterministic choice is attributed to Georg, and forms the basis of the formalization presented in~\citep{schmid2020coming}, which is beyond the scope of this dissertation.
+The said report covers more material than what is included in this chapter, in particular, our formalization and the associated metatheory are out of the scope of this dissertation \citep[Section 3 and 4]{schmid2020coming}.
 
 \input{preprint.tex}
 
@@ -337,15 +337,16 @@ This chapter is based on~\citep{blanvillain2022type}, which was written in colla
 
 \input{article.tex}
 
-\chapter{Performance-Based Evaluation}
-\label{chap:performance-based-evaluation}
+\chapter{Performance Evaluation}
+\label{chap:performance-evaluation}
 
-In this Chapter...
-\lipsum[1-1]
+In this chapter, we report performance evaluation results for the various type-level programming techniques introduce in prior chapters.
+Specifically, we are interested in evaluating the scalability of each technique when confronted with large type-level programs, in terms of compilation times (\Cref{sec:compilation-time}) and binary sizes (\Cref{sec:binary-size}).
+In \Cref{sec:the-timing-of-match-type-reductions}, we discuss how the timing of match type reduction impacts compilation times.
 
 \section{Method}
 
-We evaluate the performance of the various type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
+We evaluate the performance of the 3 type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
 Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
 
 These benchmarks are inspired by code examples used throughout this dissertation. They all follow a similar pattern of a single function call whose result type is computed at the type level. We code generated variations of each benchmark with increasing input size, from 1 to 256, in increments of 8.
@@ -372,6 +373,7 @@ For the implicit and match type benchmarks, we use the latest Scala~3 release (v
 For the generalized singleton benchmarks, we use our prototype implementation, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
 
 \section{Compilation time}
+\label{sec:compilation-time}
 
 \timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark suite (lower is better).}
 
@@ -390,6 +392,7 @@ We obtained the data points of \Cref{fig:timingGraphsZoomedOut} and~\ref{fig:tim
 As a result, the resulting measurements are precise (99.9\% confidence intervals vary between $\pm$ 0.5 and $\pm$ 2 milliseconds), but subject to variations caused by the unpredictability of the JVM's just in time compiler, which explains the bumps visible in \Cref{fig:timingGraphsZoomedIn}.
 
 \section{Binary size}
+\label{sec:binary-size}
 
 \bytecodeSizeTable{Additional JVM Bytecode generated per input size increment (in bytes).}
 
@@ -403,6 +406,7 @@ In our benchmarks, those evidences have no runtime purpose and are simply an art
 Other applications, such as those supported by the Shapeless library~\citep{sabin2011shapeless}, take advantage of implicit evidence synthesis to provide additional runtime functionalities.
 
 \section{The Timing of Match Type Reductions}
+\label{sec:the-timing-of-match-type-reductions}
 
 In \Cref{chap:match-types}, we describe the match type reduction algorithm by adding new subtyping rules to \SystemFsub (\Cref{subsec:matches}).
 The resulting system is entirely declarative: it doesn't specify \emph{when} to apply those rules.

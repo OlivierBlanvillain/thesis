@@ -242,7 +242,7 @@ For instance, the body of~$\f$ is typed with an unreduced type, as shown in \Cre
 
 We show the type safety of \SystemFm through the usual progress and preservation theorems.
 This section provides an overview of the proof structure and states the involved lemmas and theorems.
-Detailed proofs are available in the supplementary material of this paper, in two different versions.
+Detailed proofs are available in the supplementary material of this thesis, in two different versions.
 The first version, \cite{blanvillain2021type}, is a pen-and-paper proof where \SystemFm is exactly as presented in \Cref{fig:FMTypingRules}.
 The second version, \cite{blanvillain2021artifact}, is a mechanization of the proof in Coq,
 using the locally nameless representation by \citet{aydemir2008engineering} to model variable bindings.
@@ -860,7 +860,7 @@ function f<X extends string>: M<X> = new A
 Here, TypeScript's reduction algorithm fails to recognize that |new A| can be typed as |M<X>|, even though |X| is clearly a subtype of |string| in |f|'s body.
 
 Although the situation is concerning, it might not be as bad as it seems given that soundness is a non-goal of TypeScript's type system~\citep{bierman2014understanding}.
-Nevertheless, we believe that the results of this paper are directly applicable to conditional types and could be used to improve TypeScript's type checker.
+Nevertheless, we believe that the results of this chapter are directly applicable to conditional types and could be used to improve TypeScript's type checker.
 
 \section{Conclusion}
 In this chapter, we introduced \emph{match types}, a lightweight mechanism for type-level programming that integrates seamlessly in subtyping-based programming languages.

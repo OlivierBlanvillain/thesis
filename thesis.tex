@@ -47,7 +47,7 @@ Denys Shabalin, who was working on Scala Native at the time~\citep{shabalin2020j
 The discussion revolved around the following question: could a Rust-like ownership system be viable for Scala?
 Denys' answer was clear: ownership is fundamentally at odds with the way Scala handles references, and without making deep changes to Scala's type system, the task was simply impossible.
 
-The next day, I came up with a toy domain-specific language (DSL), which implements the basis of a linear type system using type-level programming.
+The next day, I came up with a toy domain-specific language (DSL) that implements the basis of a linear type system using type-level programming.
 Here is an example of a short program written in this DSL:
 
 \memImplicitMain
@@ -72,7 +72,7 @@ Denys, however, was not impressed.
 I attribute this apathy to his dislike of implicits.
 Despite their widespread usage, implicits are notorious for their complexity~\citep{kvrikava2019scala}.
 In particular, using implicits for type-level computations requires carefully crafted definitions following a specific pattern.
-To give the reader a glance of this pattern, we show the definition of the |free| method on |Context|:
+To give the reader a glimpse of this pattern, we show the definition of the |free| method on |Context|:
 
 \memImplicitContextFree
 
@@ -92,7 +92,7 @@ When a user writes |ctx.free("mem")| on a |ctx| of type |Context["bool"::"mem"::
 
 In retrospect, I have to agree with Denys' judgment at the time: this style of programming is convoluted, to say the least.
 Aesthetics and pragmatism aside, programming with implicits requires a complete paradigm shift.
-Instead using pattern matching and functions, implicits require algorithms to be expressed using relations and constraints, which makes the task harder than it should be.
+Instead of using pattern matching and functions, implicits require algorithms to be expressed using relations and constraints, which makes the task harder than it should be.
 
 % 8. State Research Objectives
 \emph{Can we do better?} This is the question that motivates the work presented in this dissertation.
@@ -317,7 +317,7 @@ Through our formalization and implementation in the context of an industrial-str
 
 This chapter is based on~\citep{schmid2020coming}, which was written in collaboration with Georg Schmid, Jad Hamza, and Viktor Kuncak.
 Georg and I worked hand-in-hand on this project: we collaborated through countless whiteboard discussions and pair programming sessions, which resulted in shared first authorship of the implementation and most of the text.
-The said report covers more material than what is included in this chapter, in particular, our formalization and the associated metatheory are out of the scope of this dissertation \citep[Section 3 and 4]{schmid2020coming}.
+The said report covers more material than what is included in this chapter, in particular, our formalization and the associated metatheory are out of the scope of this dissertation.
 
 \input{preprint.tex}
 

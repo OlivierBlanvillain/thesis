@@ -11,34 +11,30 @@ Dependently-typed languages often rely on a unified syntax to describe both term
 The simplicity of this approach is unfortunately at odds with the design of most programming languages, where types and terms are expressed using separate syntactic categories.
 Singleton types provide a simple solution to this problem by allowing terms to be represented as types.
 
-In this chapter, we report on our attempt to generalize Scala's singleton types to support type-level programming, as well as a lightweight form a dependently-typed programming.
-Unlike proof assistants, we do not aim to use types as a general-purpose logic, which would favor designs ensuring totality of functions through termination checks.
+In this chapter, we report on our attempt to generalize Scala's singleton types to support type-level programming, as well as a lightweight form of dependently-typed programming.
+Unlike proof assistants, we do not aim to use types as a general-purpose logic, which would favor designs ensuring the totality of functions through termination checks.
 Instead, our focus is on improving type safety by increasing the expressive power of the type system.
 
-TODO: reformulate
-Our system generalizes the traditional notion of singleton type: when the lifted term $t$ contains a non-deterministic choice, the resulting type $\singleton{t}$ denotes the set of values that $t$ could possibly reduce to.
-As a result, our type system is capable of type computations by manipulating types which are based on terms, but can nonetheless contain more than a single value.
-In combination with subtyping, this allows us to seamlessly integrate with impure, or imprecisely-typed programs.
-
-With these goals in mind, we extended Scala's type system to lift programs and partially evaluate them as part of type-checking.
-Users can manipulate dependent types either directly, using new syntactic forms in Scala's type language, or have them inferred automatically using a new language keyword.
+With these goals in mind, we extended Scala's type system to lift programs to the type level and partially evaluate them as part of type-checking.
+Users can manipulate those types either directly, using new syntactic forms in Scala's type language, or have them inferred automatically using a new language keyword.
 This effectively allows users to execute programs involving functions and pattern matching at the type level.
 
 The remaining of the chapter is organized as follows:
 
 \begin{itemize}
 \item
-  We begin by motivating why type-level programming in desirable and how one might use our Scala extension to improve type safety (\Cref{sec:motivating-example}). Our example demonstrates how to design a strongly-typed API in a functional style accessible to programmers.
+  We begin by motivating why type-level programming is desirable and how one might use our Scala extension to improve type safety (\Cref{sec:motivating-example}). Our example demonstrates how to design a strongly-typed API in a functional style accessible to programmers.
 \item
-  We describe how we extended Scala with a generalization of singleton types.
+  We describe how we extended Scala with a generalization of singleton types (\Cref{sec:extending-scala}).
   We prototyped our type system on top of Dotty, the reference Scala~3 compiler.
-  This practical introduction would be of interest to any Scala programmer willing to learn how to use our system,
-  as well as programming language designers interested dependent types.
+  This practical introduction would be of interest to any Scala programmer willing to learn how to use our system, as well as programming language designers interested in dependent types.
 \item
   We show a concrete use-case of our system by implementing a strongly-typed wrapper for Apache Spark~\citep{zaharia2016apache} (\Cref{sec:use-case}).
   Thanks to our generalized singleton types, we can statically ensure the type safety of database operations such as join and filter.
   We compare our implementation with an equivalent implicit-based one and show remarkable compilation time savings.
 \end{itemize}
+
+Our original presentation of generalized singleton types contains a formalization \citep[Section 3 and 4]{schmid2020coming}, which is out of the scope of this chapter.
 
 \section{Motivating Examples}
 \label{sec:motivating-example}
@@ -184,7 +180,12 @@ Types for primitive literals have recently been added to the language: literals 
 
 In addition to base types and singleton types for every pure term, our system also supports types that lie in-between. We add a new form, |_: T|, which supplements expressions in types of form |{| $e$ |}| by allowing the user to intersperse terms and base types.
 
-For instance, consider the following list and its singleton type: |Cons(Nil, Nil): { Cons(Nil, Nil) }|.
+For instance, consider the following list and its singleton type:
+
+\begin{itemize}
+  \item |Cons(Nil, Nil): { Cons(Nil, Nil) }|
+\end{itemize}
+
 In our system, this term may also be typed less precisely, such as:
 
 \begin{itemize}

@@ -4,7 +4,7 @@ Dependent types have been met with considerable interest from the research commu
 Their primary application so far has been in proof assistants such as Coq~\citep{bertot2004interactive} and Agda~\citep{norell2007towards}, where they provide a sound and expressive foundation for theorem proving.
 However, dependent types are still largely absent from general-purpose programming languages, despite a long history of lightweight approaches~\citep{xi1998eliminating}.
 In the context of Haskell, much research has gone into extending the language to support computations on types, for instance in the form of functional dependencies~\citep{jones2000type}, type families~\citep{kiselyov2010fun} and promoted datatypes~\citep{yorgey2012giving}.
-These techniques have seen adoption by Haskell programmers, showing that there is a real demand for such mechanisms.
+These techniques have seen vivid adoption by Haskell programmers, showing that there is a real demand for such mechanisms.
 Furthermore, recent research has explored how dependent types could be added to the language for the same purpose~\citep{eisenberg2016dependent, weirich2017a}.
 
 Dependently-typed languages often rely on a unified syntax to describe both terms and types.
@@ -21,8 +21,8 @@ As a result, our type system is capable of type computations by manipulating typ
 In combination with subtyping, this allows us to seamlessly integrate with impure, or imprecisely-typed programs.
 
 With these goals in mind, we extended Scala's type system to lift programs and partially evaluate them as part of type-checking.
-Users can manipulate dependent types either directly, using new syntactic forms in Scala's type language, or have them inferred automatically using an new language keyword.
-This effectively allows users to execute programs involving functions and pattern matching to the type level.
+Users can manipulate dependent types either directly, using new syntactic forms in Scala's type language, or have them inferred automatically using a new language keyword.
+This effectively allows users to execute programs involving functions and pattern matching at the type level.
 
 The remaining of the chapter is organized as follows:
 
@@ -75,7 +75,7 @@ By annotating a method as |dependent|, the user instructs our system that the re
 Effectively, this means that the body of |concat| is lifted to the type level in a singleton type, and will be partially evaluated at every call site to compute a precise result type which \emph{depends} on the given inputs.
 For recursive |dependent| methods such as |concat|, we infer types that include calls to |concat| itself.
 The |<:| annotation lets us provide an upper bound on |concat|'s result type, which will be used while type checking the method's definition.
-Finally, by qualifying the definition of |Cons| and |Nil| as |dependent| we also allow their constructors and extractors to be lifted to the type level.
+Finally, by qualifying the definition of |Cons| and |Nil| as |dependent|, we also allow their constructors and extractors to be lifted to the type level.
 Using these definitions, we can now request the precise type whenever we manipulate lists by annotating |val| bindings as |dependent|:
 
 \begin{lstlisting}
@@ -108,7 +108,7 @@ l3.remove("B"): { Cons("A", Nil()) }
 l3.remove("C") // Error: element not found
 \end{lstlisting}
 
-The lists we defined so far can be used to implement a type-safe interface for database tables.
+The lists we defined so far can be used to implement a type-safe interface for database tables:
 
 \begin{lstlisting}
 dependent case class Table(schema: Lst, data: spark.DataFrame):
@@ -193,7 +193,12 @@ In our system, this term may also be typed less precisely, such as:
   \item |Cons(Nil, Nil): { Cons(_: Any, _: Lst) }|
 \end{itemize}
 
-all of which are subsumed by |Cons(Nil, Nil): Lst|.
+\noindent
+all of which are subsumed by
+
+\begin{itemize}
+  \item |Cons(Nil, Nil): Lst|.
+\end{itemize}
 
 \subsection{Type Evaluation}
 
@@ -201,14 +206,15 @@ Our system evaluates types using a call-by-value partial evaluator, which we emb
 The evaluation rules for the term in generalized singleton types are completely standard up to dynamic type tests.
 
 We perform evaluation of types during subtyping.
-For instance, given the following definition of a |paritiy| function:
+For instance, consider the following definition of a |parity| function:
 
 \begin{lstlisting}
 dependent def parity(x: Int) =
   if (x % 2 == 0) "even" else "odd"
 \end{lstlisting}
 
-in order to prove the well-typedness of
+\noindent
+In order to prove the well-typedness of
 
 \begin{lstlisting}
 val p: { "odd" } = parity(5)
@@ -240,7 +246,8 @@ For example, \emph{extractor patterns} rely on user-defined methods to extract v
 As a result, these custom extractors can contain arbitrary side effects.
 Our implementation limits the kind of patterns available in types to the two simplest forms: decomposition of case classes and the type-tests/type-casts patterns.
 
-During type normalization, our system evaluates pattern matching expressions according to Scala's runtime semantics, that is, patterns are checked top-to-bottom, and type-tests are evaluated using runtime type information available after type erasure.
+During type normalization, our system evaluates pattern matching expressions according to Scala's runtime semantics.
+Patterns are checked top-to-bottom, and type-tests are evaluated using runtime type information available after type erasure.
 
 For example, consider the following pattern matching expression:
 
@@ -258,7 +265,7 @@ Disjointness proofs are built using static knowledge about the class hierarchy, 
 
 \subsection{Two Modes of Type Inference}
 
-In order to retain backwards-compatibility, our system supports two modes of type inference: the precise inference mode which infers singleton types, and the default inference mode that corresponds to Scala's current type-inference algorithm.
+In order to retain backwards-compatibility, our system supports two modes of type inference: the precise inference mode which infers singleton types, and the default inference mode that corresponds to Scala's type-inference algorithm.
 Concretely, users opt into our new inference mode using the |dependent| qualifier on methods, values, and classes.
 
 When inferring the result type of a |dependent| method, our system lifts the method's body into a generalized singleton type.
@@ -280,32 +287,28 @@ our system infers the following result type:
 \end{lstlisting}
 
 \noindent
-Note that we could have equivalently defined |getName| by omitting the |dependent| qualifier and writing its result type  explicitly.
+We could have equivalently defined |getName| by omitting the |dependent| qualifier and writing its result type  explicitly.
 
 Scala requires recursive methods to have an explicit result type, and this restriction also applies to |dependent| methods.
 However, in the case of a |dependent| method, an explicit result type is only used as an upper bound for the actual precise result type and will only be used to type-check the method's body.
 At other call sites, the (precise) inferred result type is used.
-Bounds of dependent methods are written using a special syntax (|<: T|), which emphasizes the difference from normal result types (|: T|).
+Bounds of dependent methods are written using a special syntax (|<: T|).
 
 \subsection{Approximating Side Effects}
-
-\paragraph{State}
 
 Scala's type system permits uncontrolled side effects in programs.
 Given the absence of an effect system, result types of methods do not convey any information about the potential use of side effects in the method body.
 The situation is analogous for |dependent| methods.
 Since we uniformly approximate all side effects, we avoid the situation where a type refers to a value that may be modified during the program execution.
-For instance, if |z| is a mutable integer variable, we will never introduce |z| in a singleton type, since reading a mutable variable is a side effect.
-However, we can still assign precise types to expressions containing |z|, for instance, we can type |Cons(z, Nil())| as |{ Cons(_: Int, Nil()) }|.
-
-\paragraph{Exceptions}
+For instance, if |z| is a mutable integer variable, we will never introduce |z| in a singleton type.
+However, we can still assign singleton types to expressions containing |z|, for example, we can type |Cons(z, Nil())| as |{ Cons(_: Int, Nil()) }|.
 
 Similarly to how we model other side effects, exceptions are approximated in types.
 Our type-inference algorithm uses a new error type, |Error(e)|, which we infer when raising an exception with |throw e|.
 Exception handlers are typed imprecisely using the default mode of type-inference.
 Exceptions thrown in statement positions are not reflected in singleton types, since the type of |{e1; e2}| is simply |{ e2 }|.
 However, exceptions thrown in tail positions (such as in remove from \Cref{sec:motivating-example}) can lead to types normalizing to |Error(e)|.
-In these cases, our type system can prove that the program execution will encounter exceptional behavior, and reports a compilation error.
+In these cases, our type system can prove that the program execution will encounter exceptional behavior, and report a compilation error.
 This approach is conservative in that it might reject programs that recover from exceptions.
 Also note that this is a sanity check, rather than a guarantee of no exceptions occurring at runtime.
 That is, depending on which rules are used during subtyping, it is possible to succeed without entering type normalization, resulting in such errors going undetected.
@@ -325,10 +328,9 @@ Given a class Foo with a |dependent| overrides of |equals|, calls to |Foo.equals
 
 \subsection{Termination}
 
-We distinguish two important aspects of termination.
+We distinguish two important aspects of termination: the termination of type-checked programs and the termination of our type checker.
 
-The first question is whether type-checked programs are guaranteed to terminate.
-Proving termination or totality of dependent programs is a non-goal of our system.
+Proving termination or totality of programs is a non-goal of our system.
 Unlike proof assistants, Scala programs do not manipulate proof terms.
 Consequently, the lack of totality checks does not affect Scala's present notion of safety.
 Exceptions or infinite loops in the evaluation of a `dependent` method would prevent the completion of type-checking.

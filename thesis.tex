@@ -97,28 +97,31 @@ Instead of using pattern matching and functions, implicits require algorithms to
 % 8. State Research Objectives
 \emph{Can we do better?} This is the question that motivates the work presented in this dissertation.
 
-% 3. State the Background Information
-Dependently-typed programming languages, such as Coq~\citep{bertot2004interactive}, Agda~\citep{norell2007towards}, and Idris~\citep{brady2014idris}, make no distinction between terms and types, and thus naturally support type-level programming.
-Scala, on the other hand, has a clear separation between its term and type language.
+Our contributions are as follows:
 
-% When terms are types are unified, the distinction between programming and type-level programming blurs out since value-level computations can be performed during type checking.
+\begin{itemize}
+  \item In \Cref{chap:ab-using-implicits}, we present techniques for programming at the type-level with implicits.
+  In particular, we develop the example presented in the introduction, and show how to use Scala's implicit resolution mechanism to compute types, in a style that resembles logic programming.
 
-TLP isn't new. GHC' Haskell is leading the charge with the numerous language extentions developped over the las decate. Unfortunately, many of the techniques developed in the context of Haskell are not directly applicable to other programming languages. In particular, subtying ...
+  \item In \Cref{chap:generalizing-singleton-types}, we propose a generalization of Scala's singleton types, whose goal is to enable type-level programming in an accessible style.
+  Concretely, we extend Scala's type system with the ability to lift term-level programs to the type level and evaluate those programs during type-checking.
+  We implement our system as an extension of the Scala~3 compiler, and show its practicality with a case study in which we develop a strongly-typed interface for Spark datasets.
 
-% 9. Create an Outline
-% - (Ab)Using Implicits
-% - Generalizing Scala's Singleton Types
-% - Match Types
-% - Performance Evaluation
+  \item In \Cref{chap:match-types}, we introduce match types, a type-level equivalent of pattern matching.
+  Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
+  We formalize match types in a self-contained calculus based on \SystemFsub and prove its soundness.
+  We demonstrate the practicality of our system by implementing match types in the Scala~3 compiler, thus making type-level programming readily available to a broad audience of programmers.
 
-\lipsum[1]
+  \item In \Cref{chap:performance-evaluation}, we evaluate the performance of the various type-level programming techniques introduced in prior chapters, when confronted with large type-level programs.
+  We show that the techniques introduced in \Cref{chap:generalizing-singleton-types} and~\ref{chap:match-types} systematically outperform implicits in terms of compilation times and binary sizes.
+\end{itemize}
 
 \chapter{(Ab)Using Implicits}
 \label{chap:ab-using-implicits}
 
 Scala's implicit parameters have outgrown their roots as a simple syntactic construct to the extent that they provide basic support for type-level programming.
 In this chapter, we present techniques for implicit-based type-level programming in Scala.
-In particular, through extended examples, we show how to use Scala's implicit resolution mechanism to \emph{compute} types, in a style that resembles logic programming.
+In particular, through extended examples, we show how to use Scala's implicit resolution mechanism to compute types, in a style that resembles logic programming.
 
 \subsection*{Attribution}
 
@@ -304,13 +307,13 @@ As we will see in \Cref{chap:performance-evaluation}, those techniques come at a
 Yet, despite those shortcomings, Scala programmers have shown a persistent interest in this style of programming, as demonstrated by its popularity in the open-source community~\citep{sabin2011shapeless, pilquist2013scodecs, blanvillain2016frameless}.
 
 \chapter{Generalizing Scala's Singleton Types}
-\label{chap:generalizing-scala-s-singleton-types}
+\label{chap:generalizing-singleton-types}
 
 Type-level programming is an increasingly popular way to obtain additional type safety.
 Unfortunately, it remains a second-class citizen in the majority of industrially-used programming languages.
 We propose a new dependently-typed system with subtyping and singleton types whose goal is enabling type-level programming in an accessible style.
 To this end, we have prototyped our system as an extension of the Scala programming language.
-We demonstrate the practicality of our system with a case study in which we develop a strongly-typed wrapper for Spark datasets.
+We demonstrate the practicality of our system with a case study in which we develop a strongly-typed interface for Spark datasets.
 Through our formalization and implementation in the context of an industrial-strength compiler, we hope to provide valuable insights for language designers interested in dependent types.
 
 \subsection*{Attribution}
@@ -329,7 +332,7 @@ However, the combination of type-level programming and subtyping remains largely
 This chapter presents \emph{match types}, a type-level equivalent of pattern matching.
 Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
 We formalize the feature of match types in a calculus based on \SystemFsub and prove its soundness.
-We practically evaluate our system by implementing match types in the Scala~3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
+We demonstrate the practicality of our system by implementing match types in the Scala~3 reference compiler, thus making type-level programming readily available to a broad audience of programmers.
 
 \subsection*{Attribution}
 
@@ -340,14 +343,14 @@ This chapter is based on~\citep{blanvillain2022type}, which was written in colla
 \chapter{Performance Evaluation}
 \label{chap:performance-evaluation}
 
-In this chapter, we report performance evaluation results for the various type-level programming techniques introduce in prior chapters.
-Specifically, we are interested in evaluating the scalability of each technique when confronted with large type-level programs, in terms of compilation times (\Cref{sec:compilation-time}) and binary sizes (\Cref{sec:binary-size}).
+In this chapter, we evaluate the performance of the various type-level programming techniques introduced in prior chapters.
+Specifically, we are interested in the scalability of each technique when confronted with large type-level programs, in terms of compilation times (\Cref{sec:compilation-time}) and binary sizes (\Cref{sec:binary-size}).
 In \Cref{sec:the-timing-of-match-type-reductions}, we discuss how the timing of match type reduction impacts compilation times.
 
 \section{Method}
 
 We evaluate the performance of the 3 type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
-Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-scala-s-singleton-types}), and once using match types (\Cref{chap:match-types}).
+Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-singleton-types}), and once using match types (\Cref{chap:match-types}).
 
 These benchmarks are inspired by code examples used throughout this dissertation. They all follow a similar pattern of a single function call whose result type is computed at the type level. We code generated variations of each benchmark with increasing input size, from 1 to 256, in increments of 8.
 The source code of our benchmarks is available in the supplementary material of this dissertation\footnote{\texttt{https://olivierblanvillain.github.io/thesis/benchmarks.zip}}, alongside instructions on how to reproduce our experiments.
@@ -449,6 +452,8 @@ In this figure, we compare the compilation times of the match type Reduce benchm
 
 \appendix
 \chapter{Type Soundness for System FM}
+\label{chap:type-soundness-for-system-fm}
+
 \renewenvironment{proof}{{\it Proof: }}{\qed} % Show proofs
 \input{proofs/permutation.tex}
 \input{proofs/weakening.tex}

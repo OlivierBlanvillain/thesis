@@ -5,11 +5,11 @@ This package is based on Java's implementation of regular expression, and thus b
 The Scala implementation innovates with its presentation: it uses the power and flexibility of Scala's pattern matching to offer a syntax that is both elegant and concise.
 The package's documentation starts with the following example:
 
+\regexDocumentation
 % val date = new Regex("(\\d{4})-(\\d{2})-(\\d{2})")
-% "2004-01-20" match {
+% "2004-01-20" match
 %   case date(year, month, day) =>
 %     s"$year was a good year for PLs."
-% }
 
 \noindent
 The extractor pattern, |case date(y,m,d) =>|, replaces the need for manually indexing into the regular expression's capture groups, and shields its users from off-by-one error.
@@ -23,24 +23,71 @@ In this chapter, we propose a new design for Scala's regular expression library 
 Our design makes extensive use of match types, Scala~3 new feature for type-level programming, to statically analyze regular expressions during type checking and generate type-specialized extractors.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement while still enjoying additional safety.
 
-Our contribution are as follows:
-
-\begin{itemize}
-  \item ...
-  \item ...
-  \item ...
-  \item ...
-\end{itemize}
-
 \section{Architecture}
 
-In this section...
+We present our library in terms of 3 components:
+
+\begin{enumerate}
+  \item The type-level capture group analysis, which uses match types to inspect the user-provided regular expression and compute the corresponding tuple-based type representation (\Cref{sec:type-level}).
+
+  \item The term-level capture group processing, which extracts and sanitizes the output of the regex engine, in accordance with the representation computed by the type-level component (\Cref{sec:term-level}).
+
+  \item The user-level interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe capture group extraction.
+\end{enumerate}
+
+We begin our presentation with the user-level interface, which takes the form of relatively simple Scala class and companion object:
+
+\regexUserLevel
+% object Regex:
+%   def apply[R <: String & Singleton](regex: R): Regex[Compile[R]] =
+%     new Regex(regex)
+%
+% class Regex[P] private (val regex: String):
+%   val pattern = Pattern.compile(regex)
+%   def unapply(s: String): Option[P] =
+%     val m = pattern.matcher(s)
+%     if (m.matches())
+%       val a = Array.tabulate(m.groupCount) { i => m.group(i + 1) }
+%       Some(toTuple[P](regex, a))
+%     else
+%       None
+
+The |apply| method is the entry point of our library.
+It takes a regular expression and returns an instance of |Regex|.
+Instead of directly accepting |String| argument, that method requires a type parameter, |R|, which will be inferred by the compiler, and allows us to get our hands on a type-level instance of the regular expression (the |Singleton| bound is necessary to guide Scala's type inference).
+We use that type-level string immediately to instantiate |Compile|, which is our type-level capture group analysis component.
+We store the output of that analysis as |Regex|'s type argument.
+
+The implementation of the |Regex| class is straightforward.
+Similarly its counterpart in the original Scala implementation, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capture groups whenever the matching succeeds.
+The |Regex| class defines an |unapply| method, which the Scala compiler will invoke when using an instance of that class as a pattern matching extractor \citep{emir2007matching}.
+
+The main difference between Scala's original |Regex| implementation and ours lies in the signature the |unapply| method, which determines the nature of extraction performed by that method.
+By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capture groups, where $n$ corresponds to the tuple arity, and that the type of those groups will correspond to the tuple types.
+We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
+In our implementation, this is done via the |toTuple| method, which is our
+term-level capture group processing component.
+As a result, our implementation never returns null values, which removes the null-checking burden of from the user.
+
+For instance, in the following example, we use a regular expression with an optional capture group to extract the integral and fractional parts of a rational number:
+
+\regexRational
+% val rational = Regex("(\\d+)\\.?(\\d+)?")
+% "3.1415" match
+%   case rational(i, Some(f)) =>
+%     val n = i.size + f.size
+%     s"This number is $n digits long"
+
+\noindent
+Here, our implementation instantiates |Regex|'s type parameter to |P = (String, Option[String])|, which it then uses in |unapply|'s return type to obtain a precise representation of the regex's capture groups.
 
 \section{Type-Level}
+\label{sec:type-level}
 
-In this section...
+The main challenge...
 
 \section{Term-Level}
+\label{sec:term-level}
 
 In this section...
 

@@ -1,9 +1,10 @@
 import annotation.experimental
+import Package._
 
 @experimental
 object Tests {
   object TypeLevel {
-    def check[A <: String, B](implicit ev: Regex.Compile[A] =:= B): Unit = ()
+    def check[A <: String, B](implicit ev: Lib.Compile[A] =:= B): Unit = ()
     type S = String
     type O = Option[String]
 
@@ -23,6 +24,23 @@ object Tests {
     assert(
       expected == actual,
       s"expected: $expected, actual: $actual")
+
+  def examples: Unit = {
+// start section regexDocumentation
+val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
+"2004-01-20" match
+  case date(y, m, d) =>
+    s"$y was a good year for PLs."
+// end section regexDocumentation
+
+// start section regexRational
+val rational = Regex("(\\d+)\\.?(\\d+)?")
+"3.1415" match
+  case rational(i, Some(f)) =>
+    val n = i.size + f.size
+    s"This number is $n digits long"
+// end section regexRational
+  }
 
   def main(args: Array[String]): Unit = {
     val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")

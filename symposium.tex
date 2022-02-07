@@ -1,0 +1,49 @@
+\section{Introduction}
+
+The Scala standard library includes a package to manipulate regular expressions.
+This package is based on Java's implementation of regular expression, and thus benefits from the high performance of the JVM's regex engine.
+The Scala implementation innovates with its presentation: it uses the power and flexibility of Scala's pattern matching to offer a syntax that is both elegant and concise.
+The package's documentation starts with the following example:
+
+% val date = new Regex("(\\d{4})-(\\d{2})-(\\d{2})")
+% "2004-01-20" match {
+%   case date(year, month, day) =>
+%     s"$year was a good year for PLs."
+% }
+
+\noindent
+The extractor pattern, |case date(y,m,d) =>|, replaces the need for manually indexing into the regular expression's capture groups, and shields its users from off-by-one error.
+
+While the syntax of this example would undoubtedly make some non-Scala programmers envious, its type safety leaves much to be desired.
+First of all, the \emph{number} of variable bindings in the extractor is entirely opaque to Scala's type system, and left to the discretion of the programmer.
+Furthermore, the values coming out of capture groups can be null (when using optional captures) and thus require an additional layer of validation.
+Those shortcomings might appear benign when looking at small examples, but can easily turn into bugs when dealing with a large-scale code base.
+
+In this chapter, we propose a new design for Scala's regular expression library which provides both type-safe and null-safe capture group extraction.
+Our design makes extensive use of match types, Scala~3 new feature for type-level programming, to statically analyze regular expressions during type checking and generate type-specialized extractors.
+We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement while still enjoying additional safety.
+
+Our contribution are as follows:
+
+\begin{itemize}
+  \item ...
+  \item ...
+  \item ...
+  \item ...
+\end{itemize}
+
+\section{Architecture}
+
+In this section...
+
+\section{Type-Level}
+
+In this section...
+
+\section{Term-Level}
+
+In this section...
+
+\section{Evaluation}
+
+In this section...

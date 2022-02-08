@@ -18,6 +18,11 @@ object Tests {
     check["(B)|C", O]
     check["C|(A)", O]
     check[".*\\s(([A-Za-z]{5}(hum)?).js)\\s.*", (S, S, O)]
+
+    check["((?:A)(B(C)))", (S, S, S)]
+    check["((A)(?:B(C)))?", (O, O, O)]
+    check["((A)(B(?:C))?)", (S, S, O)]
+    check["(?:(A)|(B(C)))", (O, O, O)]
   }
 
   def assertEquals(expected: Any, actual: Any): Unit =

@@ -79,12 +79,65 @@ For instance, in the following example, we use a regular expression with an opti
 %     s"This number is $n digits long"
 
 \noindent
-Here, our implementation instantiates |Regex|'s type parameter to |P = (String, Option[String])|, which it then uses in |unapply|'s return type to obtain a precise representation of the regex's capture groups.
+Here, we instantiates |Regex|'s type parameter to |P = (String, Option[String])|, which we then use in |unapply|'s return type to obtain a precise representation of the regex's capture groups.
 
 \section{Type-Level}
 \label{sec:type-level}
 
-The main challenge...
+The purpose of our type-level component is two-fold:
+
+\begin{enumerate}
+  \item Identify the capture groups of the input regular expression.
+  \item Determine which of those capture group are optional, that is, whether or not the regex engine can assign null values for each of those groups.
+\end{enumerate}
+
+\noindent
+The result of that type-level computation takes the form of a Scala tuple with |String| and |Option[String]| element, depending of the optionality analysis.
+
+We present our implementation incrementally, starting from simple but incomplete solution, and progressively building up towards our final solution.
+The first version of our type-level program is limited to capture group identification.
+The implementation is straightforward:
+
+\begin{lstlisting}
+import compiletime.ops.string.{Length, CharAt}
+import compiletime.ops.int.+
+
+type Compile[R <: String] =
+  Reverse[Loop[R, 0, Length[R], EmptyTuple]]
+
+type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
+  Lo match
+    case Hi => Acc
+    case _   => CharAt[R, Lo] match
+      case '('  => Loop[R, Lo + 1, Hi, String *: Acc]
+      case '\\' => Loop[R, Lo + 2, Hi, Acc]
+      case _ => Loop[R, Lo + 1, Hi, Acc]
+\end{lstlisting}
+
+\noindent
+The |Length| and |CharAt| types are special cased by the compiler: when their first argument is a literal singleton string, the compiler evaluates those types via their corresponding term-level implementation.
+Similarly, the |+| type from |compiletime.ops.int| allows us to manipulate integer just like we would at the term level.
+The |EmptyTuple| and |*:| are Scala~3's new generic representation of tuples.
+Those types remove the need for heterogeneous lists and allow us to manipulate tuples directly.
+
+Attentive readers might have noticed that our handling of backslash, regex's escape character, might lead to off-by-one errors.
+Be reassured, this is not an oversight!
+Regular expressions with trailing backslashes result in runtime exceptions (reported as "unexpected internal error").
+Even though detecting there type of error at compile time is out of the scope of our implementation, doing so is still desirable.
+If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into an call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
+
+Our first implementation of |Compile| treats every opening parethesis as the start of a capture group, which does no do honor syntax of Java's regular expression.
+Indeed, Java also support several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, and must all be discriminated from named and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
+
+\regexIsCapturing
+% type IsCapturing[R <: String, At <: Int] =
+%   CharAt[R, At] match
+%     case "?" => CharAt[R, At + 1] match
+%       case "<" => CharAt[R, At + 2] match
+%         case "!" => false // zero-width negative lookbehind
+%         case _ => true    // named-capturing group
+%       case _ => false     // other non-capturing special constructs
+%     case _ => true        // unnamed-capturing group
 
 \section{Term-Level}
 \label{sec:term-level}

@@ -35,7 +35,7 @@ We present our library in terms of 3 components:
   \item The user-level interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe capture group extraction.
 \end{enumerate}
 
-We begin our presentation with the user-level interface, which takes the form of relatively simple Scala class and companion object:
+We begin our presentation with the user-level interface, which takes the form of a relatively simple Scala class and companion object:
 
 \regexUserLevel
 % object Regex:
@@ -59,15 +59,15 @@ We use that type-level string immediately to instantiate |Compile|, which is our
 We store the output of that analysis as |Regex|'s type argument.
 
 The implementation of the |Regex| class is straightforward.
-Similarly its counterpart in the original Scala implementation, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capture groups whenever the matching succeeds.
+Similarly to its counterpart in the original Scala implementation, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capture groups whenever the matching succeeds.
 The |Regex| class defines an |unapply| method, which the Scala compiler will invoke when using an instance of that class as a pattern matching extractor \citep{emir2007matching}.
 
-The main difference between Scala's original |Regex| implementation and ours lies in the signature the |unapply| method, which determines the nature of extraction performed by that method.
+The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
 By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capture groups, where $n$ corresponds to the tuple arity, and that the type of those groups will correspond to the tuple types.
 We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
 In our implementation, this is done via the |toTuple| method, which is our
 term-level capture group processing component.
-As a result, our implementation never returns null values, which removes the null-checking burden of from the user.
+As a result, our implementation never returns null values, which removes the null-checking burden from the user.
 
 For instance, in the following example, we use a regular expression with an optional capture group to extract the integral and fractional parts of a rational number:
 
@@ -88,13 +88,13 @@ The purpose of our type-level component is two-fold:
 
 \begin{enumerate}
   \item Identify the capture groups of the input regular expression.
-  \item Determine which of those capture group are optional, that is, whether or not the regex engine can assign null values for each of those groups.
+  \item Determine which of those capture groups are optional, that is, whether or not the regex engine can assign null values for each of those groups.
 \end{enumerate}
 
 \noindent
 The result of that type-level computation takes the form of a Scala tuple with |String| and |Option[String]| element, depending of the optionality analysis.
 
-We present our implementation incrementally, starting from simple but incomplete solution, and progressively building up towards our final solution.
+We present our implementation incrementally, starting from a simple but incomplete solution, and progressively building up towards our final solution.
 The first version of our type-level program is limited to capture group identification.
 The implementation is straightforward:
 
@@ -115,7 +115,7 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
 \end{lstlisting}
 
 \noindent
-The |Length| and |CharAt| types are special cased by the compiler: when their first argument is a literal singleton string, the compiler evaluates those types via their corresponding term-level implementation.
+The |Length| and |CharAt| types are special-cased by the compiler: when their first argument is a literal singleton string, the compiler evaluates those types via their corresponding term-level implementation.
 Similarly, the |+| type from |compiletime.ops.int| allows us to manipulate integer just like we would at the term level.
 The |EmptyTuple| and |*:| are Scala~3's new generic representation of tuples.
 Those types remove the need for heterogeneous lists and allow us to manipulate tuples directly.
@@ -123,10 +123,10 @@ Those types remove the need for heterogeneous lists and allow us to manipulate t
 Attentive readers might have noticed that our handling of backslash, regex's escape character, might lead to off-by-one errors.
 Be reassured, this is not an oversight!
 Regular expressions with trailing backslashes result in runtime exceptions (reported as "unexpected internal error").
-Even though detecting there type of error at compile time is out of the scope of our implementation, doing so is still desirable.
-If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into an call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
+Even though detecting these types of errors at compile time is out of the scope of our implementation, doing so is still desirable.
+If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
 
-Our first implementation of |Compile| treats every opening parethesis as the start of a capture group, which does no do honor syntax of Java's regular expression.
+Our first implementation of |Compile| treats every opening parenthesis as the start of a capture group, which does not do honor to the syntax of Java's regular expression.
 Indeed, Java also support several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, and must all be discriminated from named and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
 
 \regexIsCapturing

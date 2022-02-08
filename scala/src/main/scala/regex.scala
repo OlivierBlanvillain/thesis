@@ -31,7 +31,7 @@ type CharAt[R <: String, At <: Int] =
 type Compile[R <: String] =
   Reverse[Loop[R, 0, Length[R], EmptyTuple, 0]]
 
-type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Lvl <: Int] <: Tuple =
+type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] <: Tuple =
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
@@ -39,15 +39,15 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Lvl <: Int] <: Tuple 
         CharAt[R, Lo + 1] match {
           case "(" =>
             IsCapturing[R, Lo + 2] match {
-              case false => Loop[R, Lo + 2, Hi, Acc, Lvl + 1]
-              case true  => Loop[R, Lo + 2, Hi, Option[String] *: Acc, Lvl + 1]
+              case false => Loop[R, Lo + 2, Hi, Acc, Opt + 1]
+              case true  => Loop[R, Lo + 2, Hi, Option[String] *: Acc, Opt + 1]
             }
-          case _ => Loop[R, Lo + 2, Hi, Acc, Lvl]
+          case _ => Loop[R, Lo + 2, Hi, Acc, Opt]
         }
       case ")" =>
-        Loop[R, Lo + 1, Hi, Acc, Max[0, Lvl - 1]]
+        Loop[R, Lo + 1, Hi, Acc, Max[0, Opt - 1]]
       case "(" =>
-        Lvl match
+        Opt match
           case 0 =>
             IsNullable[R, Lo + 1, Hi, 0] match
               case true =>
@@ -62,11 +62,11 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Lvl <: Int] <: Tuple 
                 }
           case _ =>
             IsCapturing[R, Lo + 1] match {
-              case false => Loop[R, Lo + 1, Hi, Acc, Lvl + 1]
-              case true  => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Lvl + 1]
+              case false => Loop[R, Lo + 1, Hi, Acc, Opt + 1]
+              case true  => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Opt + 1]
             }
-      case "\\" => Loop[R, Lo + 2, Hi, Acc, Lvl]
-      case _ => Loop[R, Lo + 1, Hi, Acc, Lvl]
+      case "\\" => Loop[R, Lo + 2, Hi, Acc, Opt]
+      case _ => Loop[R, Lo + 1, Hi, Acc, Opt]
 
 // start section regexIsCapturing
 type IsCapturing[R <: String, At <: Int] <: Boolean =
@@ -96,6 +96,9 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
     case _ =>
       CharAt[R, At] match
         case "?" | "*" | "|" => true
+        case "{" => CharAt[R, At + 1, Hi] match
+          case "0" => true
+          case _ => false
         case "+" => IsMarked[R, At + 1, Hi]
         case _ => false
 

@@ -67,19 +67,19 @@ object Last {
 import Lib.IsNullable
 
 // start section regexLastIteration
-type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Lvl <: Int] =
+type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] =
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
-      case ")" => Loop[R, Lo + 1, Hi, Acc, Max[0, Lvl - 1]]
+      case ")" => Loop[R, Lo + 1, Hi, Acc, Max[0, Opt - 1]]
       case "(" =>
-        Lvl match
+        Opt match
           case 0 => IsNullable[R, Lo + 1, Hi, 0] match
             case true  => Loop[R, Lo + 1, Hi, Option[String] *: Acc, 1]
             case false => Loop[R, Lo + 1, Hi, Acc, 0]
-          case _ => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Lvl + 1]
-      case "\\" => Loop[R, Lo + 2, Hi, Acc, Lvl]
-      case _ => Loop[R, Lo + 1, Hi, Acc, Lvl]
+          case _ => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Opt + 1]
+      case "\\" => Loop[R, Lo + 2, Hi, Acc, Opt]
+      case _ => Loop[R, Lo + 1, Hi, Acc, Opt]
 // end section regexLastIteration
 }
 

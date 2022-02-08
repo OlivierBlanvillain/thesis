@@ -92,7 +92,7 @@ The purpose of our type-level component is two-fold:
 \end{enumerate}
 
 \noindent
-The result of that type-level computation takes the form of a Scala tuple with |String| and |Option[String]| element, depending of the optionality analysis.
+The result of that type-level computation takes the form of a Scala tuple with |String| and |Option[String]| elements, depending of the optionality analysis.
 
 We present our implementation incrementally, starting from a simple but incomplete solution, and progressively building up towards our final solution.
 The first version of our type-level program is limited to capture group identification.
@@ -116,7 +116,7 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
 
 \noindent
 The |Length| and |CharAt| types are special-cased by the compiler: when their first argument is a literal singleton string, the compiler evaluates those types via their corresponding term-level implementation.
-Similarly, the |+| type from |compiletime.ops.int| allows us to manipulate integer just like we would at the term level.
+Similarly, the |+| type from |compiletime.ops.int| allows us to manipulate integers just like we would at the term level.
 The |EmptyTuple| and |*:| are Scala~3's new generic representation of tuples.
 Those types remove the need for heterogeneous lists and allow us to manipulate tuples directly.
 
@@ -127,7 +127,7 @@ Even though detecting these types of errors at compile time is out of the scope 
 If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
 
 Our first implementation of |Compile| treats every opening parenthesis as the start of a capture group, which does not do honor to the syntax of Java's regular expression.
-Indeed, Java also support several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, and must all be discriminated from named and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
+Indeed, Java also supports several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, and must all be discriminated from named and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
 
 \regexIsCapturing
 % type IsCapturing[R <: String, At <: Int] =

@@ -45,6 +45,31 @@ val rational = Regex("(\\d+)\\.?(\\d+)?")
     val n = i.size + f.size
     s"This number is $n digits long"
 // end section regexRational
+
+import Lib.{CharAt, Reverse}
+
+// start section regexFirstIteration
+import compiletime.ops.string._
+import compiletime.ops.int.+
+
+type Compile[R <: String] =
+  Reverse[Loop[R, 0, Length[R], EmptyTuple]]
+
+type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
+  Lo match
+    case Hi => Acc
+    case _   => CharAt[R, Lo] match
+      case "("  => Loop[R, Lo + 1, Hi, String *: Acc]
+      case "\\" => Loop[R, Lo + 2, Hi, Acc]
+      case _ => Loop[R, Lo + 1, Hi, Acc]
+// end section regexFirstIteration
+
+def check[A <: String, B](implicit ev: Compile[A] =:= B): Unit = ()
+type S = String
+check["(\\d{4})-(\\d{2})-(\\d{2})", (S, S, S)]
+check["(\\()-(\\d{2})-(\\d{2})", (S, S, S)]
+check["((A)(B(C)))", (S, S, S, S)]
+check["((B(C)))", (S, S, S)]
   }
 
   def main(args: Array[String]): Unit = {

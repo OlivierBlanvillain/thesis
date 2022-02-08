@@ -59,7 +59,7 @@ We use that type-level string immediately to instantiate |Compile|, which is our
 We store the output of that analysis as |Regex|'s type argument.
 
 The implementation of the |Regex| class is straightforward.
-Similarly to its counterpart in the original Scala implementation, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capture groups whenever the matching succeeds.
+Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capture groups whenever the matching succeeds.
 The |Regex| class defines an |unapply| method, which the Scala compiler will invoke when using an instance of that class as a pattern matching extractor \citep{emir2007matching}.
 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
@@ -92,33 +92,37 @@ The purpose of our type-level component is two-fold:
 \end{enumerate}
 
 \noindent
-The result of that type-level computation takes the form of a Scala tuple with |String| and |Option[String]| elements, depending of the optionality analysis.
+The result of that type-level computation takes the form of a Scala tuple with |String| and |Option[String]| elements, depending of the nullability analysis.
 
 We present our implementation incrementally, starting from a simple but incomplete solution, and progressively building up towards our final solution.
+
+\subsection{Capture Group Identification}
+
 The first version of our type-level program is limited to capture group identification.
 The implementation is straightforward:
 
-\begin{lstlisting}
-import compiletime.ops.string.{Length, CharAt}
-import compiletime.ops.int.+
-
-type Compile[R <: String] =
-  Reverse[Loop[R, 0, Length[R], EmptyTuple]]
-
-type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
-  Lo match
-    case Hi => Acc
-    case _   => CharAt[R, Lo] match
-      case '('  => Loop[R, Lo + 1, Hi, String *: Acc]
-      case '\\' => Loop[R, Lo + 2, Hi, Acc]
-      case _ => Loop[R, Lo + 1, Hi, Acc]
-\end{lstlisting}
+\regexFirstIteration
+% import compiletime.ops.string._
+% import compiletime.ops.int.+
+%
+% type Compile[R <: String] =
+%   Reverse[Loop[R, 0, Length[R], EmptyTuple]]
+%
+% type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
+%   Lo match
+%     case Hi => Acc
+%     case _   => CharAt[R, Lo] match
+%       case "("  => Loop[R, Lo + 1, Hi, String *: Acc]
+%       case "\\" => Loop[R, Lo + 2, Hi, Acc]
+%       case _ => Loop[R, Lo + 1, Hi, Acc]
 
 \noindent
 The |Length| and |CharAt| types are special-cased by the compiler: when their first argument is a literal singleton string, the compiler evaluates those types via their corresponding term-level implementation.
-Similarly, the |+| type from |compiletime.ops.int| allows us to manipulate integers just like we would at the term level.
+Similarly, the |+| type (from |compiletime.ops.int|) allows us to manipulate integers just like we would at the term level.
 The |EmptyTuple| and |*:| are Scala~3's new generic representation of tuples.
-Those types remove the need for heterogeneous lists and allow us to manipulate tuples directly.
+Those types remove the need for heterogeneous lists and lets us manipulate tuples directly.
+
+\subsection{Out-Of-Bound Errors}
 
 Attentive readers might have noticed that our handling of backslash, regex's escape character, might lead to off-by-one errors.
 Be reassured, this is not an oversight!
@@ -126,11 +130,14 @@ Regular expressions with trailing backslashes result in runtime exceptions (repo
 Even though detecting these types of errors at compile time is out of the scope of our implementation, doing so is still desirable.
 If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
 
+\subsection{Ruling Out Non-Capturing}
+
 Our first implementation of |Compile| treats every opening parenthesis as the start of a capture group, which does not do honor to the syntax of Java's regular expression.
-Indeed, Java also supports several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, and must all be discriminated from named and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
+Indeed, Java also supports several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, which must all be discriminated from named- and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
+Our second implementation (omitted) uses the following |IsCapturing| predicate type to rule out non-capturing groups:
 
 \regexIsCapturing
-% type IsCapturing[R <: String, At <: Int] =
+% type IsCapturing[R <: String, At <: Int] <: Boolean =
 %   CharAt[R, At] match
 %     case "?" => CharAt[R, At + 1] match
 %       case "<" => CharAt[R, At + 2] match
@@ -138,6 +145,31 @@ Indeed, Java also supports several other special constructs which start with an 
 %         case _ => true    // named-capturing group
 %       case _ => false     // other non-capturing special constructs
 %     case _ => true        // unnamed-capturing group
+
+\noindent
+Similar to our handling of backslash characters, this implementation intentionally does not guard against out-of-bounds errors, since these errors correspond to ill-formed regular expressions.
+
+\subsection{Nullability Analysis}
+
+
+\regexIsNullable
+% type IsNullable[R <: String, At <: Int, Hi <: Int, Ops <: Int] <: Boolean =
+%   CharAt[R, At] match
+%     case ")" => Ops match
+%       case 0 => IsMarked[R, At + 1, Hi]
+%       case _ => IsNullable[R, At + 1, Hi, Ops - 1]
+%     case "(" => IsNullable[R, At + 1, Hi, Ops + 1]
+%     case "\\" => IsNullable[R, At + 2, Hi, Ops]
+%     case _    => IsNullable[R, At + 1, Hi, Ops]
+%
+% type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
+%   At match
+%     case Hi => false
+%     case _ =>
+%       CharAt[R, At] match
+%         case "?" | "*" | "|" => true
+%         case "+" => IsMarked[R, At + 1, Hi]
+%         case _ => false
 
 \section{Term-Level}
 \label{sec:term-level}

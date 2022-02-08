@@ -35,12 +35,21 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Nw <: Int] <: Tuple =
   Lo match
     case Hi => Acc
     case _   => CharAt[R, Lo] match
-      case ")"  =>
+      case "|" =>
+        CharAt[R, Lo + 1] match {
+          case "(" =>
+            IsCapturing[R, Lo + 2] match {
+              case false => Loop[R, Lo + 2, Hi, Acc, Nw + 1]
+              case true  => Loop[R, Lo + 2, Hi, Option[String] *: Acc, Nw + 1]
+            }
+          case _ => Loop[R, Lo + 2, Hi, Acc, Nw]
+        }
+      case ")" =>
         Loop[R, Lo + 1, Hi, Acc, Max[0, Nw - 1]]
-      case "("  =>
+      case "(" =>
         Nw match
           case 0 =>
-            Nullable[R, Lo + 1, Hi] match
+            IsNullable[R, Lo + 1, Hi, 0] match
               case true =>
                 IsCapturing[R, Lo + 1] match {
                   case false => Loop[R, Lo + 1, Hi, Acc, 1]
@@ -60,7 +69,7 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Nw <: Int] <: Tuple =
       case _ => Loop[R, Lo + 1, Hi, Acc, Nw]
 
 // start section regexIsCapturing
-type IsCapturing[R <: String, At <: Int] =
+type IsCapturing[R <: String, At <: Int] <: Boolean =
   CharAt[R, At] match
     case "?" => CharAt[R, At + 1] match
       case "<" => CharAt[R, At + 2] match
@@ -70,33 +79,25 @@ type IsCapturing[R <: String, At <: Int] =
     case _ => true        // unnamed-capturing group
 // end section regexIsCapturing
 
-type Nullmark[R <: String, At <: Int, Hi <: Int] =
+// start section regexIsNullable
+type IsNullable[R <: String, At <: Int, Hi <: Int, Ops <: Int] <: Boolean =
+  CharAt[R, At] match
+    case ")" => Ops match
+      case 0 => IsMarked[R, At + 1, Hi]
+      case _ => IsNullable[R, At + 1, Hi, Ops - 1]
+    case "(" => IsNullable[R, At + 1, Hi, Ops + 1]
+    case "\\" => IsNullable[R, At + 2, Hi, Ops]
+    case _    => IsNullable[R, At + 1, Hi, Ops]
+
+type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
   At match
     case Hi => false
     case _ =>
       CharAt[R, At] match
         case "?" | "*" | "|" => true
-        case "+" => Nullmark[R, At + 1, Hi]
+        case "+" => IsMarked[R, At + 1, Hi]
         case _ => false
-
-type Nullable[R <: String, At <: Int, Hi <: Int] =
-  At match
-    case 1 => Nullable0[R, At, Hi, 0]
-    case _ => CharAt[R, At - 2] match
-      case "|" => true
-      case _ => Nullable0[R, At, Hi, 0]
-
-type Nullable0[R <: String, At <: Int, Hi <: Int, Ops <: Int] =
-  At match
-    case Hi => false
-    case _ =>
-      CharAt[R, At] match
-        case ")" => Ops match
-          case 0 => Nullmark[R, At + 1, Hi]
-          case _ => Nullable0[R, At + 1, Hi, Ops - 1]
-        case "(" => Nullable0[R, At + 1, Hi, Ops + 1]
-        case "\\" => Nullable0[R, At + 2, Hi, Ops]
-        case _    => Nullable0[R, At + 1, Hi, Ops]
+// end section regexIsNullable
 
 def toTuple[P](pattern: String, arr: Array[String]): P = {
   if (arr.size == 1)

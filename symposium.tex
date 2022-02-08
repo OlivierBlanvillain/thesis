@@ -32,10 +32,10 @@ We present our library in terms of 3 components:
 
   \item The term-level capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the representation computed by the type-level component (\Cref{sec:term-level}).
 
-  \item The user-level interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe capturing group extraction.
+  \item The user interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe capturing group extraction.
 \end{enumerate}
 
-We begin our presentation with the user-level interface, which takes the form of a relatively simple Scala class and companion object:
+We begin our presentation with the user interface, which takes the form of a relatively simple Scala class and companion object:
 
 \regexUserLevel
 % object Regex:
@@ -99,7 +99,7 @@ We present our implementation incrementally, starting from a simple but incomple
 \subsection{Capture Group Identification}
 
 The first version of our type-level program is limited to capturing group identification.
-The implementation is straightforward:
+The implementation is straightforward, it iterates through the regex's characters and accumulates a |String| type for every opening parenthesis:
 
 \regexFirstIteration
 % import compiletime.ops.string._
@@ -111,7 +111,7 @@ The implementation is straightforward:
 % type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
 %   Lo match
 %     case Hi => Acc
-%     case _   => CharAt[R, Lo] match
+%     case _  => CharAt[R, Lo] match
 %       case "("  => Loop[R, Lo + 1, Hi, String *: Acc]
 %       case "\\" => Loop[R, Lo + 2, Hi, Acc]
 %       case _ => Loop[R, Lo + 1, Hi, Acc]
@@ -133,7 +133,16 @@ If we invoke |Compile| on a regular expression with a trailing backslash, the co
 \subsection{Non-Capturing Groups}
 
 Our first implementation of |Compile| treats every opening parenthesis as the start of a capturing group, which does not do honor to the syntax of Java's regular expression.
-Indeed, Java also supports several other special constructs which start with an opening parenthesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, which must all be discriminated from named- and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
+Indeed, Java also supports several other special constructs which start with an opening parenthesis, for instance:
+
+\begin{itemize}
+  \item non-capturing groups, |(?:X)|,
+  \item lookaheads, |(?=X)| and |(?!X)|,
+  \item lookbehinds, |(?<=X)| and |(?<!X)|.
+\end{itemize}
+
+\noindent
+To correctly identify capturing groups (which can be either named, |(?<name>X)|, or unnamed, |(X)|), we must differentiate them from other special constructs.
 Our second implementation (omitted) uses the following |IsCapturing| predicate type to rule out non-capturing groups:
 
 \regexIsCapturing
@@ -152,7 +161,11 @@ Similar to our handling of backslash characters, this implementation intentional
 \subsection{Nullability Analysis}
 
 Establishing the nullability of capturing groups is more complicated than it sounds.
-At first glance, it seems that this is simply a matter of looking for regex quantifiers in suffix position\footnote{For brevity, our presentation does not account for the regex alternative operator (\textbar) which also influences the nullability of capturing groups and can appear in both prefix and suffix positions. In our implementation, we do account for that operator, which we handle analogously.}:
+At first glance, it seems that this is simply a matter of looking for regex quantifiers in suffix position\footnote{
+For brevity, our presentation does not account for the regex alternative operator, which also influences the nullability of capturing groups and can appear in both prefix and suffix positions.
+In our implementation, we do account for that operator, which we handle analogously.
+}.
+For instance, in the following naive implementation of |IsNullable|, we look for the first closing parenthesis and inspect the following characters to determine if a capturing group is nullable:
 
 \regexNaiveIsNullable
 % type IsNullable[R <: String, At <: Int, Hi <: Int] <: Boolean =
@@ -171,8 +184,8 @@ At first glance, it seems that this is simply a matter of looking for regex quan
 
 \noindent
 Unfortunately, this naive solution is incorrect for regular expressions with nested capturing groups.
-For example, in |(A(B)?)|, our naive solution incorrectly labels the first group as optional.
-To overcome this problem, we add a parameter to the definition of |IsNullable|, which we use keep to track of the nesting level:
+For example, in |(A(B)?)|, that solution incorrectly labels the first group as optional.
+To overcome this problem, we update our solution to keep track of the number of opening and closing parentheses (|Lvl|), which allows us to differentiate closing parentheses of inner groups from the closing parenthesis of the outer group:
 
 \regexIsNullable
 % type IsNullable[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Boolean =
@@ -184,9 +197,28 @@ To overcome this problem, we add a parameter to the definition of |IsNullable|, 
 %     case "\\" => IsNullable[R, At + 2, Hi, Lvl]
 %     case _    => IsNullable[R, At + 1, Hi, Lvl]
 
-Nested capturing groups bring another complication to the nullability analysis, caused by the interaction between the nullability of inner and outer groups.
-When an outer group is deemed optional, it overrides the nullability of all its inner groups, which also become optional.
+Nested capturing groups bring another complication to the nullability analysis, which is caused by the interaction between inner and outer groups.
+When an outer group is deemed optional, this overrides the nullability of all its inner groups, which also become optional.
 For instance, in |(A(B))?|, both the first (|A(B)|) and the second (|B|) capturing group are optional.
+
+The final iteration of our type-level program handles nested groups by operating in two different modes.
+While iterating through the regex's characters, our algorithm can either be outside of an optional group (|Lvl=0|), or inside an option group (|Lvl>0|), in which case it overrides the nullability of newly encountered groups.
+Our implementation is as follows (|IsCapturing| omitted for brevity):
+
+\regexLastIteration
+% type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Lvl <: Int] =
+%   Lo match
+%     case Hi => Acc
+%     case _  => CharAt[R, Lo] match
+%       case ")" => Loop[R, Lo + 1, Hi, Acc, Max[0, Lvl - 1]]
+%       case "(" =>
+%         Lvl match
+%           case 0 => IsNullable[R, Lo + 1, Hi, 0] match
+%             case true  => Loop[R, Lo + 1, Hi, Option[String] *: Acc, 1]
+%             case false => Loop[R, Lo + 1, Hi, Acc, 0]
+%           case _ => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Lvl + 1]
+%       case "\\" => Loop[R, Lo + 2, Hi, Acc, Lvl]
+%       case _ => Loop[R, Lo + 1, Hi, Acc, Lvl]
 
 \section{Term-Level}
 \label{sec:term-level}

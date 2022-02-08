@@ -34,7 +34,7 @@ type Compile[R <: String] =
 type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Lvl <: Int] <: Tuple =
   Lo match
     case Hi => Acc
-    case _   => CharAt[R, Lo] match
+    case _  => CharAt[R, Lo] match
       case "|" =>
         CharAt[R, Lo + 1] match {
           case "(" =>
@@ -73,10 +73,10 @@ type IsCapturing[R <: String, At <: Int] <: Boolean =
   CharAt[R, At] match
     case "?" => CharAt[R, At + 1] match
       case "<" => CharAt[R, At + 2] match
-        case "!" => false // zero-width negative lookbehind
-        case _ => true    // named-capturing group
-      case _ => false     // other non-capturing special constructs
-    case _ => true        // unnamed-capturing group
+        case "=" | "!" => false // lookbehinds
+        case _ => true          // named-capturing group
+      case _ => false           // other special constructs
+    case _ => true              // unnamed-capturing group
 // end section regexIsCapturing
 
 // start section regexIsNullable

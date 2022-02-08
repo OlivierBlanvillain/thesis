@@ -12,14 +12,14 @@ The package's documentation starts with the following example:
 %     s"$year was a good year for PLs."
 
 \noindent
-The extractor pattern, |case date(y,m,d) =>|, replaces the need for manually indexing into the regular expression's capture groups, and shields its users from off-by-one error.
+The extractor pattern, |case date(y,m,d) =>|, replaces the need for manually indexing into the regular expression's capturing groups, and shields its users from off-by-one error.
 
 While the syntax of this example would undoubtedly make some non-Scala programmers envious, its type safety leaves much to be desired.
 First of all, the \emph{number} of variable bindings in the extractor is entirely opaque to Scala's type system, and left to the discretion of the programmer.
-Furthermore, the values coming out of capture groups can be null (when using optional captures) and thus require an additional layer of validation.
+Furthermore, the values coming out of capturing groups can be null (when using optional captures) and thus require an additional layer of validation.
 Those shortcomings might appear benign when looking at small examples, but can easily turn into bugs when dealing with a large-scale code base.
 
-In this chapter, we propose a new design for Scala's regular expression library which provides both type-safe and null-safe capture group extraction.
+In this chapter, we propose a new design for Scala's regular expression library which provides both type-safe and null-safe capturing group extraction.
 Our design makes extensive use of match types, Scala~3 new feature for type-level programming, to statically analyze regular expressions during type checking and generate type-specialized extractors.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement while still enjoying additional safety.
 
@@ -28,11 +28,11 @@ We build our interface to mimic Scala's original regular expression API so that 
 We present our library in terms of 3 components:
 
 \begin{enumerate}
-  \item The type-level capture group analysis, which uses match types to inspect the user-provided regular expression and compute the corresponding tuple-based type representation (\Cref{sec:type-level}).
+  \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute the corresponding tuple-based type representation (\Cref{sec:type-level}).
 
-  \item The term-level capture group processing, which extracts and sanitizes the output of the regex engine, in accordance with the representation computed by the type-level component (\Cref{sec:term-level}).
+  \item The term-level capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the representation computed by the type-level component (\Cref{sec:term-level}).
 
-  \item The user-level interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe capture group extraction.
+  \item The user-level interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe capturing group extraction.
 \end{enumerate}
 
 We begin our presentation with the user-level interface, which takes the form of a relatively simple Scala class and companion object:
@@ -55,21 +55,21 @@ We begin our presentation with the user-level interface, which takes the form of
 The |apply| method is the entry point of our library.
 It takes a regular expression and returns an instance of |Regex|.
 Instead of directly accepting |String| argument, that method requires a type parameter, |R|, which will be inferred by the compiler, and allows us to get our hands on a type-level instance of the regular expression (the |Singleton| bound is necessary to guide Scala's type inference).
-We use that type-level string immediately to instantiate |Compile|, which is our type-level capture group analysis component.
+We use that type-level string immediately to instantiate |Compile|, which is our type-level capturing group analysis component.
 We store the output of that analysis as |Regex|'s type argument.
 
 The implementation of the |Regex| class is straightforward.
-Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capture groups whenever the matching succeeds.
+Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against the regular expression, and to extract the capturing groups whenever the matching succeeds.
 The |Regex| class defines an |unapply| method, which the Scala compiler will invoke when using an instance of that class as a pattern matching extractor \citep{emir2007matching}.
 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
-By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capture groups, where $n$ corresponds to the tuple arity, and that the type of those groups will correspond to the tuple types.
+By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ corresponds to the tuple arity, and that the type of those groups will correspond to the tuple types.
 We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
 In our implementation, this is done via the |toTuple| method, which is our
-term-level capture group processing component.
+term-level capturing group processing component.
 As a result, our implementation never returns null values, which removes the null-checking burden from the user.
 
-For instance, in the following example, we use a regular expression with an optional capture group to extract the integral and fractional parts of a rational number:
+For instance, in the following example, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:
 
 \regexRational
 % val rational = Regex("(\\d+)\\.?(\\d+)?")
@@ -79,7 +79,7 @@ For instance, in the following example, we use a regular expression with an opti
 %     s"This number is $n digits long"
 
 \noindent
-Here, we instantiates |Regex|'s type parameter to |P = (String, Option[String])|, which we then use in |unapply|'s return type to obtain a precise representation of the regex's capture groups.
+Here, we instantiates |Regex|'s type parameter to |P = (String, Option[String])|, which we then use in |unapply|'s return type to obtain a precise representation of the regex's capturing groups.
 
 \section{Type-Level}
 \label{sec:type-level}
@@ -87,8 +87,8 @@ Here, we instantiates |Regex|'s type parameter to |P = (String, Option[String])|
 The purpose of our type-level component is two-fold:
 
 \begin{enumerate}
-  \item Identify the capture groups of the input regular expression.
-  \item Determine which of those capture groups are optional, that is, whether or not the regex engine can assign null values for each of those groups.
+  \item Identify the capturing groups of the input regular expression.
+  \item Determine which of those capturing groups are optional, that is, whether or not the regex engine can assign null values for each of those groups.
 \end{enumerate}
 
 \noindent
@@ -98,7 +98,7 @@ We present our implementation incrementally, starting from a simple but incomple
 
 \subsection{Capture Group Identification}
 
-The first version of our type-level program is limited to capture group identification.
+The first version of our type-level program is limited to capturing group identification.
 The implementation is straightforward:
 
 \regexFirstIteration
@@ -130,10 +130,10 @@ Regular expressions with trailing backslashes result in runtime exceptions (repo
 Even though detecting these types of errors at compile time is out of the scope of our implementation, doing so is still desirable.
 If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
 
-\subsection{Ruling Out Non-Capturing}
+\subsection{Non-Capturing Groups}
 
-Our first implementation of |Compile| treats every opening parenthesis as the start of a capture group, which does not do honor to the syntax of Java's regular expression.
-Indeed, Java also supports several other special constructs which start with an opening parethesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, which must all be discriminated from named- and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
+Our first implementation of |Compile| treats every opening parenthesis as the start of a capturing group, which does not do honor to the syntax of Java's regular expression.
+Indeed, Java also supports several other special constructs which start with an opening parenthesis, such as non-capturing groups, |(?:X)|, lookaheads, |(?=X)| \& |(?!X)|, and lookbehinds, |(?<=X)| \& |(?<!X)|, which must all be discriminated from named- and unnamed-capturing groups, |(?<name>X)| \& |(X)|.
 Our second implementation (omitted) uses the following |IsCapturing| predicate type to rule out non-capturing groups:
 
 \regexIsCapturing
@@ -151,25 +151,42 @@ Similar to our handling of backslash characters, this implementation intentional
 
 \subsection{Nullability Analysis}
 
+Establishing the nullability of capturing groups is more complicated than it sounds.
+At first glance, it seems that this is simply a matter of looking for regex quantifiers in suffix position\footnote{For brevity, our presentation does not account for the regex alternative operator (\textbar) which also influences the nullability of capturing groups and can appear in both prefix and suffix positions. In our implementation, we do account for that operator, which we handle analogously.}:
 
-\regexIsNullable
-% type IsNullable[R <: String, At <: Int, Hi <: Int, Ops <: Int] <: Boolean =
+\regexNaiveIsNullable
+% type IsNullable[R <: String, At <: Int, Hi <: Int] <: Boolean =
 %   CharAt[R, At] match
-%     case ")" => Ops match
-%       case 0 => IsMarked[R, At + 1, Hi]
-%       case _ => IsNullable[R, At + 1, Hi, Ops - 1]
-%     case "(" => IsNullable[R, At + 1, Hi, Ops + 1]
-%     case "\\" => IsNullable[R, At + 2, Hi, Ops]
-%     case _    => IsNullable[R, At + 1, Hi, Ops]
+%     case ")" => IsMarked[R, At + 1, Hi]
+%     case _   => IsNullable[R, At + 1, Hi]
 %
 % type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
 %   At match
 %     case Hi => false
 %     case _ =>
 %       CharAt[R, At] match
-%         case "?" | "*" | "|" => true
+%         case "?" | "*" => true
 %         case "+" => IsMarked[R, At + 1, Hi]
 %         case _ => false
+
+\noindent
+Unfortunately, this naive solution is incorrect for regular expressions with nested capturing groups.
+For example, in |(A(B)?)|, our naive solution incorrectly labels the first group as optional.
+To overcome this problem, we add a parameter to the definition of |IsNullable|, which we use keep to track of the nesting level:
+
+\regexIsNullable
+% type IsNullable[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Boolean =
+%   CharAt[R, At] match
+%     case ")" => Lvl match
+%       case 0 => IsMarked[R, At + 1, Hi]
+%       case _ => IsNullable[R, At + 1, Hi, Lvl - 1]
+%     case "(" => IsNullable[R, At + 1, Hi, Lvl + 1]
+%     case "\\" => IsNullable[R, At + 2, Hi, Lvl]
+%     case _    => IsNullable[R, At + 1, Hi, Lvl]
+
+Nested capturing groups bring another complication to the nullability analysis, caused by the interaction between the nullability of inner and outer groups.
+When an outer group is deemed optional, it overrides the nullability of all its inner groups, which also become optional.
+For instance, in |(A(B))?|, both the first (|A(B)|) and the second (|B|) capturing group are optional.
 
 \section{Term-Level}
 \label{sec:term-level}

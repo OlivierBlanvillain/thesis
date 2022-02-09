@@ -23,6 +23,45 @@ class Regex[P] private (val regex: String):
       None
 // end section regexUserLevel
 
+abstract class Sanetizer[T](val i: Int):
+  def mutate(arr: Array[Any]): Unit
+
+object Sanetizer:
+  implicit val basecase1: Sanetizer[EmptyTuple] =
+    new Sanetizer[EmptyTuple](0):
+      def mutate(arr: Array[Any]): Unit = ()
+
+  implicit def stringcase[T <: Tuple]
+    (implicit ev: Sanetizer[T]): Sanetizer[String *: T] =
+      new Sanetizer[String *: T](ev.i + 1):
+        def mutate(arr: Array[Any]): Unit =
+          assert(arr(arr.size - i) != null)
+          ev.mutate(arr)
+
+  implicit def optioncase[T <: Tuple]
+    (implicit ev: Sanetizer[T]): Sanetizer[Option[String] *: T] =
+      new Sanetizer[Option[String] *: T](ev.i + 1):
+        def mutate(arr: Array[Any]): Unit =
+          arr(arr.size - i) = Option(arr(arr.size - i))
+          ev.mutate(arr)
+
+object Regex2:
+  def apply[R <: String & Singleton](regex: R)(implicit san: Sanetizer[Compile[R]]): Regex2[Compile[R]] =
+    new Regex2(regex, san)
+
+class Regex2[P] private (val regex: String, val san: Sanetizer[P]):
+  val pattern = Pattern.compile(regex)
+  def unapply(s: String): Option[P] =
+    val m = pattern.matcher(s)
+    if (m.matches())
+      val arr = Array.tabulate[Any](m.groupCount)(i => m.group(i + 1))
+      assert(arr.size == san.i, "Unexpected number of capturing groups")
+      san.mutate(arr)
+      val tuple = Tuple.fromArray(arr)
+      Some(tuple.asInstanceOf[P])
+    else
+      None
+
 object Lib {
 
 type CharAt[R <: String, At <: Int] =
@@ -211,61 +250,6 @@ type Reverse[L <: Tuple] = L match {
   case x1 *: x2 *: x3 *: x4 *: x5 *: x6 *: x7 *: x8 *: x9 *: x10 *: x11 *: x12 *: x13 *: x14 *: x15 *: x16 *: x17 *: x18 *: x19 *: x20 *: x21 *: EmptyTuple => (x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x9, x8, x7, x6, x5, x4, x3, x2, x1)
   case x1 *: x2 *: x3 *: x4 *: x5 *: x6 *: x7 *: x8 *: x9 *: x10 *: x11 *: x12 *: x13 *: x14 *: x15 *: x16 *: x17 *: x18 *: x19 *: x20 *: x21 *: x22 *: EmptyTuple => (x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x9, x8, x7, x6, x5, x4, x3, x2, x1)
 }
-
 }
-
-// trait Parser[T <: Tuple] {
-//   def mutate(arr: Array[String]): Unit
-//   val i: Int
-// }
-
-// object Parser {
-//   implicit val basecase: Parser[EmptyTuple] =
-//     new Parser[EmptyTuple] {
-//       val i = 0
-//       def mutate(arr: Array[String]): Unit = ()
-//     }
-
-//   implicit def stringcase[T <: Tuple]
-//     (implicit ev: Parser[T]): Parser[String *: T] =
-//       new Parser[String *: T] {
-//         val i = ev.i + 1
-//         def mutate(arr: Array[String]): Unit =
-//           ev.mutate(arr)
-//       }
-
-//   implicit def optioncase[T <: Tuple]
-//     (implicit ev: Parser[T]): Parser[Option[String] *: T] =
-//       new Parser[Option[String] *: T] {
-//         val i = ev.i + 1
-//         def mutate(arr: Array[String]): Unit = {
-//           ev.mutate(arr)
-//           arr(i) = Option(arr(i))
-//         }
-//       }
-// }
-
-// val p: Parser[String *: Option[String] *: String *: EmptyTuple] = implicitly[Parser[String *: Option[String] *: String *: EmptyTuple]](
-//   stringcase(optioncase(stringcase(basecase())))
-
-//   val ev =     new Parser[String *: T] {
-//     val size =
-//       new Parser[EmptyTuple] {
-//           def mutate(arr: Array[String]): Unit = ()
-//           val size = 0
-//         }
-//       .size + 1
-//     def mutate(arr: Array[String]): Unit = ()
-//   }
-//   new Parser[Option[String] *: T] {
-//     val size = ev.size + 1
-//     def mutate(arr: Array[String]): Unit =
-//       ev.mutate(arr)
-//       arr(size) = Option(arr(size))
-//   }
-// )
-// val arr = Array("a", "b", "c")
-// p.mutate(arr)
-// assert(arr == Array("a", Option("b"), "c"))
 
 }

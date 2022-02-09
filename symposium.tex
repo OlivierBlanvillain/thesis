@@ -238,8 +238,7 @@ The term-level component of our library is in charge of sanitizing and packaging
 Concretely, this component's job consists in transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
 That transformation must conform to the representation computed at the type level.
 
-In Scala, all type parameters are erased, which can lead so some friction when trying to write programs whose execution \emph{depends} on a type, such as in the problem at hand.
-In this section, we propose two different solutions to that problem.
+In Scala, all type parameters are erased, which can lead so some friction when trying to write programs whose execution \emph{depends} on a type, such as in the problem at hand. In this section, we propose two different solutions to that problem.
 
 \begin{enumerate}
   \item In \Cref{subsec:we-ain-t-need-no-dependent-types}, we proceed by sheer force of code duplication: we translate the entirety of our type-level algorithm into term-level functions and use a cast to correlate the two.
@@ -281,17 +280,27 @@ After having computed those functions, we simply do a pointwise application with
 %   assert(arr.size == fs.size, "Unexpected number of capturing groups")
 %   ts.asInstanceOf[P]
 
-\emph{In principle}, Scala~3's type system is capable of doing a lightweight form of dependent typing (\Cref{subsec:a-lightweight-form-of-dependent-typing}), where it...
+This solution has the benefit of being conceptually simple.
+We needed to write an implementation that conforms to our type-level program, and we did!
+By duplicating that program, and using an unsafe case to convince the compiler of our good intentions.
 
-\begin{lstlisting}
-def isMarked
-  [R <: String, At <: Int, Hi <: Int]
-  (r: R, at: At, hi: Hi)
-  : IsMarked[R, At, Hi]
-\end{lstlisting}
+The first alternative that comes to mind is perhaps to turn ourselves to a dependently typed language that supports type- and term-level polymorphism.
+In a language with shared term and type syntax, we could write our analysis generically and derive two programs from it, one for each level.
+
+In principle, Scala~3's type inference should be able to solve half of the problem with its ability to correlate match types and match expression.
+In \Cref{subsec:a-lightweight-form-of-dependent-typing}, we show an example of that ability, where the compiler type checks a small program using a match type.
+In our case, this mechanism should allow us to get rid of the unsafe cast but does not address the problem of code duplication.
+In practice, at the time of writing, this solution does not play well with predefined types from the standard library, because the compiler lacks the knowledge necessary to correlate those types with their term-level counterpart.
+For instance, the compiler does not recognize |CharAt["foo",0]| as a valid type for |"foo".chatAt(0)|.
+
+In the long run, it would be interesting to investigate extending Scala with a "precise" mode of type inference, that would automatically infer match types and singleton types, whenever possible.
+In \Cref{chap:generalizing-singleton-types}, we demonstrated the feasibility of this approach by generalizing Scala's singleton types.
+A promising avenue would be to revisit that line of work through the lens of type inference.
 
 \subsection{Implicit-Based Extractor Synthesis}
 \label{subsec:implicit-based-extractor-synthesis}
+
+
 
 \section{Evaluation}
 

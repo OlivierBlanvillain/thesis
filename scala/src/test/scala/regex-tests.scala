@@ -31,11 +31,11 @@ object Tests {
       s"expected: $expected, actual: $actual")
 
   def main(args: Array[String]): Unit = {
-    val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
+    val date = Regex2("(\\d{4})-(\\d{2})-(\\d{2})")
     assertEquals("2004", "2004-01-20" match
       case date(year, month, day) => year)
 
-    val everyday = Regex(".*\\s(([A-Za-z]{5}(hum)?).js)\\s.*")
+    val everyday = Regex2(".*\\s(([A-Za-z]{5}(hum)?).js)\\s.*")
     assertEquals(("Scala.js", "Scala"),
       "Write Scala.js everyday!" match
         case everyday(a, b, None) => (a, b))

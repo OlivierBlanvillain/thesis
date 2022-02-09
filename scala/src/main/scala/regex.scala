@@ -17,8 +17,8 @@ class Regex[P] private (val regex: String):
   def unapply(s: String): Option[P] =
     val m = pattern.matcher(s)
     if (m.matches())
-      val a = Array.tabulate(m.groupCount) { i => m.group(i + 1) }
-      Some(toTuple[P](regex, a))
+      val a = Array.tabulate(m.groupCount)(i => m.group(i + 1))
+      Some(transform[P](regex, a))
     else
       None
 // end section regexUserLevel
@@ -96,69 +96,91 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
     case _ =>
       CharAt[R, At] match
         case "?" | "*" | "|" => true
-        case "{" => CharAt[R, At + 1, Hi] match
+        case "{" => CharAt[R, At + 1] match
           case "0" => true
           case _ => false
         case "+" => IsMarked[R, At + 1, Hi]
         case _ => false
 
-def toTuple[P](pattern: String, arr: Array[String]): P = {
+def transform[P](pattern: String, arr: Array[String]): P =
   if (arr.size == 1)
     arr(0).asInstanceOf[P]
   else
     val fs = loop(pattern, 0, pattern.length, Nil, 0).reverse
     val ts = Tuple.fromArray(arr.zip(fs).map { (x, f) => f(x) })
-    assert(arr.size == fs.size)
+    assert(arr.size == fs.size, "Unexpected number of capturing groups")
     ts.asInstanceOf[P]
-}
 
-def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], nw: Int): List[String => Any] =
+def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[String => Any] =
   lo match
     case `hi` => acc
-    case _   => r.charAt(lo) match
-      case ')'  =>
-        loop(r, lo + 1, hi, acc, 0.max(nw - 1))
-      case '('  =>
-        nw match
+    case _  => r.charAt(lo) match
+      case '|' =>
+        r.charAt(lo + 1) match {
+          case '(' =>
+            isCapturing(r, lo + 2) match {
+              case false => loop(r, lo + 2, hi, acc, opt + 1)
+              case true  => loop(r, lo + 2, hi, Option.apply :: acc, opt + 1)
+            }
+          case _ => loop(r, lo + 2, hi, acc, opt)
+        }
+      case ')' =>
+        loop(r, lo + 1, hi, acc, 0.max(opt - 1))
+      case '(' =>
+        opt match
           case 0 =>
-            nullable(r, lo + 1, hi) match
+            isNullable(r, lo + 1, hi, 0) match
               case true =>
-                loop(r, lo + 1, hi, Option[String] :: acc, 1)
+                isCapturing(r, lo + 1) match {
+                  case false => loop(r, lo + 1, hi, acc, 1)
+                  case true  => loop(r, lo + 1, hi, Option.apply :: acc, 1)
+                }
               case false =>
-                loop(r, lo + 1, hi, (x => x) :: acc, 0)
+                isCapturing(r, lo + 1) match {
+                  case false => loop(r, lo + 1, hi, acc, 0)
+                  case true  => loop(r, lo + 1, hi, { x => assert(x != null); x } :: acc, 0)
+                }
           case _ =>
-            loop(r, lo + 1, hi, Option[String] :: acc, nw + 1)
-      case '\\' => loop(r, lo + 2, hi, acc, nw)
-      case _    => loop(r, lo + 1, hi, acc, nw)
+            isCapturing(r, lo + 1) match {
+              case false => loop(r, lo + 1, hi, acc, opt + 1)
+              case true  => loop(r, lo + 1, hi, Option.apply :: acc, opt + 1)
+            }
+      case '\\' => loop(r, lo + 2, hi, acc, opt)
+      case _ => loop(r, lo + 1, hi, acc, opt)
 
+// start section regexisCapturing
+def isCapturing(r: String, at: Int): Boolean =
+  r.charAt(at) match
+    case '?' => r.charAt(at + 1) match
+      case '<' => r.charAt(at + 2) match
+        case '=' | '!' => false // lookbehinds
+        case _ => true          // named-capturing group
+      case _ => false           // other special constructs
+    case _ => true              // unnamed-capturing group
+// end section regexisCapturing
 
-def nullmark(r: String, at: Int, hi: Int): Boolean =
+// start section regexisNullable
+def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean =
+  r.charAt(at) match
+    case ')' => lvl match
+      case 0 => isMarked(r, at + 1, hi)
+      case _ => isNullable(r, at + 1, hi, lvl - 1)
+    case '(' => isNullable(r, at + 1, hi, lvl + 1)
+    case '\\' => isNullable(r, at + 2, hi, lvl)
+    case _    => isNullable(r, at + 1, hi, lvl)
+// end section regexisNullable
+
+def isMarked(r: String, at: Int, hi: Int): Boolean =
   at match
     case `hi` => false
     case _ =>
       r.charAt(at) match
         case '?' | '*' | '|' => true
-        case '+' => nullmark(r, at + 1, hi)
+        case '{' => r.charAt(at + 1) match
+          case '0' => true
+          case _ => false
+        case '+' => isMarked(r, at + 1, hi)
         case _ => false
-
-def nullable(r: String, at: Int, hi: Int): Boolean =
-  at match
-    case 1 => nullable0(r, at, hi, 0)
-    case _ => r.charAt(at - 2) match
-      case '|' => true
-      case _ => nullable0(r, at, hi, 0)
-
-def nullable0(r: String, at: Int, hi: Int, ops: Int): Boolean =
-  at match
-    case `hi` => false
-    case _ =>
-      r.charAt(at) match
-        case ')' => ops match
-          case 0 => nullmark(r, at + 1, hi)
-          case _ => nullable0(r, at + 1, hi, ops - 1)
-        case '(' => nullable0(r, at + 1, hi, ops + 1)
-        case '\\' => nullable0(r, at + 2, hi, ops)
-        case _    => nullable0(r, at + 1, hi, ops)
 
 // Actually, Scala's unapply does not play way with Tuple1, so we need to
 // get ride of those types. Furthermore, the code responsible for

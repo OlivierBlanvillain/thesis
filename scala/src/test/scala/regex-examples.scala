@@ -81,6 +81,36 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] =
       case "\\" => Loop[R, Lo + 2, Hi, Acc, Opt]
       case _ => Loop[R, Lo + 1, Hi, Acc, Opt]
 // end section regexLastIteration
+
+def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean = false
+
+// start section regexTermLvlLoop
+val identity: String => Any = { x => assert(x != null); x }
+
+def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int)
+    : List[String => Any] =
+  lo match
+    case `hi` => acc
+    case _  => r.charAt(lo) match
+      case ')' => loop(r, lo + 1, hi, acc, 0.max(opt - 1))
+      case '(' =>
+        opt match
+          case 0 => isNullable(r, lo + 1, hi, 0) match
+            case true  => loop(r, lo + 1, hi, Option.apply :: acc, 1)
+            case false => loop(r, lo + 1, hi, identity :: acc, 0)
+          case _ => loop(r, lo + 1, hi, Option.apply :: acc, opt + 1)
+      case '\\' => loop(r, lo + 2, hi, acc, opt)
+      case _ => loop(r, lo + 1, hi, acc, opt)
+// end section regexTermLvlLoop
+
+// start section regexTransform
+def transform[P](pattern: String, arr: Array[String]): P =
+  val fs = loop(pattern, 0, pattern.length, Nil, 0).reverse
+  val ts = Tuple.fromArray(arr.zip(fs).map { (x, f) => f(x) })
+  assert(arr.size == fs.size, "Unexpected number of capturing groups")
+  ts.asInstanceOf[P]
+// end section regexTransform
+
 }
 
 }

@@ -83,6 +83,8 @@ When the scrutinee type is a |List|, the match type |Elem| is defined recursivel
 Hence, in our example |Elem[List[Int]]| first reduces to the type |Elem[Int]|, and eventually to the type |Int|.
 
 \subsection{A Lightweight Form of Dependent Typing}
+\label{subsec:a-lightweight-form-of-dependent-typing}
+
 Match types enable a lightweight form of dependent typing, since term-level pattern matching expressions can be typed accordingly at the type level as a match types.
 Consider the following function definition:
 %

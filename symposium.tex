@@ -30,7 +30,7 @@ We present our library in terms of 3 components:
 \begin{enumerate}
   \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute the corresponding tuple-based type representation (\Cref{sec:type-level}).
 
-  \item The term-level capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the representation computed at the type level (\Cref{sec:term-level}).
+  \item The term-level capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation computed (\Cref{sec:term-level}).
 
   \item The user interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe experience.
 \end{enumerate}
@@ -47,8 +47,8 @@ We begin our presentation with the user interface, which takes the form of a rel
 %   def unapply(s: String): Option[P] =
 %     val m = pattern.matcher(s)
 %     if (m.matches())
-%       val a = Array.tabulate(m.groupCount) { i => m.group(i + 1) }
-%       Some(toTuple[P](regex, a))
+%       val a = Array.tabulate(m.groupCount)(i => m.group(i + 1))
+%       Some(transform[P](regex, a))
 %     else
 %       None
 
@@ -64,8 +64,8 @@ The |Regex| class defines an |unapply| method, which the Scala compiler invokes 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
 By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ corresponds to the tuple arity, and that the type of those groups will correspond to the tuple types.
 We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
-In our implementation, this is done via the |toTuple| method, which is our
-term-level capturing group processing component.
+In our implementation, this is done via the |transform| method, which is our
+term-level processing component.
 As a result, our implementation never returns null values, which removes the null-checking burden from the user.
 
 For instance, in the following example, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:
@@ -130,6 +130,7 @@ Even though detecting these types of errors at compile time is out of the scope 
 If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
 
 \subsection{Non-Capturing Groups}
+\label{subsec:non-capturing-groups}
 
 Our first implementation of |Compile| treats every opening parenthesis as the start of a capturing group, which does not do honor to the syntax of Java's regular expression.
 Indeed, Java also supports several other special constructs which start with an opening parenthesis, for instance:
@@ -202,10 +203,10 @@ When an outer group is deemed optional, this overrides the nullability of all it
 For instance, in |(A(B))?|, both the first (|A(B)|) and the second (|B|) capturing group are optional.
 
 We handle nested groups by updated our algorithm to operate in two different modes while iterating through the regex's characters.
-The algorithm can either be outside of an optional group (|Opt=0|), in which case it computes nullability of newly encountered via |IsNullable|, or inside an optional group (|Opt>0|), in which case it treats every group as nullable.
+Our algorithm can either be outside of an optional group (|Opt=0|), in which case it computes nullability of newly encountered groups via |IsNullable|, or inside an optional group (|Opt>0|), in which case it treats every group as nullable.
 This last improvement leads to the final iteration of our type-level program handles nested groups by operating in two different modes.
 
-With this latest improvement, we develop our implementation into its final iteration (|IsCapturing| omitted for brevity):
+With this latest improvement, we advance our implementation to its final iteration (we omit usages of |IsCapturing|, from \Cref{subsec:non-capturing-groups}, for brevity):
 
 \regexLastIteration
 % type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] =
@@ -229,7 +230,64 @@ In its final iteration, our capturing group analysis is, to the best of our know
 \section{Term-Level}
 \label{sec:term-level}
 
-In this section...
+The term-level component of our library is in charge of sanitizing and packaging the results of regular expression matchings.
+Concretely, this component's job consists in transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
+That transformation must conform to the representation computed at the type level.
+
+In Scala, all type parameters are erased, which can lead so some friction when trying to write programs whose execution \emph{depends} on a type, such as in the problem at hand.
+In this section, we propose two different solutions to that problem.
+
+\begin{enumerate}
+  \item In \Cref{subsec:we-ain-t-need-no-dependent-types}, we proceed by sheer force of code duplication: we translate the entirety of our type-level algorithm into term-level functions and use a cast to correlate the two.
+
+  \item In \Cref{subsec:implicit-based-extractor-synthesis}, we show...
+\end{enumerate}
+
+\subsection{We Ain't Need No Dependent Types!}
+\label{subsec:we-ain-t-need-no-dependent-types}
+
+The first implementation of our term-level component duplicates the type-level definitions presented in \Cref{sec:type-level} to compute a list of sanitizing functions that correspond to the given regex's capturing groups.
+In a nutshell, instead of accumulating |String| and |Option[String]| types, we rewrite the outer loop of our algorithm to accumulate identity functions and eta-expansions of option's constructor:
+
+\regexTermLvlLoop
+% val identity: String => Any = { x => assert(x != null); x }
+% type Accumulator = List[String => Any]
+%
+% def loop(r: String, lo: Int, hi: Int, acc: Accumulator, opt: Int): Accumulator =
+%   lo match
+%     case `hi` => acc
+%     case _  => r.charAt(lo) match
+%       case ')' => loop(r, lo + 1, hi, acc, 0.max(opt - 1))
+%       case '(' =>
+%         opt match
+%           case 0 => isNullable(r, lo + 1, hi, 0) match
+%             case true  => loop(r, lo + 1, hi, Option.apply :: acc, 1)
+%             case false => loop(r, lo + 1, hi, identity :: acc, 0)
+%           case _ => loop(r, lo + 1, hi, Option.apply :: acc, opt + 1)
+%       case '\\' => loop(r, lo + 2, hi, acc, opt)
+%       case _ => loop(r, lo + 1, hi, acc, opt)
+
+\noindent
+After having computed those functions, we simply do a pointwise application with the raw output of the regex engine, package the result into a tuple, \emph{et voilà!}
+
+\regexTransform
+% def transform[P](pattern: String, arr: Array[String]): P =
+%   val fs = loop(pattern, 0, pattern.length, Nil, 0).reverse
+%   val ts = Tuple.fromArray(arr.zip(fs).map { (x, f) => f(x) })
+%   assert(arr.size == fs.size, "Unexpected number of capturing groups")
+%   ts.asInstanceOf[P]
+
+\emph{In principle}, Scala~3's type system is capable of doing a lightweight form of dependent typing (\Cref{subsec:a-lightweight-form-of-dependent-typing}), where it...
+
+\begin{lstlisting}
+def isMarked
+  [R <: String, At <: Int, Hi <: Int]
+  (r: R, at: At, hi: Hi)
+  : IsMarked[R, At, Hi]
+\end{lstlisting}
+
+\subsection{Implicit-Based Extractor Synthesis}
+\label{subsec:implicit-based-extractor-synthesis}
 
 \section{Evaluation}
 

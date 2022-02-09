@@ -28,7 +28,6 @@ watch: FORCE
 	git ls-files | entr make
 
 publish: FORCE
-	git clean -fdX
 	make
 	cp thesis.pdf docs
 	rm -rf docs/benchmarks.zip

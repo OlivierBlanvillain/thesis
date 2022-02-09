@@ -58,17 +58,17 @@ Instead of directly accepting a |String| argument, that method takes a type para
 We use that type-level string to instantiate |Compile|, our type-level analysis component.
 
 The implementation of the |Regex| class is straightforward.
-Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against its regular expression, and to extract the capturing groups when the matching succeeds.
-The |Regex| class defines an |unapply| method, which the Scala compiler invokes when using instances of that class as pattern matching extractors \citep{emir2007matching}.
+Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against the given regular expression, and to extract the content of the capturing groups when the matching succeeds.
+These operations operations take place within the |unapply| method, which is the way to define custom pattern matching extractors in Scala \citep{emir2007matching}.
 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
-By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ corresponds to the tuple arity, and that the type of those groups will correspond to the tuple types.
+By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity, and that the type of those groups corresponds to the type of the tuple elements.
 We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
 In our implementation, this is done via the |transform| method, which is our
 term-level processing component.
 As a result, our implementation never returns null values, which removes the null-checking burden from the user.
 
-For instance, in the following example, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:
+For instance, in the following example usage of our library, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:
 
 \regexRational
 % val rational = Regex("(\\d+)\\.?(\\d+)?")
@@ -79,6 +79,9 @@ For instance, in the following example, we use a regular expression with an opti
 
 \noindent
 Here, we instantiates |Regex|'s type parameter to |P = (String, Option[String])|, which we then use in |unapply|'s return type to obtain a precise representation of the regex's capturing groups.
+The resulting code is type-safe: if we change the pattern to omit the option unpacking (replacing |Some(f)| by |f|), the compiler would raise a type error on the call to |.size| (size is defined on strings but not options).
+
+In the following section, we explain our technique to analysis regular expressions and statically compute a type-level representation of the regex's capturing groups (|P| in the example above).
 
 \section{Type-Level}
 \label{sec:type-level}
@@ -86,8 +89,8 @@ Here, we instantiates |Regex|'s type parameter to |P = (String, Option[String])|
 The purpose of our type-level component is two-fold:
 
 \begin{enumerate}
-  \item Identify the capturing groups of the input regular expression.
-  \item Determine which of those capturing groups are optional, that is, whether or not the regex engine can assign null values for each of those groups.
+  \item Identify the capturing groups of a regular expression.
+  \item Determine which of those capturing groups are optional, that is, whether or not the regex engine could possibly assign null values for each of those groups.
 \end{enumerate}
 
 \noindent
@@ -116,18 +119,20 @@ The implementation is straightforward, it iterates through the regex's character
 %       case _ => Loop[R, Lo + 1, Hi, Acc]
 
 \noindent
-The |Length| and |CharAt| types are special-cased by the compiler: when their first argument is a literal singleton string, the compiler evaluates those types via their corresponding term-level implementation.
-Similarly, the |+| type (from |compiletime.ops.int|) allows us to manipulate integers just like we would at the term level.
-The |EmptyTuple| and |*:| are Scala~3's new generic representation of tuples.
-Those types remove the need for heterogeneous lists and lets us manipulate tuples directly.
+The |Length| and |CharAt| types (from |ops.string|) are special-cased by the compiler: when their first argument is a known string literal, the compiler evaluates those types via their corresponding term-level implementation.
+Similarly, the |+| type (from |ops.int|) allows us to manipulate integers just like we would at the term level.
+The |EmptyTuple| and |*:| types are Scala~3's new generic representation of tuples.
+Those types remove the need for heterogeneous lists and let us manipulate tuples directly.
 
 \subsection{Out-Of-Bound Errors}
 
-Attentive readers might have noticed that our handling of backslash, regex's escape character, might lead to off-by-one errors.
+Attentive readers might have noticed that our handling of backslash, regex's escape character, might result in off-by-one errors.
+Indeed, the |Loop| type terminates when |Lo = Hi|, but increases |Lo| by 2 to skip over escaped characters.
+
 Be reassured, this is not an oversight!
-Regular expressions with trailing backslashes result in runtime exceptions (reported as "unexpected internal error").
-Even though detecting these types of errors at compile time is out of the scope of our implementation, doing so is still desirable.
-If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error.
+Regular expressions with trailing backslashes are invalid and result in runtime crashes (reported as "unexpected internal error").
+Even though detecting these types of errors at compile time is out of the scope of our library, doing so is still desirable.
+If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error, which is certainly better reporting that error at runtime.
 
 \subsection{Non-Capturing Groups}
 \label{subsec:non-capturing-groups}
@@ -163,7 +168,7 @@ Similar to our handling of backslash characters, this implementation intentional
 Establishing the nullability of capturing groups is more complicated than it sounds.
 At first glance, it seems that this is simply a matter of looking for regex quantifiers in suffix position\footnote{
 For brevity, our presentation does not account for the regex alternative operator, which also influences the nullability of capturing groups and can appear in both prefix and suffix positions.
-Similarly, we omit handling the "at least n times" quantifiers which can lead to nullable capturing groups.
+Similarly, we omit handling the "at least $n$ times" quantifiers which can lead to nullable capturing groups (when $n=0$).
 Our implementation accounts for both operators.
 }.
 For instance, in the following naive implementation of |IsNullable|, we look for the first closing parenthesis and inspect the following characters to determine if a capturing group is nullable:
@@ -204,7 +209,6 @@ For instance, in |(A(B))?|, both the first (|A(B)|) and the second (|B|) capturi
 
 We handle nested groups by updated our algorithm to operate in two different modes while iterating through the regex's characters.
 Our algorithm can either be outside of an optional group (|Opt=0|), in which case it computes nullability of newly encountered groups via |IsNullable|, or inside an optional group (|Opt>0|), in which case it treats every group as nullable.
-This last improvement leads to the final iteration of our type-level program handles nested groups by operating in two different modes.
 
 With this latest improvement, we advance our implementation to its final iteration (we omit usages of |IsCapturing|, from \Cref{subsec:non-capturing-groups}, for brevity):
 
@@ -223,7 +227,7 @@ With this latest improvement, we advance our implementation to its final iterati
 %       case "\\" => Loop[R, Lo + 2, Hi, Acc, Opt]
 %       case _ => Loop[R, Lo + 1, Hi, Acc, Opt]
 
-This concludes the development of our nullability analysis and completes the presentation of the type-level component of our library.
+This concludes the development of our nullability analysis and completes our presentation of the type-level component of our library.
 Despite the scarcity of Scala's standard library at the type level, we managed to achieve our ends while keeping our implementation relatively concise and, hopefully, understandable.
 In its final iteration, our capturing group analysis is, to the best of our knowledge, on par with Java's implementation of regular expression.
 
@@ -246,8 +250,8 @@ In this section, we propose two different solutions to that problem.
 \subsection{We Ain't Need No Dependent Types!}
 \label{subsec:we-ain-t-need-no-dependent-types}
 
-The first implementation of our term-level component duplicates the type-level definitions presented in \Cref{sec:type-level} to compute a list of sanitizing functions that correspond to the given regex's capturing groups.
-In a nutshell, instead of accumulating |String| and |Option[String]| types, we rewrite the outer loop of our algorithm to accumulate identity functions and eta-expansions of option's constructor:
+The first implementation of our term-level component duplicates the type-level definitions presented in the previous section to compute a list of sanitizing functions that correspond to the given regex's capturing groups.
+In a nutshell, instead of accumulating |String| and |Option[String]| types, we rewrite the outer loop of our algorithm to accumulate identity functions and eta-expansions of the option constructor:
 
 \regexTermLvlLoop
 % val identity: String => Any = { x => assert(x != null); x }

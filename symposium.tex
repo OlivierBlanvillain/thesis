@@ -235,7 +235,7 @@ In its final iteration, our capturing group analysis is, to the best of our know
 \label{sec:term-level}
 
 The term-level component of our library is in charge of sanitizing and packaging the results of regular expression matchings.
-Concretely, this component's job consists in transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
+Concretely, this component's job consists of transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
 That transformation must conform to the representation computed at the type level.
 
 In Scala, all type parameters are erased, which can lead so some friction when trying to write programs whose execution \emph{depends} on a type, such as in the problem at hand. In this section, we propose two different solutions to that problem.
@@ -281,13 +281,13 @@ After having computed those functions, we simply do a pointwise application with
 %   ts.asInstanceOf[P]
 
 This solution has the benefit of being conceptually simple.
-We needed to write an implementation that conforms to our type-level program, and we did!
-By duplicating that program, and using an unsafe case to convince the compiler of our good intentions.
+We needed to write an implementation that conforms to our type-level program, and we did!XXX
+By duplicating that program, and using an unsafe cast to convince the compiler of our good intentions.
 
 The first alternative that comes to mind is perhaps to turn ourselves to a dependently typed language that supports type- and term-level polymorphism.
 In a language with shared term and type syntax, we could write our analysis generically and derive two programs from it, one for each level.
 
-In principle, Scala~3's type inference should be able to solve half of the problem with its ability to correlate match types and match expression.
+In principle, Scala~3's type inference should be able to solve half of the problem with its ability to correlate match types and match expressions.
 In \Cref{subsec:a-lightweight-form-of-dependent-typing}, we show an example of that ability, where the compiler type checks a small program using a match type.
 In our case, this mechanism should allow us to get rid of the unsafe cast but does not address the problem of code duplication.
 In practice, at the time of writing, this solution does not play well with predefined types from the standard library, because the compiler lacks the knowledge necessary to correlate those types with their term-level counterpart.

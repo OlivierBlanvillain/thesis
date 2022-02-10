@@ -36,15 +36,12 @@ The remaining of the chapter is organized as follows:
 
 Our original presentation of generalized singleton types contains a formalization \citep[Section 3 and 4]{schmid2020coming}, which is out of the scope of this chapter.
 
-\section{Motivating Examples}
+\section{Motivating Example}
 \label{sec:motivating-example}
 
 We begin by motivating why type-level programming is desirable in general purpose programming.
 In our first example, we design an API that keeps track of database tables' schemas in the type, and uses that information to improve type safety.
 The examples in this section are written in our Scala extension described in \Cref{sec:extending-scala}.
-
-\subsection{Safe Join}
-\label{sec:safe-join}
 
 As a first step, we show how our system supports type-level programming in the style of term-level programs.
 Consider the following definition of the list datatype, which is standard Scala up the |dependent| keyword:

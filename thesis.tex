@@ -15,9 +15,21 @@
 
 \cleardoublepage
 \chapter*{Abstract}
-\markboth{Abstract}{Abstract}
+\markboth{Abstract}{Abstract}% max 3499 characters
 \addcontentsline{toc}{chapter}{Abstract (English/Français)}
-\lipsum[1-2] % max 3499 characters
+
+Over the past decade, the Scala community has shown great interest in using type-level programming to obtain additional type safety.
+Unfortunately, the lack of support from the Scala compiler has been a barrier to the adoption of that technique, notably due to its negative impact on compilation times.
+In this thesis, we present three techniques for type-level programming in Scala.
+First, we explain the status quo, implicits, and show how we can divert them from their intended use to write ad hoc type-level programs.
+Second, we propose a generalization of Scala's singleton types, which adds the ability to manipulate term-level programs at the type level.
+Third, we introduce match types, a type-level equivalent of pattern matching, which we implemented in the Scala~3 compiler.
+We demonstrate the practicality of our newly introduced techniques throughout the dissertation, by the means of case studies and examples.
+Our performance evaluation shows that our new proposals also outperform the status quo in terms of binary sizes and compilation times.
+
+
+\paragraph{Keywords} Programming Languages, Type Systems, Compilers, Scala.
+
 \begin{otherlanguage}{french}
 \cleardoublepage
 \chapter*{Résumé}
@@ -79,8 +91,9 @@ To give the reader a glimpse of this pattern, we show the definition of the |fre
 \noindent
 This definition uses three parameter lists, one for type parameters (|V| and |Out|), one for a value parameter (|v|), and one of an implicit value parameter (|ev|).
 Only the second parameter list is intended to be specified at use site; the type and implicit parameters are meant to be inferred.
-When a user writes |.free("mem")| he only sets the |v| parameter (|v="mem"|); the compiler takes care of finding valid assignments for |V|, |Out| and |ev|.
-The implicit parameter of type |Remove[V,Ps,Out]| is the entry point to the world of type-level programming, it specifies how |V| (constrained by to be |v|'s type), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
+When a users write |.free("mem")| they only set the |v| parameter (|v="mem"|); the compiler takes care of finding valid assignments for |V|, |Out| and |ev|.
+The implicit parameter of type |Remove[V,Ps,Out]| is the entry point to the world of type-level programming.
+It specifies how |V| (constrained by to be |v|'s type), |Ps| (defined in the class), and |Out| (unconstrained) are interrelated:
 
 \memImplicitRemove
 
@@ -242,16 +255,16 @@ In the next section, we discuss ambiguities and priorities between implicit defi
 \section{Ambiguities and Priorities}
 
 Scala's implicit resolution relies on an intricate priority system to establish the precedence of implicit definitions.
-Implicit-based programs sometimes rely on ambiguities and priorities of implicit definition, as we will see in this section through a series of example.
+Implicit-based programs sometimes rely on ambiguities and priorities of implicit definition, as we will see in this section through a series of examples.
 
 \subsection{Implicit Ambiguities}
 
-The Scala compiler rejects programs with \emph{ambiguous} implicit definition.
+The Scala compiler rejects programs with \emph{ambiguous} implicit definitions.
 For instance, if we write two identically-typed implicit definitions in the same scope, the compiler will consider them ambiguous and report an error:
 
 \implicitAmbiguity
 
-While ambiguities typically indicate programming errors, we can also use them purposefully to implement the error case of a type-level program.
+While ambiguities typically indicate programming errors, we can also use them purposefully to implement error cases of a type-level program.
 As an example, consider the |NotIn| operation on |HList| that is only defined if the given element is \emph{not} part of the list.
 We define |NotIn| using two ambiguous implicits; the implementation is lengthy, but straightforward:
 

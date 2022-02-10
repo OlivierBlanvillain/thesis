@@ -1,9 +1,14 @@
-import Package._
+package bench
+
+import RegexPackage._
 import annotation.experimental
+import org.openjdk.jmh.annotations._
 
 @experimental
-object RegexBench2 {
-def mains(args: Array[String]): Unit = {
+class RegexBench2 {
+
+@Benchmark
+def run(): Unit = {
 
 val r1 = Regex2("((((((((((a))))))))))"); "a" match { case r1(g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) => assert((g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) == ("a", "a", "a", "a", "a", "a", "a", "a", "a", "a")) }
 val r2 = Regex2("((((((((((a))))))))))\\10"); "aa" match { case r2(g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) => assert((g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) == ("a", "a", "a", "a", "a", "a", "a", "a", "a", "a")) }

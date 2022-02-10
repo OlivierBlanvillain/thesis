@@ -1,11 +1,14 @@
+package bench
+
 import annotation.experimental
-import Package._
+import bench._
+import RegexPackage._
 import Lib.{CharAt, Reverse}
 import compiletime.ops.int.Max
 import compiletime.ops.int.-
 
 @experimental
-object Examples {
+object RegexExamples {
 
 // start section regexDocumentation
 val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
@@ -136,5 +139,27 @@ object Sanitizer:
 // end section regexSanitizerTypeClass
 
 }
+
+def checkLib[A <: String, B](implicit ev: Lib.Compile[A] =:= B): Unit = ()
+type O = Option[String]
+
+checkLib["(\\d{4})-(\\d{2})-(\\d{2})", (S, S, S)]
+checkLib["(\\()-(\\d{2})-(\\d{2})", (S, S, S)]
+checkLib["(\\d{4})?-(\\d{2})*-(\\d{2})++", (O, O, S)]
+checkLib["((A)(B(C)))", (S, S, S, S)]
+checkLib["((A)(B(C)))?", (O, O, O, O)]
+checkLib["((A)(B(C))?)", (S, S, O, O)]
+checkLib["((A)|(B(C)))", (S, O, O, O)]
+checkLib["(B)|C", O]
+checkLib["C|(A)", O]
+checkLib[".*\\s(([A-Za-z]{5}(hum)?).js)\\s.*", (S, S, O)]
+
+checkLib["((?:A)(B(C)))", (S, S, S)]
+checkLib["((A)(?:B(C)))?", (O, O, O)]
+checkLib["((A)(B(?:C))?)", (S, S, O)]
+checkLib["(?:(A)|(B(C)))", (O, O, O)]
+checkLib["(A)(B)|(C)(D)", (O, O, O, O)]
+checkLib["(A)(B)(C)(D)|", (O, O, O, O)]
+checkLib["((A)|(B)(C))(D)", (S, O, O, O, S)]
 
 }

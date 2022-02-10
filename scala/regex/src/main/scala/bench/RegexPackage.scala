@@ -1,11 +1,13 @@
+package bench
+
 import java.util.regex.Pattern
 import annotation.experimental
 import compiletime.ops.string._
 import compiletime.ops.int.{+, -, Max, <}
-import Package.Lib._
 
 @experimental
-object Package {
+object RegexPackage {
+import Lib._
 
 // start section regexUserLevel
 object Regex:
@@ -73,6 +75,20 @@ class Regex2[P] private (val regex: String, val san: Sanitizer[P]):
         Some(arr(0).asInstanceOf[P])
       else
         Some(Tuple.fromArray(arr).asInstanceOf[P])
+    else
+      None
+
+object Regex3:
+  def apply(regex: String): Regex3 =
+    new Regex3(regex)
+
+class Regex3 private (val regex: String):
+  val pattern = Pattern.compile(regex)
+  def unapplySeq(s: String): Option[Seq[String]] =
+    val m = pattern.matcher(s)
+    if (m.matches())
+      val arr = Array.tabulate(m.groupCount)(i => m.group(i + 1))
+      Some(arr)
     else
       None
 
@@ -252,7 +268,7 @@ def isPiped(r: String, at: Int, hi: Int, lvl: Int): Int =
 // get ride of those types. Furthermore, the code responsible for
 // generating _n extractors for tuples does not know about generic tuples,
 // so we also manually flattern those types here...
-type Reverse[L <: Tuple] = L match {
+type Reverse[L <: Tuple] = L match
   case EmptyTuple => Unit
   case x1 *: EmptyTuple => x1
   case x1 *: x2 *: EmptyTuple => (x2, x1)
@@ -276,7 +292,6 @@ type Reverse[L <: Tuple] = L match {
   case x1 *: x2 *: x3 *: x4 *: x5 *: x6 *: x7 *: x8 *: x9 *: x10 *: x11 *: x12 *: x13 *: x14 *: x15 *: x16 *: x17 *: x18 *: x19 *: x20 *: EmptyTuple => (x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x9, x8, x7, x6, x5, x4, x3, x2, x1)
   case x1 *: x2 *: x3 *: x4 *: x5 *: x6 *: x7 *: x8 *: x9 *: x10 *: x11 *: x12 *: x13 *: x14 *: x15 *: x16 *: x17 *: x18 *: x19 *: x20 *: x21 *: EmptyTuple => (x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x9, x8, x7, x6, x5, x4, x3, x2, x1)
   case x1 *: x2 *: x3 *: x4 *: x5 *: x6 *: x7 *: x8 *: x9 *: x10 *: x11 *: x12 *: x13 *: x14 *: x15 *: x16 *: x17 *: x18 *: x19 *: x20 *: x21 *: x22 *: EmptyTuple => (x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x9, x8, x7, x6, x5, x4, x3, x2, x1)
-}
-}
 
+}
 }

@@ -23,33 +23,35 @@ class Regex[P] private (val regex: String):
       None
 // end section regexUserLevel
 
-abstract class Sanetizer[T](val i: Int):
+// start section regexSanitizerTypeClass
+abstract class Sanitizer[T](val i: Int):
   def mutate(arr: Array[Any]): Unit
 
-object Sanetizer:
-  implicit val basecase1: Sanetizer[EmptyTuple] =
-    new Sanetizer[EmptyTuple](0):
+object Sanitizer:
+  implicit val basecase: Sanitizer[EmptyTuple] =
+    new Sanitizer[EmptyTuple](0):
       def mutate(arr: Array[Any]): Unit = ()
 
   implicit def stringcase[T <: Tuple]
-    (implicit ev: Sanetizer[T]): Sanetizer[String *: T] =
-      new Sanetizer[String *: T](ev.i + 1):
+    (implicit ev: Sanitizer[T]): Sanitizer[String *: T] =
+      new Sanitizer[String *: T](ev.i + 1):
         def mutate(arr: Array[Any]): Unit =
           assert(arr(arr.size - i) != null)
           ev.mutate(arr)
 
   implicit def optioncase[T <: Tuple]
-    (implicit ev: Sanetizer[T]): Sanetizer[Option[String] *: T] =
-      new Sanetizer[Option[String] *: T](ev.i + 1):
+    (implicit ev: Sanitizer[T]): Sanitizer[Option[String] *: T] =
+      new Sanitizer[Option[String] *: T](ev.i + 1):
         def mutate(arr: Array[Any]): Unit =
           arr(arr.size - i) = Option(arr(arr.size - i))
           ev.mutate(arr)
+// end section regexSanitizerTypeClass
 
 object Regex2:
-  def apply[R <: String & Singleton](regex: R)(implicit san: Sanetizer[Compile[R]]): Regex2[Compile[R]] =
+  def apply[R <: String & Singleton](regex: R)(implicit san: Sanitizer[Compile[R]]): Regex2[Compile[R]] =
     new Regex2(regex, san)
 
-class Regex2[P] private (val regex: String, val san: Sanetizer[P]):
+class Regex2[P] private (val regex: String, val san: Sanitizer[P]):
   val pattern = Pattern.compile(regex)
   def unapply(s: String): Option[P] =
     val m = pattern.matcher(s)

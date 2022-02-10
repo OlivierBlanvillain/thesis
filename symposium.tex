@@ -281,8 +281,7 @@ After having computed those functions, we simply do a pointwise application with
 %   ts.asInstanceOf[P]
 
 This solution has the benefit of being conceptually simple.
-We needed to write an implementation that conforms to our type-level program, and we did!XXX
-By duplicating that program, and using an unsafe cast to convince the compiler of our good intentions.
+We needed to write an implementation that conforms to our type-level program, and this is literally what we did, by duplicating that program and using an unsafe cast to convince the compiler of our good intentions.
 
 The first alternative that comes to mind is perhaps to turn ourselves to a dependently typed language that supports type- and term-level polymorphism.
 In a language with shared term and type syntax, we could write our analysis generically and derive two programs from it, one for each level.
@@ -300,7 +299,42 @@ A promising avenue would be to revisit that line of work through the lens of typ
 \subsection{Implicit-Based Extractor Synthesis}
 \label{subsec:implicit-based-extractor-synthesis}
 
+The second implementation of our term-level component takes a completely different approach.
+Instead of analyzing regular expressions at runtime, to reconstitute type-level analysis results, we use implicit resolution to \emph{synthesize} a type-specialized program.
+That synthesis is type-directed: it generates a single-purpose program that sanitized the output of the regex engine for a particular regular expression.
 
+Our implementation consists of a type class, |Sanitizer|, and three implicit definitions, which will guide the compiler into generating the correct |Sanitizer[T]|, for any tuple |T| with |String| and |Option[String]| elements.
+That design is analogous to the recursive implicit
+\Cref{sec:recursive-implicit-resolution}
+
+The |Sanitizer| type class defines a single method that mutates an array in place to warp its nullable elements into options:
+
+\regexSanitizerTypeClass
+% abstract class Sanitizer[T](val i: Int):
+%   def mutate(arr: Array[Any]): Unit
+%
+% object Sanitizer:
+%   implicit val basecase: Sanitizer[EmptyTuple] =
+%     new Sanitizer[EmptyTuple](0):
+%       def mutate(arr: Array[Any]): Unit = ()
+%
+%   implicit def stringcase[T <: Tuple]
+%     (implicit ev: Sanitizer[T]): Sanitizer[String *: T] =
+%       new Sanitizer[String *: T](ev.i + 1):
+%         def mutate(arr: Array[Any]): Unit =
+%           assert(arr(arr.size - i) != null)
+%           ev.mutate(arr)
+%
+%   implicit def optioncase[T <: Tuple]
+%     (implicit ev: Sanitizer[T]): Sanitizer[Option[String] *: T] =
+%       new Sanitizer[Option[String] *: T](ev.i + 1):
+%         def mutate(arr: Array[Any]): Unit =
+%           arr(arr.size - i) = Option(arr(arr.size - i))
+%           ev.mutate(arr)
+
+From a design standpoint, this solution is appealing as it leads to no duplicated code and no duplicated computations: we perform our capture group analysis at the type-level, once and for all, and synthesize code accordingly.
+However, this solution comes with an additional cost in terms of compilation time.
+In the following section, we evaluate the performance of our library and discuss the trade-offs between the first and second implementation of our term-level component.
 
 \section{Evaluation}
 

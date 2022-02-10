@@ -30,7 +30,7 @@ object Tests {
       expected == actual,
       s"expected: $expected, actual: $actual")
 
-  def main(args: Array[String]): Unit = {
+  def mains(args: Array[String]): Unit = {
     val date = Regex2("(\\d{4})-(\\d{2})-(\\d{2})")
     assertEquals("2004", "2004-01-20" match
       case date(year, month, day) => year)

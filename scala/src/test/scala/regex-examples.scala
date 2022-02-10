@@ -111,6 +111,30 @@ def transform[P](pattern: String, arr: Array[String]): P =
   ts.asInstanceOf[P]
 // end section regexTransform
 
+// start section regexSanitizerTypeClass
+abstract class Sanitizer[T](val i: Int):
+  def mutate(arr: Array[Any]): Unit
+
+object Sanitizer:
+  implicit val basecase: Sanitizer[EmptyTuple] =
+    new Sanitizer[EmptyTuple](0):
+      def mutate(arr: Array[Any]): Unit = ()
+
+  implicit def stringcase[T <: Tuple]
+    (implicit ev: Sanitizer[T]): Sanitizer[String *: T] =
+      new Sanitizer[String *: T](ev.i + 1):
+        def mutate(arr: Array[Any]): Unit =
+          assert(arr(arr.size - i) != null)
+          ev.mutate(arr)
+
+  implicit def optioncase[T <: Tuple]
+    (implicit ev: Sanitizer[T]): Sanitizer[Option[String] *: T] =
+      new Sanitizer[Option[String] *: T](ev.i + 1):
+        def mutate(arr: Array[Any]): Unit =
+          arr(arr.size - i) = Option(arr(arr.size - i))
+          ev.mutate(arr)
+// end section regexSanitizerTypeClass
+
 }
 
 }

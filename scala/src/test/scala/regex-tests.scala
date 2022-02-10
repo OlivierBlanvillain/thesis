@@ -23,6 +23,9 @@ object Tests {
     check["((A)(?:B(C)))?", (O, O, O)]
     check["((A)(B(?:C))?)", (S, S, O)]
     check["(?:(A)|(B(C)))", (O, O, O)]
+    check["(A)(B)|(C)(D)", (O, O, O, O)]
+    check["(A)(B)(C)(D)|", (O, O, O, O)]
+    check["((A)|(B)(C))(D)", (S, O, O, O, S)]
   }
 
   def assertEquals(expected: Any, actual: Any): Unit =

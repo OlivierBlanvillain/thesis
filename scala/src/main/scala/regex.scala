@@ -47,6 +47,16 @@ object Sanitizer:
           ev.mutate(arr)
 // end section regexSanitizerTypeClass
 
+  implicit val tuple1stringcase: Sanitizer[String] =
+    new Sanitizer[String](1):
+      def mutate(arr: Array[Any]): Unit =
+        assert(arr(0) != null)
+
+  implicit val tuple1optioncase: Sanitizer[Option[String]] =
+    new Sanitizer[Option[String]](1):
+      def mutate(arr: Array[Any]): Unit =
+        arr(0) = Option(arr(0))
+
 object Regex2:
   def apply[R <: String & Singleton](regex: R)(implicit san: Sanitizer[Compile[R]]): Regex2[Compile[R]] =
     new Regex2(regex, san)
@@ -59,8 +69,10 @@ class Regex2[P] private (val regex: String, val san: Sanitizer[P]):
       val arr = Array.tabulate[Any](m.groupCount)(i => m.group(i + 1))
       assert(arr.size == san.i, "Unexpected number of capturing groups")
       san.mutate(arr)
-      val tuple = Tuple.fromArray(arr)
-      Some(tuple.asInstanceOf[P])
+      if (arr.size == 1)
+        Some(arr(0).asInstanceOf[P])
+      else
+        Some(Tuple.fromArray(arr).asInstanceOf[P])
     else
       None
 
@@ -70,21 +82,13 @@ type CharAt[R <: String, At <: Int] =
   Substring[R, At, At + 1]
 
 type Compile[R <: String] =
-  Reverse[Loop[R, 0, Length[R], EmptyTuple, 0]]
+  Reverse[Loop[R, 0, Length[R], EmptyTuple, IsPiped[R, 0, Length[R], 0]]]
 
 type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] <: Tuple =
+
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
-      case "|" =>
-        CharAt[R, Lo + 1] match {
-          case "(" =>
-            IsCapturing[R, Lo + 2] match {
-              case false => Loop[R, Lo + 2, Hi, Acc, Opt + 1]
-              case true  => Loop[R, Lo + 2, Hi, Option[String] *: Acc, Opt + 1]
-            }
-          case _ => Loop[R, Lo + 2, Hi, Acc, Opt]
-        }
       case ")" =>
         Loop[R, Lo + 1, Hi, Acc, Max[0, Opt - 1]]
       case "(" =>
@@ -98,8 +102,8 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] <: Tuple 
                 }
               case false =>
                 IsCapturing[R, Lo + 1] match {
-                  case false => Loop[R, Lo + 1, Hi, Acc, 0]
-                  case true  => Loop[R, Lo + 1, Hi, String *: Acc, 0]
+                  case false => Loop[R, Lo + 1, Hi, Acc, IsPiped[R, Lo + 1, Hi, 0]]
+                  case true  => Loop[R, Lo + 1, Hi, String *: Acc, IsPiped[R, Lo + 1, Hi, 0]]
                 }
           case _ =>
             IsCapturing[R, Lo + 1] match {
@@ -134,37 +138,44 @@ type IsNullable[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Boolean =
 type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
   At match
     case Hi => false
-    case _ =>
-      CharAt[R, At] match
-        case "?" | "*" | "|" => true
-        case "{" => CharAt[R, At + 1] match
-          case "0" => true
-          case _ => false
-        case "+" => IsMarked[R, At + 1, Hi]
+    case _ => CharAt[R, At] match
+      case "?" | "*" => true
+      case "{" => CharAt[R, At + 1] match
+        case "0" => true
         case _ => false
+      case "+" => IsMarked[R, At + 1, Hi]
+      case _ => false
+
+type IsPiped[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Int =
+  At match
+    case Hi => 0
+    case _ => CharAt[R, At] match
+      case "|" => Lvl match
+        case 0 => 1
+        case _ => IsPiped[R, At + 1, Hi, Lvl]
+      case ")" => Lvl match
+        case 0 => 0
+        case _ => IsPiped[R, At + 1, Hi, Lvl - 1]
+      case "(" => IsPiped[R, At + 1, Hi, Lvl + 1]
+      case "\\" => IsPiped[R, At + 2, Hi, Lvl]
+      case _    => IsPiped[R, At + 1, Hi, Lvl]
 
 def transform[P](pattern: String, arr: Array[String]): P =
+  val fs = compile(pattern)
+  val ts = arr.zip(fs).map { (x, f) => f(x) }
+  assert(arr.size == fs.size, "Unexpected number of capturing groups")
   if (arr.size == 1)
-    arr(0).asInstanceOf[P]
+    ts(0).asInstanceOf[P]
   else
-    val fs = loop(pattern, 0, pattern.length, Nil, 0).reverse
-    val ts = Tuple.fromArray(arr.zip(fs).map { (x, f) => f(x) })
-    assert(arr.size == fs.size, "Unexpected number of capturing groups")
-    ts.asInstanceOf[P]
+    Tuple.fromArray(ts).asInstanceOf[P]
+
+def compile(r: String): List[String => Any] =
+  loop(r, 0, r.length, Nil, isPiped(r, 0, r.length, 0)).reverse
 
 def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[String => Any] =
   lo match
     case `hi` => acc
     case _  => r.charAt(lo) match
-      case '|' =>
-        r.charAt(lo + 1) match {
-          case '(' =>
-            isCapturing(r, lo + 2) match {
-              case false => loop(r, lo + 2, hi, acc, opt + 1)
-              case true  => loop(r, lo + 2, hi, Option.apply :: acc, opt + 1)
-            }
-          case _ => loop(r, lo + 2, hi, acc, opt)
-        }
       case ')' =>
         loop(r, lo + 1, hi, acc, 0.max(opt - 1))
       case '(' =>
@@ -178,8 +189,8 @@ def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[
                 }
               case false =>
                 isCapturing(r, lo + 1) match {
-                  case false => loop(r, lo + 1, hi, acc, 0)
-                  case true  => loop(r, lo + 1, hi, { x => assert(x != null); x } :: acc, 0)
+                  case false => loop(r, lo + 1, hi, acc, isPiped(r, lo + 1, hi, 0))
+                  case true  => loop(r, lo + 1, hi, { x => assert(x != null); x } :: acc, isPiped(r, lo + 1, hi, 0))
                 }
           case _ =>
             isCapturing(r, lo + 1) match {
@@ -216,12 +227,26 @@ def isMarked(r: String, at: Int, hi: Int): Boolean =
     case `hi` => false
     case _ =>
       r.charAt(at) match
-        case '?' | '*' | '|' => true
+        case '?' | '*' => true
         case '{' => r.charAt(at + 1) match
           case '0' => true
           case _ => false
         case '+' => isMarked(r, at + 1, hi)
         case _ => false
+
+def isPiped(r: String, at: Int, hi: Int, lvl: Int): Int =
+  at match
+    case `hi` => 0
+    case _ => r.charAt(at) match
+      case '|' => lvl match
+        case 0 => 1
+        case _ => isPiped(r, at + 1, hi, lvl)
+      case ')' => lvl match
+        case 0 => 0
+        case _ => isPiped(r, at + 1, hi, lvl - 1)
+      case '(' => isPiped(r, at + 1, hi, lvl + 1)
+      case '\\' => isPiped(r, at + 2, hi, lvl)
+      case _    => isPiped(r, at + 1, hi, lvl)
 
 // Actually, Scala's unapply does not play way with Tuple1, so we need to
 // get ride of those types. Furthermore, the code responsible for

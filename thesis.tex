@@ -14,8 +14,8 @@
 \hfill Olivier Blanvillain
 
 \cleardoublepage
-\chapter*{Abstract}
-\markboth{Abstract}{Abstract}% max 3499 characters
+\chapter*{Abstract} % max 3499 characters
+\markboth{Abstract}{Abstract}
 \addcontentsline{toc}{chapter}{Abstract (English/Français)}
 
 Over the past decade, the Scala community has shown great interest in using type-level programming to obtain additional type safety.
@@ -24,9 +24,8 @@ In this thesis, we present three techniques for type-level programming in Scala.
 First, we explain the status quo, implicits, and show how we can divert them from their intended use to write ad hoc type-level programs.
 Second, we propose a generalization of Scala's singleton types, which adds the ability to manipulate term-level programs at the type level.
 Third, we introduce match types, a type-level equivalent of pattern matching, which we implemented in the Scala~3 compiler.
-We demonstrate the practicality of our newly introduced techniques throughout the dissertation, by the means of case studies and examples.
-Our performance evaluation shows that our new proposals also outperform the status quo in terms of binary sizes and compilation times.
-
+Throughout this dissertation, we demonstrate the practicality of our newly introduced techniques, by the means of case studies and examples.
+Our performance evaluation shows that our new techniques outperform the status quo in terms of binary sizes and compilation times.
 
 \paragraph{Keywords} Programming Languages, Type Systems, Compilers, Scala.
 
@@ -34,7 +33,18 @@ Our performance evaluation shows that our new proposals also outperform the stat
 \cleardoublepage
 \chapter*{Résumé}
 \markboth{Résumé}{Résumé}
-\lipsum[1-2]
+
+Au cours de la dernière décennie, la communauté Scala a montré un grand intérêt pour l'utilisation de la programmation au niveau du système de type afin d'améliorer la sûreté du typage.
+Malheureusement, le manque de support dans le compilateur Scala a été un frein pour l'adoption de cette technique, notamment en raison de son impact négatif sur les temps de compilation.
+Dans cette thèse, nous présentons trois techniques de programmation au niveau du système de type en Scala.
+Tout d'abord, nous expliquons le statu quo, les implicites, et montrons comment nous pouvons les détourner de leur usage prévu pour écrire des programmes au niveau des types.
+Deuxièmement, nous proposons une généralisation des types singleton de Scala, qui ajoute la possibilité de manipuler et d'exécuter des programmes au niveau des types.
+Troisièmement, nous introduisons les match types, un équivalent du pattern matching au niveau des types, que nous avons implémenté dans le compilateur Scala~3.
+Tout au long de cette dissertation, nous démontrons le caractère pratique de nos nouvelles techniques, au moyen d'études de cas et d'exemples.
+Notre évaluation des performances montre que nos nouvelles techniques surpassent le statu quo en termes de tailles binaires et de temps de compilation.
+
+\paragraph{Mots clés} Langages de Programmation, Systèmes de Types, Compilateurs, Scala.
+
 \end{otherlanguage}
 
 \hypersetup{linkcolor=black}

@@ -30,7 +30,7 @@ We present our library in terms of 3 components:
 \begin{enumerate}
   \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute the corresponding tuple-based type representation (\Cref{sec:type-level}).
 
-  \item The term-level capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation computed (\Cref{sec:term-level}).
+  \item The rnutime capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation computed (\Cref{sec:term-level}).
 
   \item The user interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe experience.
 \end{enumerate}
@@ -65,7 +65,7 @@ The main difference between Scala's original |Regex| implementation and ours lie
 By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity, and that the type of those groups corresponds to the type of the tuple elements.
 We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
 In our implementation, this is done via the |transform| method, which is our
-term-level processing component.
+runtime processing component.
 As a result, our implementation never returns null values, which removes the null-checking burden from the user.
 
 For instance, in the following example usage of our library, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:
@@ -234,7 +234,7 @@ In its final iteration, our capturing group analysis is, to the best of our know
 \section{Term-Level}
 \label{sec:term-level}
 
-The term-level component of our library is in charge of sanitizing and packaging the results of regular expression matchings.
+The runtime component of our library is in charge of sanitizing and packaging the results of regular expression matchings.
 Concretely, this component's job consists of transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
 That transformation must conform to the representation computed at the type level.
 
@@ -249,7 +249,7 @@ In Scala, all type parameters are erased, which can lead so some friction when t
 \subsection{We Ain't Need No Dependent Types!}
 \label{subsec:we-ain-t-need-no-dependent-types}
 
-The first implementation of our term-level component duplicates the type-level definitions presented in the previous section to compute a list of sanitizing functions that correspond to the given regex's capturing groups.
+The first implementation of our runtime component duplicates the type-level definitions presented in the previous section to compute a list of sanitizing functions that correspond to the given regex's capturing groups.
 In a nutshell, instead of accumulating |String| and |Option[String]| types, we rewrite the outer loop of our algorithm to accumulate identity functions and eta-expansions of the option constructor:
 
 \regexTermLvlLoop
@@ -299,7 +299,7 @@ A promising avenue would be to revisit that line of work through the lens of typ
 \subsection{Implicit-Based Extractor Synthesis}
 \label{subsec:implicit-based-extractor-synthesis}
 
-The second implementation of our term-level component takes a completely different approach.
+The second implementation of our runtime component takes a completely different approach.
 Instead of analyzing regular expressions at runtime, to reconstitute type-level analysis results, we use implicit resolution to \emph{synthesize} a type-specialized program.
 That synthesis is type-directed: it generates a single-purpose program that sanitized the output of the regex engine for a particular regular expression.
 
@@ -334,8 +334,19 @@ The |Sanitizer| type class defines a single method that mutates an array in plac
 
 From a design standpoint, this solution is appealing as it leads to no duplicated code and no duplicated computations: we perform our capture group analysis at the type-level, once and for all, and synthesize code accordingly.
 However, this solution comes with an additional cost in terms of compilation time.
-In the following section, we evaluate the performance of our library and discuss the trade-offs between the first and second implementation of our term-level component.
+In the following section, we evaluate the performance of our library and discuss the trade-offs between the first and second implementation of our runtime component.
 
 \section{Evaluation}
 
-In this section... \citep{w3c1994xquery} and \citep{w3c1994qt3ts}.
+To assess the correctness of our library, we use the QT3TS test suite \citep{w3c1994xquery}, which contains about 1700 test cases for regular expressions \citep[perl-tests.xml]{w3c1994qt3ts}.
+We select the subset of those tests which exercise successful matching with capturing groups, which amounts to a total of 183 tests.
+Each test consists of one capturing group extraction, which we check againts the reference extraction.
+
+\regexBars{A comparison of the compilation time (left) and execution time (right) of Scala's standard regex library (Std) against our library with its code duplicated runtime (Dup) and with its implicit-based runtime (Impl) on our test suite (lower is better).}
+
+In this section... \Cref{fig:regexBars}.
+
+\section{Related Work}
+
+They did it all: \citep{spishak2012type}
+Also this talk, from Stephanie: \citep{weirich2014examples}

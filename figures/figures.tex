@@ -450,13 +450,13 @@
   \begin{figure}
     \centering
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/concat-graph.tex}
+      \centering
+      \input{figures/concat-graph.tex}
     \end{subfigure}%
     \hspace{-20pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/join-graph.tex}
+      \centering
+      \input{figures/join-graph.tex}
     \end{subfigure}
     \caption{#1}
     \label{fig:dependentVsImplicitBenchmarks}
@@ -467,24 +467,24 @@
   \begin{figure}
     \centering
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/concat.gex}
+      \centering
+      \input{figures/concat.gex}
     \end{subfigure}%
     \hspace{-20pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/remove.gex}
+      \centering
+      \input{figures/remove.gex}
     \end{subfigure}
 
     \vspace{-2pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/join.gex}
+      \centering
+      \input{figures/join.gex}
     \end{subfigure}%
     \hspace{-20pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/reduce.gex}
+      \centering
+      \input{figures/reduce.gex}
     \end{subfigure}
     \caption{#1}
     \label{fig:timingGraphsZoomedOut}
@@ -495,27 +495,45 @@
   \begin{figure}[!ht]
     \centering
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/concat-2.gex}
+      \centering
+      \input{figures/concat-2.gex}
     \end{subfigure}%
     \hspace{-20pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/remove-2.gex}
+      \centering
+      \input{figures/remove-2.gex}
     \end{subfigure}
 
     \vspace{-2pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/join-2.gex}
+      \centering
+      \input{figures/join-2.gex}
     \end{subfigure}%
     \hspace{-20pt}
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/reduce-2.gex}
+      \centering
+      \input{figures/reduce-2.gex}
     \end{subfigure}
     \caption{#1}
     \label{fig:timingGraphsZoomedIn}
+  \end{figure}
+}
+
+\newcommand\regexBars[1]{
+  \begin{figure}[!ht]
+    \centering
+    \hspace{-15pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/regex-compiletime.gex}
+    \end{subfigure}%
+    \hspace{10pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/regex-runtime.gex}
+    \end{subfigure}
+    \caption{#1}
+    \label{fig:regexBars}
   \end{figure}
 }
 
@@ -523,8 +541,8 @@
   \begin{figure}
     \centering
     \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \input{figures/2early2late.gex}
+      \centering
+      \input{figures/2early2late.gex}
     \end{subfigure}%
     \caption{#1}
     \label{fig:timingGraphsTooEarlyTooLate}

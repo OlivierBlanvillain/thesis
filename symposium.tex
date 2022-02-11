@@ -338,13 +338,18 @@ In the following section, we evaluate the performance of our library and discuss
 
 \section{Evaluation}
 
-To assess the correctness of our library, we use the QT3TS test suite \citep{w3c1994xquery}, which contains about 1700 test cases for regular expressions \citep[perl-tests.xml]{w3c1994qt3ts}.
-We select the subset of those tests which exercise successful matching with capturing groups, which amounts to a total of 183 tests.
-Each test consists of one capturing group extraction, which we check againts the reference extraction.
+To assess the correctness of our library, we run our implementation against the QT3TS test suite \citep{w3c1994xquery}, which consists of about 1700 test cases for regular expressions \citep[perl-tests.xml]{w3c1994qt3ts}.
+We select the subset of those tests that are positive (they match successfully) and exercises capturing groups, totaling 183 test cases, which we then collated to form a single benchmark.
+We use this benchmark to evaluate the performance of our library in terms of compilation times and execution times.
 
-\regexBars{A comparison of the compilation time (left) and execution time (right) of Scala's standard regex library (Std) against our library with its code duplicated runtime (Dup) and with its implicit-based runtime (Impl) on our test suite (lower is better).}
+\regexBars{A comparison of the compilation time (left) and execution time (right) of Scala's standard regex library (Std) against our library with its code duplicated runtime (Dup) and with its implicit-based runtime (Impl). Lower is better.}
 
-In this section... \Cref{fig:regexBars}.
+In \Cref{fig:regexBars}, we show the results of our experiments, which compare Scala's standard regular expression library (Std) against two flavors of our library, one using our code duplicated runtime (Dup), presented in \Cref{subsec:we-ain-t-need-no-dependent-types}, and the other using our implicit-based runtime (Impl), presented in \Cref{subsec:implicit-based-extractor-synthesis}.
+
+We obtained these results by averaging the measurements obtained over 2 hour runs, for each data point, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0\_212 and Linux.
+With these settings, we obtains margins of errors below \textpm1\%, with 99.9\% confidence (omitted from \Cref{fig:regexBars}).
+
+
 
 \section{Related Work}
 

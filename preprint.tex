@@ -482,7 +482,7 @@ In the join benchmark, we see that the implicit-based implementation exceeds 30 
 This can be explained by the nature of implicit resolution, which might backtrack during its search.
 The compilation time of the dependently-typed implementation grows linearly and stays below one second until the 350 columns mark.
 We were able to observe similar trends in the concatenation benchmark.
-These measurements were obtained by averaging 120 compilations on a warm compiler, and have been performed on an i7-7700K Processor running Oracle JVM 1.8.0 on Linux.
+We obtained those measurements by averaging 120 independent compilations on a warm compiler, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0 on Linux.
 
 \section{Related Work}
 

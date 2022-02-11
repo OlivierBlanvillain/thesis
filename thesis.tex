@@ -406,9 +406,9 @@ Here is a brief description of our benchmark suite:
   Computes the dimension of a multidimensional array after dimensional reduction along all axes (\Cref{subsubsec:reduction}).
 \end{enumerate}
 
-We run the experiments presented in this chapter on an i7-7700K processor running OpenJDK~1.8.0\_212 and Linux.
-For the implicit and match type benchmarks, we use the latest Scala~3 release (version~3.1.2 at the time of writing).
-For the generalized singleton benchmarks, we use our prototype implementation, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
+We obtained the measurements presented in this chapter by averaging 60 independent compilations on a warm compiler, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0\_212 and Linux.
+For the implicit and match type benchmarks, we used the latest Scala~3 release (version~3.1.2 at the time of writing).
+For the generalized singleton benchmarks, we used our prototype implementation, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
 
 \section{Compilation time}
 \label{sec:compilation-time}
@@ -480,7 +480,7 @@ In this figure, we compare the compilation times of the match type Reduce benchm
 \chapter{Conclusion}
 \label{chap:conclusion}
 
-In this thesis, we presented three techniques for type-level programming in Scala: the status quo, implicits, and two new approaches, generalized singleton types, and match types.
+In this thesis, we presented three techniques for type-level programming in Scala: implicits, generalized singleton types, and match types.
 We showed that programming with implicits can be relatively cumbersome, both for programmers and compilers, which led us to the following question: \emph{can we do better?}
 Our main contribution, match types, certainly answers that question positively.
 They do provide a simple, first-class solution to type-level programming which is both easy to use and fast to compile.

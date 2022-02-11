@@ -519,24 +519,6 @@
   \end{figure}
 }
 
-\newcommand\regexBars[1]{
-  \begin{figure}[!ht]
-    \centering
-    \hspace{-15pt}
-    \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/regex-compiletime.gex}
-    \end{subfigure}%
-    \hspace{10pt}
-    \begin{subfigure}[t]{0.5\textwidth}
-      \centering
-      \input{figures/regex-runtime.gex}
-    \end{subfigure}
-    \caption{#1}
-    \label{fig:regexBars}
-  \end{figure}
-}
-
 \newcommand\timingGraphsTooEarlyTooLate[1]{
   \begin{figure}
     \centering
@@ -565,4 +547,22 @@
     \bottomrule
     \end{tabular}
   \end{table*}
+}
+
+\newcommand\regexBars[1]{
+  \begin{figure}
+    \centering
+    \hspace{-15pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/regex-compiletime.gex}
+    \end{subfigure}%
+    \hspace{10pt}
+    \begin{subfigure}[t]{0.5\textwidth}
+      \centering
+      \input{figures/regex-runtime.gex}
+    \end{subfigure}
+    \caption{#1}
+    \label{fig:regexBars}
+  \end{figure}
 }

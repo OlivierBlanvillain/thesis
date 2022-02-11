@@ -482,10 +482,11 @@ In this figure, we compare the compilation times of the match type Reduce benchm
 
 In this thesis, we presented three techniques for type-level programming in Scala: the status quo, implicits, and two new approaches, generalized singleton types, and match types.
 We showed that programming with implicits can be relatively cumbersome, both for programmers and compilers, which led us to the following question: \emph{can we do better?}
-
 Our main contribution, match types, certainly answers that question positively.
-They \emph{do} provide a simple, first-class solution to type-level programming which is both easy to use and fast to compile.
-Beyond the scope of Scala, it will interesting to see if our design can inspire other languages interested in moving their type system towards dependent types.
+They do provide a simple, first-class solution to type-level programming which is both easy to use and fast to compile.
+We formalized match types in a calculus based on \SystemFsub and proved its soundness, which gives us confidence that our approach is correct and sensible.
+Our implementation of match types in the Scala~3 compiler makes them accessible to a large audience of programmers and is already in active use.
+Beyond the scope of Scala, it will be interesting to see if our design can inspire other general-purpose languages interested in moving their type system towards dependent types.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%  Bibliography, Appendix, CV  %%%%%%%%%%

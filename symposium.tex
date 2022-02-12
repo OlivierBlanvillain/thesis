@@ -300,14 +300,11 @@ A promising avenue would be to revisit that line of work through the lens of typ
 \label{subsec:implicit-based-extractor-synthesis}
 
 The second implementation of our runtime component takes a completely different approach.
-Instead of analyzing regular expressions at runtime, to reconstitute type-level analysis results, we use implicit resolution to \emph{synthesize} a type-specialized program.
+Instead of analyzing regular expressions at runtime, to reconstitute type-level analysis results, we use implicit resolution to \emph{synthesize} a type-specialized runtime.
 That synthesis is type-directed: it generates a single-purpose program that sanitized the output of the regex engine for a particular regular expression.
 
 Our implementation consists of a type class, |Sanitizer|, and three implicit definitions, which will guide the compiler into generating the correct |Sanitizer[T]|, for any tuple |T| with |String| and |Option[String]| elements.
-That design is analogous to the recursive implicit
-\Cref{sec:recursive-implicit-resolution}
-
-The |Sanitizer| type class defines a single method that mutates an array in place to warp its nullable elements into options:
+The |Sanitizer| type class defines a single method that mutates an array in place to warp its nullable elements in options:
 
 \regexSanitizerTypeClass
 % abstract class Sanitizer[T](val i: Int):
@@ -333,7 +330,9 @@ The |Sanitizer| type class defines a single method that mutates an array in plac
 %           ev.mutate(arr)
 
 From a design standpoint, this solution is appealing as it leads to no duplicated code and no duplicated computations: we perform our capture group analysis at the type-level, once and for all, and synthesize code accordingly.
-However, this solution comes with an additional cost in terms of compilation time.
+This combination of type-level programming and implicit-based code synthesis is reminiscent of the compile-time variant of multi-stage metaprogramming \citep{stucki2018practical}.
+In those terms, our approach corresponds to a multi-staged program whose stage 0 happens entirely within Scala's type checker.
+
 In the following section, we evaluate the performance of our library and discuss the trade-offs between the first and second implementation of our runtime component.
 
 \section{Evaluation}
@@ -346,12 +345,19 @@ We use this benchmark to evaluate the performance of our library in terms of com
 
 In \Cref{fig:regexBars}, we show the results of our experiments, which compare Scala's standard regular expression library (Std) against two flavors of our library, one using our code duplicated runtime (Dup), presented in \Cref{subsec:we-ain-t-need-no-dependent-types}, and the other using our implicit-based runtime (Impl), presented in \Cref{subsec:implicit-based-extractor-synthesis}.
 
+XXX
+
 We obtained these results by averaging the measurements obtained over 2 hour runs, for each data point, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0\_212 and Linux.
 With these settings, we obtains margins of errors below \textpm1\%, with 99.9\% confidence (omitted from \Cref{fig:regexBars}).
 
-
-
 \section{Related Work}
 
-They did it all: \citep{spishak2012type}
+\citeauthor{spishak2012type} developed a type system to validate regular expression syntax and capturing group extraction in Java programs \citep{spishak2012type}.
+Their tool takes the form of a compiler plugin that enhances Java's type system to track the number of capturing groups using type annotations.
+Unlike our system, their are not concerned with null safety and does not detect optional capturing groups.
+In practice, their tool operates similarly to a linter: it reports false positives and sometimes requires manual annotations.
+
+\citep{mainland2007s}'s quasiquote
+
 Also this talk, from Stephanie: \citep{weirich2014examples}
+dependently-typed flavor of GHC Haskell which requires no less than 20 language extensions, whereas our implementation compiles with vanilla Scala~3.

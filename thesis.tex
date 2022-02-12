@@ -133,7 +133,12 @@ Our contributions are as follows:
   \item In \Cref{chap:match-types}, we introduce match types, a type-level equivalent of pattern matching.
   Match types integrate seamlessly into programming languages with subtyping and, despite their simplicity, offer significant additional expressiveness.
   We formalize match types in a self-contained calculus based on \SystemFsub and prove its soundness.
-  We demonstrate the practicality of our system by implementing match types in the Scala~3 compiler, thus making type-level programming readily available to a broad audience of programmers.
+  We demonstrate the practical value of our system by implementing match types in the Scala~3 compiler, thus making type-level programming readily available to a broad audience of programmers.
+
+  \item In \Cref{chap:type-safe-regular-expressions}, we propose a new design for type-safe regular expressions in Scala.
+  Our approach makes extensive use of match types to identify capturing groups during type checking.
+  We walk the reader through our design, step by step, providing detailed explanations along the way.
+  Our implementation is on par with Java's regular expressions and only has a marginal impact on compilation times.
 
   \item In \Cref{chap:performance-evaluation}, we evaluate the performance of the various type-level programming techniques introduced in prior chapters, when confronted with large type-level programs.
   We show that the techniques introduced in \Cref{chap:generalizing-singleton-types} and~\ref{chap:match-types} systematically outperform implicits in terms of compilation times and binary sizes.
@@ -360,18 +365,28 @@ We demonstrate the practicality of our system by implementing match types in the
 
 \subsection*{Attribution}
 
-This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer, and Martin Odersky, and published in POPL'22. \Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface in Scala, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models. Maxime also contributed to the Scala~3 compiler by adding support for arithmetic computations at the type level. Jonathan mechanized the soundness proof for \SystemFm, and provided invaluable help and guidance with redaction. Martin and I collaborated on the implementation of match types in the Scala 3 compiler, which is now actively used by the Scala community.
+This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer, and Martin Odersky, and published in POPL'22.
+\Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface in Scala, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models.
+Maxime also contributed to the Scala~3 compiler by adding support for arithmetic computations at the type level.
+Jonathan mechanized the soundness proof for \SystemFm, and provided invaluable help and guidance with redaction.
+Martin and I collaborated on the implementation of match types in the Scala 3 compiler, which is now actively used by the Scala community.
 
 \input{article.tex}
 
 \chapter{Type-Safe Regular Expressions}
-\label{chap:regex}
+\label{chap:type-safe-regular-expressions}
 
-Abstract...
+Regular expressions can easily go wrong.
+Capturing groups, in particular, require meticulous care to avoid running into off-by-one errors and null pointer exceptions.
+In this chapter, we propose a new design for Scala's regular expressions which completely eliminates this class of errors.
+Our design makes extensive use of match types, Scala's new feature for type-level programming, to statically analyze regular expressions during type checking.
+We show that our approach only has a marginal impact on compilation times, which confirms its pragmatism.
 
-% \subsection*{Attribution}
+\subsection*{Attribution}
 
-% Attribution...
+This chapter is inspired by Andrea Veneziano's semester project entitled "Strongly-typed regular expressions in Dotty".
+In his project, Andrea implemented a regex library in two different flavors, one based on match types and the other based on generalized singleton types, with the objective to compare the two approaches in terms of expressivity and ease of use.
+The present chapter is a reboot of the match-type side of that project.
 
 \input{symposium.tex}
 
@@ -407,7 +422,7 @@ Here is a brief description of our benchmark suite:
 \end{enumerate}
 
 We obtained the measurements presented in this chapter by averaging 60 independent compilations on a warm compiler, which we executed on an i7-7700K Processor running Oracle JVM~1.8.0\_212 and Linux.
-For the implicit and match type benchmarks, we used the latest version of Scala~3 (3.1.2 at the time of writing).
+For the implicit and match type benchmarks, we used the latest version of Scala~3 at the time of writing (3.1.2).
 For the generalized singleton benchmarks, we used our prototype implementation, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
 
 \section{Compilation time}

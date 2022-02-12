@@ -2,13 +2,13 @@
 
 The Scala standard library contains a package to manipulate regular expressions.
 This package is based on Java's implementation, and thus benefits from the high performance of the JVM's regex engine.
-The Scala implementation innovates in its presentation: it uses the power and flexibility of Scala's pattern matching to offer a syntax that is both elegant and concise.
+The Scala implementation innovates in its presentation: it uses the flexibility of Scala's pattern matching to offer a syntax that is both elegant and concise.
 The package's documentation starts with the following example:
 
 \regexDocumentation
 
 \noindent
-The extractor pattern, |case date(y,m,d) =>|, replaces the need for manually indexing into the regular expression's capturing groups, and shields users from off-by-one error.
+The extractor pattern, |case date(y,m,d)|, replaces the need for manually indexing into the regular expression's capturing groups, and shields users from off-by-one error.
 
 While the syntax of this example would undoubtedly make some non-Scala programmers envious, its type safety leaves much to be desired.
 First of all, the \emph{number} of variable bindings in the extractor is entirely opaque to Scala's type system, and left to the discretion of the programmer.
@@ -16,7 +16,7 @@ Furthermore, the values that come out of capturing groups can be null (when usin
 Those shortcomings might appear benign on small examples, but can easily turn into bugs when dealing with a large-scale code base.
 
 In this chapter, we propose a new design for Scala's regular expression library which provides a type-safe and null-safe mechanism for capturing group extraction.
-Our design makes extensive use of match types, Scala~3 new feature for type-level programming, to statically analyze regular expressions during type checking and generate type-specialized extractors.
+Our design makes extensive use of match types, Scala's new feature for type-level programming, to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
 
 \section{Architecture}
@@ -166,7 +166,7 @@ In Scala, all type parameters are erased, which leads to some friction when want
 \begin{enumerate}
   \item In \Cref{subsec:we-ain-t-need-no-dependent-types}, we proceed by sheer force of code duplication: we translate the entirety of our type-level algorithm into term-level functions and use a cast to correlate the two.
 
-  \item In \Cref{subsec:implicit-based-extractor-synthesis}, we show how to use implicits to perform type-directed code synthesis: we use the output of our type-level analysis as an input of implicit search to generate a type-specialized capture group sanitizer.
+  \item In \Cref{subsec:implicit-based-extractor-synthesis}, we show how to use implicits to perform type-directed code synthesis: we use the output of our type-level analysis as an input of implicit search to generate a type-specialized capturing group sanitizer.
 \end{enumerate}
 
 \subsection{We Ain't Need No Dependent Types!}
@@ -210,7 +210,7 @@ The |Sanitizer| type class defines a single method that mutates an array in plac
 
 \regexSanitizerTypeClass
 
-From a design standpoint, this solution is appealing as it leads to no duplicated code or computation: we perform our capture group analysis at the type-level, once and for all, and synthesize code accordingly.
+From a design standpoint, this solution is appealing as it leads to no duplicated code or computation: we perform our capturing group analysis at the type-level, once and for all, and synthesize code accordingly.
 This combination of type-level programming and implicit-based code synthesis is reminiscent of multi-stage metaprogramming, in its compile-time variant \citep{stucki2018practical}.
 In those terms, our approach corresponds to a multi-staged program whose stage 0 happens entirely within Scala's type checker.
 
@@ -224,24 +224,24 @@ We use these benchmarks to evaluate the performance of our library in terms of c
 
 In \Cref{fig:regexBars}, we show the results of our experiments, which compare Scala's standard regular expression library (Std) against two flavors of our library, one using our code-duplicated runtime (Dup), presented in \Cref{subsec:we-ain-t-need-no-dependent-types}, and the other using our implicit-based runtime (Impl), presented in \Cref{subsec:implicit-based-extractor-synthesis}.
 
-\regexBars{A comparison of the compilation time (left) and execution time (right) of Scala's standard regex library (Std) against our library with its code-duplicated runtime (Dup) and with its implicit-based runtime (Impl). Lower is better.}
+\regexBars{A comparison of the compilation time (left) and execution time (right) of Scala's standard regex library (Std) against our library with its code-duplicated runtime (Dup) and with its implicit-based runtime (Impl).}
 
 We obtained these results by averaging the measurements obtained over 2 hour runs, for each data point, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0\_212 and Linux.
 With these settings, we obtains margins of errors below \textpm1\%, with 99.9\% confidence (omitted in \Cref{fig:regexBars}).
-We run our benchmarks on the latest version of Scala~3 (3.1.2 at the time of writing).
+We run our benchmarks on the latest version of Scala~3 at the time of writing (3.1.2).
 
-\paragraph{Compilation Times} Our library in its code-duplicated variant adds a total of 53~ms over the baseline, which corresponds to an average of +0.3~ms per regex.
+\paragraph{Compilation Times} Our library in its code-duplicated variant adds a total of 53~ms over the baseline (an average of +0.3~ms per regex).
 This corresponds to the cost of match type reduction.
 The implicit-based variant adds another 21~ms (+0.1~ms per regex), which corresponds to the cost implicit resolution.
-Both variants are thus relatively cheap which validates their utility for practical uses.
-When it comes to compilation times, it would be misleading to compare increments relative to the overall time, given that the compiler spends a large portion of its time outside of the type checker \citep[2.11.3]{petrashko2017design}.
+Both variants are thus relatively cheap, which validates their utility for practical uses.
+When it comes to compilation times, it would be misleading to compare increments relative to the overall time, given that the compiler spends a large portion of its time outside of type checking \citep[2.11.3]{petrashko2017design}.
 
-\paragraph{Execution Times} At runtime, the code-duplicated variant adds 51~\textmu s over the baseline.
+\paragraph{Execution Times} At runtime, our code-duplicated variant adds 51~\textmu s over the baseline.
 Although this difference is three orders of magnitudes smaller than at compile-time, it corresponds to a 25\% increase, which is a rather substantial price to pay for redoing an already-performed analysis.
-The implicit-based variant gets rid of this cost by synthesizing a type-specialized runtime (at the cost of increased compilation timed).
+The implicit-based variant gets rid of this cost by synthesizing a type-specialized runtime (at the cost of increased compilation time).
 To our surprise, our implicit-based runtime outperforms Scala's standard library implementation.
 We suspect that this difference is due to the poor interaction between the JVM's just-in-time compiler and the code generated for variadic extractors (|unapplySeq|, used by the Std implementation).
-Our implicit-based implementation appears to be more prone to inlining and partial evaluation since it does not involve generic sequences, which could explain the slight grain in performance.
+Our implicit-based implementation appears to be more prone to inlining and partial evaluation since it does not involve generic sequences, which could explain the slight gain in performance.
 
 \bigskip
 
@@ -250,7 +250,7 @@ In view of these results, we decided to use our implicit-based runtime in the pu
 
 \citeauthor{spishak2012type} developed a type system to validate regular expression syntax and capturing group extraction in Java programs \citep{spishak2012type}.
 Their tool takes the form of a compiler plugin that enhances Java's type system to track the number of capturing groups using type annotations.
-Unlike our system, their are not concerned with null safety and does not detect optional capturing groups.
+Unlike our system, their solution is not concerned with null safety and does not detect optional capturing groups.
 In practice, their tool operates similarly to a linter: it reports false positives and sometimes requires manual annotations.
 
 \citep{mainland2007s}'s quasiquote

@@ -246,6 +246,7 @@ Our implicit-based implementation appears to be more prone to inlining and parti
 \bigskip
 
 In view of these results, we decided to use our implicit-based runtime in the published version of our library.
+
 \section{Related Work}
 
 \citeauthor{spishak2012type} developed a type system to validate regular expression syntax and capturing group extraction in Java programs \citep{spishak2012type}.
@@ -257,3 +258,16 @@ In practice, their tool operates similarly to a linter: it reports false positiv
 
 Also this talk, from Stephanie: \citep{weirich2014examples}
 dependently-typed flavor of GHC Haskell which requires no less than 20 language extensions, whereas our implementation compiles with vanilla Scala~3.
+
+\section{Conclusion}
+
+In this chapter, we introduced a new design for type-safe regular expressions in Scala.
+We presented our type-level analysis, which identifies capturing groups and computes their nullability.
+We built our library following the design of Scala's original regular expression API, in order to provide a frictionless migration path for programmers interested in the additional type safety.
+We evaluated our implementation by running it against the QT3TS test suite and showed that, on those benchmarks, our type-level analysis has a marginal impact on compilation times.
+
+\paragraph{Future Work}
+We propose to use a dedicated data type to represent the regex alternative operator.
+In our current design, we map every optional regex operator to an |Option[String]|, which does not always accurately reflects the structure of regular expressions.
+For instance, in \lstinline!"(A)(B)|(C)"! (which matches either |AB| or |C|), our system represents capturing as a 3-tuple, |(Option[String],| |Option[String],| |Option[String])|. This representation fails to account for the fact that the first and second capturing groups have identical nullability status, and that this status is opposite to the nullability of the third group.
+Instead, we could represent those capturing groups as |Either[(String,| |String),| |String]|, which is isomorphic to the regular expression.

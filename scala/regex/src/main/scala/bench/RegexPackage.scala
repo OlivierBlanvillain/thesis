@@ -60,12 +60,12 @@ object Sanitizer:
         arr(0) = Option(arr(0))
 
 object Regex2:
-  def apply[R <: String & Singleton](regex: R)(implicit san: Sanitizer[Compile[R]]): Regex2[Compile[R]] =
-    new Regex2(regex, san)
+  def apply[R <: String & Singleton](regex: R): Regex2[Compile[R]] =
+    new Regex2(regex)
 
-class Regex2[P] private (val regex: String, val san: Sanitizer[P]):
+class Regex2[P] private (val regex: String):
   val pattern = Pattern.compile(regex)
-  def unapply(s: String): Option[P] =
+  def unapply(s: String)(implicit san: Sanitizer[P]): Option[P] =
     val m = pattern.matcher(s)
     if (m.matches())
       val arr = Array.tabulate[Any](m.groupCount)(i => m.group(i + 1))

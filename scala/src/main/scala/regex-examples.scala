@@ -96,12 +96,11 @@ def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int)
     case `hi` => acc
     case _  => r.charAt(lo) match
       case ')' => loop(r, lo + 1, hi, acc, 0.max(opt - 1))
-      case '(' =>
-        opt match
-          case 0 => isNullable(r, lo + 1, hi, 0) match
-            case true  => loop(r, lo + 1, hi, Option.apply :: acc, 1)
-            case false => loop(r, lo + 1, hi, identity :: acc, 0)
-          case _ => loop(r, lo + 1, hi, Option.apply :: acc, opt + 1)
+      case '(' => opt match
+        case 0 => isNullable(r, lo + 1, hi, 0) match
+          case true  => loop(r, lo + 1, hi, Option.apply :: acc, 1)
+          case false => loop(r, lo + 1, hi, identity :: acc, 0)
+        case _ => loop(r, lo + 1, hi, Option.apply :: acc, opt + 1)
       case '\\' => loop(r, lo + 2, hi, acc, opt)
       case _ => loop(r, lo + 1, hi, acc, opt)
 // end section regexTermLvlLoop

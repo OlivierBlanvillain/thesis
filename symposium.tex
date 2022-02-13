@@ -249,12 +249,14 @@ In view of these results, we decided to use our implicit-based runtime in the pu
 
 \section{Related Work}
 
-\citeauthor{spishak2012type} developed a type system to validate regular expression syntax and capturing group extraction in Java programs \citep{spishak2012type}.
+There is surprisingly little literature concerned with the safety of regular expression capturing groups.
+In a recent survey paper on the correctness of regular expressions, \citet{li2021ensuring} classified the publications in this area into several categories, ranging from empirical studies to regular expression synthesis and repair.
+However, they only listed a single paper about static checking: the type system developed by \citet{spishak2012type} to validate regular expression syntax and capturing group usage in Java programs.
 Their tool takes the form of a compiler plugin that enhances Java's type system to track the number of capturing groups using type annotations.
 Unlike our system, their solution is not concerned with null safety and does not detect optional capturing groups.
 In practice, their tool operates similarly to a linter: it reports false positives and sometimes requires manual annotations.
 
-\citep{mainland2007s}'s quasiquote
+\citep{cheplyaka2011regex} regex-applicative
 
 Also this talk, from Stephanie: \citep{weirich2014examples}
 dependently-typed flavor of GHC Haskell which requires no less than 20 language extensions, whereas our implementation compiles with vanilla Scala~3.
@@ -264,7 +266,7 @@ dependently-typed flavor of GHC Haskell which requires no less than 20 language 
 In this chapter, we introduced a new design for type-safe regular expressions in Scala.
 We presented our type-level analysis, which identifies capturing groups and computes their nullability.
 We built our library following the design of Scala's original regular expression API, in order to provide a frictionless migration path for programmers interested in the additional type safety.
-We evaluated our implementation by running it against the QT3TS test suite and showed that, on those benchmarks, our type-level analysis has a marginal impact on compilation times.
+We evaluated our implementation by running it against the QT3TS test suite and showed that, on those benchmarks, our type-level analysis only has a marginal impact on compilation times.
 
 \paragraph{Future Work}
 We propose to extend our approach with a dedicated data type for the regex alternative operator.

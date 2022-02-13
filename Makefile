@@ -33,7 +33,7 @@ publish: FORCE
 	make
 	cp thesis.pdf docs
 	rm -rf docs/benchmarks.zip
-	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py)
+	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py | grep -v regex)
 	rm -rf docs/sources.zip
 	zip docs/sources.zip -- $$(git ls-files)
 	git add -f docs/*
@@ -42,7 +42,7 @@ publish: FORCE
 scala/code-sections.tex: scala/generate-code-sections.py $(shell find scala -name "*.scala")
 	python3 scala/generate-code-sections.py $(shell find scala -name "*.scala")
 
-%.gex %.eps %.pdf: %.gnu %.csv figures/2x1.gnu figures/4x4.gnu
+%.gex %.eps %.pdf: %.gnu figures/2x1.gnu figures/4x4.gnu
 	gnuplot $*.gnu || exit
 	epstopdf $*.eps --outfile=$*.pdf
 

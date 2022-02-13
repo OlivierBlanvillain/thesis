@@ -18,6 +18,7 @@ Those shortcomings might appear benign on small examples, but can easily turn in
 In this chapter, we propose a new design for Scala's regular expression library which provides a type-safe and null-safe mechanism for capturing group extraction.
 Our design makes extensive use of match types, Scala's new feature for type-level programming, to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
+The source code of our implementation is available online\footnote{\texttt{https://gist.github.com/OlivierBlanvillain/418dcb74cbd2e12eb4a90b7336f40b17}}.
 
 \section{Architecture}
 
@@ -256,10 +257,15 @@ Their tool takes the form of a compiler plugin that enhances Java's type system 
 Unlike our system, their solution is not concerned with null safety and does not detect optional capturing groups.
 In practice, their tool operates similarly to a linter: it reports false positives and sometimes requires manual annotations.
 
-\citep{cheplyaka2011regex} regex-applicative
+The Haskell ecosystem contains several packages for regular expressions, with various levels of static safety.
+The regex-applicative package stands on the safe side of that spectrum: it allows programmers to write regular expressions using a parser combinator library, which entirely removes the need to reference capturing groups \citep{cheplyaka2011regex}.
+The main drawback of this solution lies in the library's learning curves: programmers already familiar with POSIX regular expressions~\citep{ieee2018the} are constrained to learn a new syntax, which is arguably more complicated.
 
-Also this talk, from Stephanie: \citep{weirich2014examples}
-dependently-typed flavor of GHC Haskell which requires no less than 20 language extensions, whereas our implementation compiles with vanilla Scala~3.
+Stephanie Weirich presented, on several occasions \citep{weirich2014examples}, a regular expression library as an example of a dependently-typed program written in Haskell.
+The library provides safety guarantees similar to ours, but from the slightly different angle of named-capturing groups.
+To make that possible, her implementation makes heavy use of Haskell's advanced type system features and requires no less than 20 language extensions to compile.
+In contrast, our implementation does not use metaprogramming and compiles with vanilla Scala~3.
+An important conceptual difference is that our approach only focuses on type checking (we rely on Java's regular expressions at runtime), whereas her library also contains a complete regular expression engine.
 
 \section{Conclusion}
 

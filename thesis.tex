@@ -294,7 +294,7 @@ We use the |NotIn| operation to constrain the allocation method, |malloc|, to pr
 \memImplicitContextMalloc
 
 Scala~3 introduced an alternative to the ambiguous implicit pattern in the form of the |scala.util.NotGiven| type~\citep[Given Instances]{odersky2013scala}.
-The compiler will synthesize an implicit parameter of type |NotGiven[T]|, if and only if there is no implicit value of type |T| in scope.
+The compiler will synthesize an implicit parameter of type |NotGiven[T]| if and only if there is no implicit value of type |T| in scope.
 We can use a "negative" implicit evidence to simplify the definition of |NotIn| by removing the ambiguous implicits and changing |casecons| to the following:
 
 \memImplicitNotGiven
@@ -364,7 +364,7 @@ We demonstrate the practicality of our system by implementing match types in the
 \subsection*{Attribution}
 
 This chapter is based on~\citep{blanvillain2022type}, which was written in collaboration with Jonathan Brachthäuser, Maxime Kjaer, and Martin Odersky, and published in POPL'22.
-\Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface in Scala, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models.
+\Cref{sec:case-study-shape-safe-num-py} is based on Maxime's semester project entitled "Shape-safe TensorFlow in Dotty", where he designed a strongly typed TensorFlow interface, which checks tensor shapes at compile-time in order to prevent runtime errors in machine learning models.
 Maxime also contributed to the Scala~3 compiler by adding support for arithmetic computations at the type level.
 Jonathan mechanized the soundness proof for \SystemFm, and provided invaluable help and guidance with redaction.
 Martin and I collaborated on the implementation of match types in the Scala 3 compiler, which is now actively used by the Scala community.

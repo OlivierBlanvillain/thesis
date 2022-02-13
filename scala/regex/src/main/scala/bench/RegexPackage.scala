@@ -78,20 +78,6 @@ class Regex2[P] private (val regex: String):
     else
       None
 
-object Regex3:
-  def apply(regex: String): Regex3 =
-    new Regex3(regex)
-
-class Regex3 private (val regex: String):
-  val pattern = Pattern.compile(regex)
-  def unapplySeq(s: String): Option[Seq[String]] =
-    val m = pattern.matcher(s)
-    if (m.matches())
-      val arr = Array.tabulate(m.groupCount)(i => m.group(i + 1))
-      Some(arr)
-    else
-      None
-
 object Lib {
 
 type CharAt[R <: String, At <: Int] =
@@ -101,7 +87,6 @@ type Compile[R <: String] =
   Reverse[Loop[R, 0, Length[R], EmptyTuple, IsPiped[R, 0, Length[R], 0]]]
 
 type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] <: Tuple =
-
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
@@ -216,7 +201,6 @@ def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[
       case '\\' => loop(r, lo + 2, hi, acc, opt)
       case _ => loop(r, lo + 1, hi, acc, opt)
 
-// start section regexisCapturing
 def isCapturing(r: String, at: Int): Boolean =
   r.charAt(at) match
     case '?' => r.charAt(at + 1) match
@@ -225,9 +209,7 @@ def isCapturing(r: String, at: Int): Boolean =
         case _ => true          // named-capturing group
       case _ => false           // other special constructs
     case _ => true              // unnamed-capturing group
-// end section regexisCapturing
 
-// start section regexisNullable
 def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean =
   r.charAt(at) match
     case ')' => lvl match
@@ -236,7 +218,6 @@ def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean =
     case '(' => isNullable(r, at + 1, hi, lvl + 1)
     case '\\' => isNullable(r, at + 2, hi, lvl)
     case _    => isNullable(r, at + 1, hi, lvl)
-// end section regexisNullable
 
 def isMarked(r: String, at: Int, hi: Int): Boolean =
   at match
@@ -264,10 +245,10 @@ def isPiped(r: String, at: Int, hi: Int, lvl: Int): Int =
       case '\\' => isPiped(r, at + 2, hi, lvl)
       case _    => isPiped(r, at + 1, hi, lvl)
 
-// Actually, Scala's unapply does not play way with Tuple1, so we need to
-// get ride of those types. Furthermore, the code responsible for
-// generating _n extractors for tuples does not know about generic tuples,
-// so we also manually flattern those types here...
+// Scala's unapply does not play well with Tuple1, so we need to get ride of
+// those types. Furthermore, the code responsible for generating _n
+// extractors for tuples does not know about generic tuples, so we also
+// manually flattern those types here...
 type Reverse[L <: Tuple] = L match
   case EmptyTuple => Unit
   case x1 *: EmptyTuple => x1

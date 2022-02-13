@@ -378,7 +378,7 @@ Regular expressions can easily go wrong.
 Capturing groups, in particular, require meticulous care to avoid running into off-by-one errors and null pointer exceptions.
 In this chapter, we propose a new design for Scala's regular expressions which completely eliminates this class of errors.
 Our design makes extensive use of match types, Scala's new feature for type-level programming, to statically analyze regular expressions during type checking.
-We show that our approach only has a marginal impact on compilation times, which confirms its pragmatism.
+We show that our approach has a minor impact on compilation times, which makes it suitability for practical use.
 
 \subsection*{Attribution}
 

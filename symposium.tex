@@ -267,7 +267,7 @@ We built our library following the design of Scala's original regular expression
 We evaluated our implementation by running it against the QT3TS test suite and showed that, on those benchmarks, our type-level analysis has a marginal impact on compilation times.
 
 \paragraph{Future Work}
-We propose to use a dedicated data type to represent the regex alternative operator.
-In our current design, we map every optional regex operator to an |Option[String]|, which does not always accurately reflects the structure of regular expressions.
-For instance, in \lstinline!"(A)(B)|(C)"! (which matches either |AB| or |C|), our system represents capturing as a 3-tuple, |(Option[String],| |Option[String],| |Option[String])|. This representation fails to account for the fact that the first and second capturing groups have identical nullability status, and that this status is opposite to the nullability of the third group.
+We propose to extend our approach with a dedicated data type for the regex alternative operator.
+In our current design, we map every optional regex operator to an |Option[String]|, which does not always accurately reflect the structure of regular expressions.
+For instance, in \lstinline!"(A)(B)|(C)"! (which matches either |AB| or |C|), our system represents capturing groups as a 3-tuple, |(Option[String],| |Option[String],| |Option[String])|. This representation fails to account for the fact that the first and second groups have identical nullability status, and that this status is opposite to the nullability of the third group.
 Instead, we could represent those capturing groups as |Either[(String,| |String),| |String]|, which is isomorphic to the regular expression.

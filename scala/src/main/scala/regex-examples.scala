@@ -18,7 +18,7 @@ val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
 // end section regexDocumentation
 
 // start section regexRational
-val rational = Regex("(\\d+)\\.?(\\d+)?")
+val rational = Regex("(\\d+)(?:\\.(\\d+))?")
 "3.1415" match
   case rational(i, Some(f)) =>
     val n = i.size + f.size
@@ -61,7 +61,7 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
     case _ =>
       CharAt[R, At] match
         case "?" | "*" => true
-        case "+" => IsMarked[R, At + 1, Hi]
+        case "+" => false
         case _ => false
 // end section regexNaiveIsNullable
 }

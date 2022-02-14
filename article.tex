@@ -258,9 +258,14 @@ The basic structure resembles that of \SystemFsub's standard safety proof from~\
 We continue our presentation by introducing the lemmas and theorems used in our type safety proof.
 
 \subsubsection*{Preliminary Lemmas}
-Our proof begins with preliminary technical lemmas: \prelemma{Permutation}, \prelemma{Weakening}, \prelemma{Strengthening}, \prelemma{Substitution}.
-We omit stating these lemmas as they are entirely standard yet relatively lengthy given that they span the three relations of our system: typing, subtyping, and disjointness.
-As usual, their proofs follow by mutual inductions on derivations.
+Our proof begins with preliminary technical lemmas:
+%
+\input{proofs/permutation.tex}
+\input{proofs/weakening.tex}
+\input{proofs/strengthening.tex}
+\input{proofs/substitution.tex}
+%
+These lemmas are entirely standard, and as usual, their proofs follow by mutual inductions on derivations.
 
 \subsubsection*{Disjointness / Subtyping Exclusivity}
 The following non-standard lemma is necessary to prevent overlap between the \SMatch1/2 and \SMatch3/4 rules.

@@ -392,14 +392,14 @@ The present chapter is a reboot of the match-type side of that project.
 \chapter{Performance Evaluation}
 \label{chap:performance-evaluation}
 
-In this chapter, we evaluate the performance of the various type-level programming techniques introduced in prior chapters.
+In this chapter, we evaluate the performance of the various type-level programming techniques presented in prior chapters.
 Specifically, we are interested in the scalability of each technique when confronted with large type-level programs, in terms of compilation times (\Cref{sec:compilation-time}) and binary sizes (\Cref{sec:binary-size}).
 In \Cref{sec:the-timing-of-match-type-reductions}, we discuss how the timing of match type reduction impacts compilation times.
 
 \section{Method}
 
-We evaluate the performance of the 3 type-level programming techniques presented in this dissertation by comparing them on a set of 4 benchmarks.
-Each benchmark consists of a simple type-level operation, which we implemented once using implicits (\Cref{chap:ab-using-implicits}), once using generalized singletons (\Cref{chap:generalizing-singleton-types}), and once using match types (\Cref{chap:match-types}).
+We evaluate the performance of the three type-level programming techniques presented in this thesis by comparing them on a set of four benchmarks.
+Each benchmark consists of a simple type-level operation, which we implemented once with implicits (\Cref{chap:ab-using-implicits}), once with generalized singletons (\Cref{chap:generalizing-singleton-types}), and once with match types (\Cref{chap:match-types}).
 
 These benchmarks are inspired by code examples used throughout this dissertation. They all follow a similar pattern of a single function call whose result type is computed at the type level. We code generated variations of each benchmark with increasing input size, from 1 to 256, in increments of 8.
 The source code of our benchmarks is available in the supplementary material of this dissertation\footnote{\texttt{https://olivierblanvillain.github.io/thesis/benchmarks.zip}}, alongside instructions on how to reproduce our experiments.
@@ -411,18 +411,18 @@ Here is a brief description of our benchmark suite:
   Concatenates a heterogeneous list with itself.
 
   \item \textbf{Remove}\quad
-  Removes the last element of a heterogeneous list (\Cref{sec:hlists-remove}).
+  Removes the last element of a heterogeneous list (inspired by the example presented in \Cref{sec:hlists-remove}).
 
   \item \textbf{Join}\quad
-  Computes the resulting schema after performing a self-join along the last column of a database table (\Cref{sec:motivating-example}).
+  Computes the resulting schema after performing a self-join along the last column of a database table (inspired by the example presented in \Cref{sec:motivating-example}).
 
   \item \textbf{Reduce}\quad
-  Computes the dimension of a multidimensional array after dimensional reduction along all axes (\Cref{subsubsec:reduction}).
+  Computes the dimension of a multidimensional array after dimensional reduction along all axes (inspired by the example presented in \Cref{subsubsec:reduction}).
 \end{enumerate}
 
-We obtained the measurements presented in this chapter by averaging 60 independent compilations on a warm compiler, which we executed on an i7-7700K Processor running Oracle JVM~1.8.0\_212 and Linux.
-For the implicit and match type benchmarks, we used the latest version of Scala~3 at the time of writing (3.1.2).
-For the generalized singleton benchmarks, we used our prototype implementation, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
+We obtained the measurements presented in this chapter by averaging independent compilations on warm compilers, which we executed on an i7-7700K processor running Oracle JVM~1.8.0\_212 and Linux.
+For the implicit and match type benchmarks, we used the latest version of Scala at the time of writing (3.1.2).
+For the generalized singleton benchmarks, we used our prototype, which lives in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
 
 \section{Compilation time}
 \label{sec:compilation-time}
@@ -430,18 +430,18 @@ For the generalized singleton benchmarks, we used our prototype implementation, 
 \timingGraphsZoomedOut{A comparison of the compilation time of implicits, generalized singletons and match types for our benchmark suite (lower is better).}
 
 \Cref{fig:timingGraphsZoomedOut} compares the compilation time of implicits, generalized singletons and match types on our benchmark suite.
-The compilation time of implicit-based benchmarks dominates the graphs on each figures, and suggests a quadratic complexity.
+The compilation time of implicit-based benchmarks dominates the graphs on each figure, and suggests a quadratic complexity.
 These results imply that implicits are ill-suited for large scale type-level computations: spending tens of seconds on a single operation is clearly out of the question for practical applications.
 
 \timingGraphsZoomedIn{A comparison of the compilation time of generalized singletons and match types for our benchmark suite (lower is better).}
 
-The same measurements are shown in \Cref{fig:timingGraphsZoomedIn}, but with millisecond y-axes, to focus on the comparison of non-implicit curves.
+The same measurements are shown in \Cref{fig:timingGraphsZoomedIn} with millisecond y-axes, to focus on the comparison of non-implicit curves.
 Each graph follows a similar trend, with singleton-based implementations outperforming their match-type-based counterparts by about a factor of two.
 We speculate that this difference is due to the overhead of subtyping, which in inherent to the design of match type.
-Our prototype for generalized singletons uses a dedicated type evaluation procedure that is specialized for the task and thus faster.
+Our prototype for generalized singletons uses a dedicated type evaluation procedure that is specialized for the task and therefore faster.
 
-We obtained the data points of \Cref{fig:timingGraphsZoomedOut} and~\ref{fig:timingGraphsZoomedIn} using Java Microbenchmark Harness (JMH) with 60 seconds of warmup, 60 seconds of measurement and a single JVM fork.
-As a result, the resulting measurements are precise (99.9\% confidence intervals vary between $\pm$ 0.5 and $\pm$ 2 milliseconds), but subject to variations caused by the unpredictability of the JVM's just in time compiler, which explains the bumps visible in \Cref{fig:timingGraphsZoomedIn}.
+We obtained the data points of \Cref{fig:timingGraphsZoomedOut} and~\ref{fig:timingGraphsZoomedIn} using the Java Microbenchmark Harness library with 60 seconds of warmup, 60 seconds of measurement and a single JVM.
+As a result, the resulting measurements are precise (99.9\% confidence intervals vary between $\pm$ 0.5 and $\pm$ 2 milliseconds), but subject to variations caused by the unpredictability of the JVM's just-in-time compiler, which explains the bumps visible in \Cref{fig:timingGraphsZoomedIn}.
 
 \section{Binary size}
 \label{sec:binary-size}
@@ -449,42 +449,41 @@ As a result, the resulting measurements are precise (99.9\% confidence intervals
 \bytecodeSizeTable{Additional JVM Bytecode generated per input size increment (in bytes).}
 
 In \Cref{fig:bytecodeSizeTable}, we show the amount of additional JVM Bytecode generated per benchmark size increment.
-The binary sizes of singleton- and match-type-based implementations are stable with respect to benchmark input size, which is expected given that our benchmarks consist of type-level-only operations.
+The binary sizes of singleton- and match-type-based implementations are stable with respect to the benchmark input size, which is expected given that our benchmarks consist of type-level-only operations.
 
-The binary sizes of implicit-based implementations grow linearly with the input size, by 6 bytes per input size increment for smaller benchmarks (Concat and Remove), and by 12 and 18 bytes for the larger benchmarks (Reduce and Join, respectively).
-To put those numbers in perspective, they represent an overall binary size increase of 9\%, 9\%, 12\%, and 20\%, when comparing the size-1 instantiation to the size-256 instantiation of Concat, Remove, Reduce, and Join, respectively.
-These increases in binary size are caused by the implicit evidences synthesized by the compiler during implicit resolution.
-In our benchmarks, those evidences have no runtime purpose and are simply an artifact of the mechanism in play.
+The binary sizes of implicit-based implementations grow linearly with the input size, by 6 bytes per increment for smaller benchmarks (Concat and Remove), and by 12 and 18 bytes for the larger benchmarks (Reduce and Join, respectively).
+To put those numbers in perspective, they represent an overall binary size increase of 9\%, 9\%, 12\%, and 20\%, when comparing the size-1 instantiation to the size-256 instantiation of our Concat, Remove, Reduce, and Join benchmarks, respectively.
+These binary size increases are caused by the implicit evidences synthesized by the compiler after implicit resolution.
+In our benchmarks, those evidences have no runtime purpose and are simply artifacts of the mechanism in play.
 Other applications, such as those supported by the Shapeless library~\citep{sabin2011shapeless}, take advantage of implicit evidence synthesis to provide additional runtime functionalities.
 
 \section{The Timing of Match Type Reductions}
 \label{sec:the-timing-of-match-type-reductions}
 
-In \Cref{chap:match-types}, we describe the match type reduction algorithm by adding new subtyping rules to \SystemFsub (\Cref{subsec:matches}).
+In \Cref{chap:match-types}, we described the match type reduction algorithm by adding new subtyping rules to \SystemFsub (\Cref{subsec:matches}).
 The resulting system is entirely declarative: it doesn't specify \emph{when} to apply those rules.
 In this section, we discuss how the timing of match type reduction impacts compilation times.
 
-A correct type system implementation must attempt to reduce match types \emph{as late as possible}, during subtyping.
-Indeed, failing to do so could lead to incorrect results in cases where a match type is reducible in the context of the subtyping query but is not reducible in any prior context.
+A correct type system implementation must attempt to reduce match types \emph{as late as possible}, that is, during subtyping.
+Indeed, failing to do so could lead to incorrect results, for instance, if a match type is reducible in the context of the subtyping query, but is not reducible in any prior context.
 
-In addition to the reductions attempted during subtyping, the compiler can try to reduce match types earlier in the pipeline, essentially at any point in time.
-Doing so is always correct, since the types before and after reduction are mutually subtypes of each other.
-Each early attempt of match type reduction is a trade-off: it can either be a small overhead, if the reduction fails, a no-op, if the reduction succeeds but the result is used exactly once, or an optimization, if the reduction succeeds and the result is used more than once.
-Note that reducing match types in a lazy fashion would not be a replacement for early reduction attempts, because the subtyping and disjointness checks are context-dependent (\Cref{subsec:caching}).
+In addition to reducing match types during subtyping, the compiler can attempt to reduce match types earlier in the pipeline, essentially at any point in time.
+Doing so is always correct: the types before and after reduction are mutually subtypes.
+Each early attempt of match type reduction can be viewed as a performance trade-off: it can either introduce a small overhead, if the reduction fails, be a no-op, if the reduction succeeds but the result is used exactly once, or be an optimization, if the reduction succeeds and the result is used more than once.
 
 Let us consider an example that illustrates the benefits of early reduction attempts:
 
 \geqDefinition
 
 \noindent
-Without any early reductions, this definition will result in a quadratic number of additions. For example, here is the sequence of subtyping queries issued while compiling |GEQ[5,1]|:
+Without any early reductions, this definition results in a quadratic number of additions. For example, here is the sequence of subtyping queries that would be issued while compiling |GEQ[5,1]|:
 
 \geqExample
 
 \noindent
 The first instance of |1+1| comes from the right-hand-side of the first |GEQ| call (with |B=1|), but that type is used in all the subsequent subtyping queries. As a result, reducing |1+1| to |2| once and for all leads to a speed-up in compilation.
 
-Our Scala~3 implementation reduces match types at multiple points during compilation, including right after creating types, during subtyping, and after instantiating parameters of type applications.
+Our implementation reduces match types at multiple points during compilation, including directly after creating types, during subtyping, and after instantiating parameters of type applications.
 This last point is essential to avoid the quadratic behavior of the |GEQ| example.
 In \Cref{fig:timingGraphsTooEarlyTooLate}, we show the impact of this optimization on our Reduce benchmark.
 In this figure, we compare the compilation times of the match type Reduce benchmark with (S1) and without (S2) the reduction of match types after type parameter instantiation.
@@ -499,7 +498,7 @@ We showed that programming with implicits can be relatively cumbersome, both for
 Our main contribution, match types, certainly answers that question positively.
 They do provide a simple, first-class solution to type-level programming which is both easy to use and fast to compile.
 We formalized match types in a calculus based on \SystemFsub and proved its soundness, which gives us confidence that our approach is correct and sensible.
-Our implementation of match types in the Scala~3 compiler makes them accessible to a large audience of programmers and is already in active use.
+Our implementation of match types in the Scala~3 compiler is already in active use and makes type-level programming accessible to a large audience of programmers.
 Beyond the scope of Scala, it will be interesting to see if our design can inspire other general-purpose languages interested in moving their type system towards dependent types.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -527,8 +526,8 @@ Beyond the scope of Scala, it will be interesting to see if our design can inspi
 \input{proofs/canonical-forms.tex}
 \input{proofs/inversion-of-typing.tex}
 \input{proofs/minimum-types.tex}
-\input{proofs/preservation.tex}
 \input{proofs/progress.tex}
+\input{proofs/preservation.tex}
 
 \backmatter
 \phantomsection

@@ -144,7 +144,7 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
       case "{" => CharAt[R, At + 1] match
         case "0" => true
         case _ => false
-      case "+" => IsMarked[R, At + 1, Hi]
+      case "+" => false
       case _ => false
 
 type IsPiped[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Int =

@@ -5,10 +5,10 @@ import annotation.experimental
 import org.openjdk.jmh.annotations._
 
 @experimental
-class RegexBench2 {
+object RegexBench2 {
 
-@Benchmark
-def run(): Unit = {
+// @Benchmark
+def main(args: Array[String]): Unit = {
 
 val r1 = Regex2("((((((((((a))))))))))"); "a" match { case r1(g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) => assert((g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) == ("a", "a", "a", "a", "a", "a", "a", "a", "a", "a")) }
 val r2 = Regex2("((((((((((a))))))))))\\10"); "aa" match { case r2(g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) => assert((g0, g1, g2, g3, g4, g5, g6, g7, g8, g9) == ("a", "a", "a", "a", "a", "a", "a", "a", "a", "a")) }
@@ -193,5 +193,9 @@ val r180 = Regex2("foo(aA|bB)?+b"); "foobBb" match { case r180(Some(g0)) => asse
 val r181 = Regex2("foo(aA|bB){1,5}+b"); "foobBaAaAaAaAb" match { case r181(g0) => assert((g0) == ("aA")) }
 val r182 = Regex2("X(\\w+)(?=\\s)|X(\\w+)"); "Xab" match { case r182(None, Some(g1)) => assert((null, g1) == (null, "ab")) }
 val r183 = Regex2("x(~~)*(?:(?:F)?)?"); "x~~" match { case r183(Some(g0)) => assert((g0) == ("~~")) }
+
+val r184 = Regex2("(\\Qxxx\\E)"); "xxx" match { case r184(g0) => assert((g0) == ("xxx")) }
+val r185 = Regex2("([(][)])"); "()" match { case r185(g0) => assert((g0) == ("()")) }
+// val r186 = Regex2("(\\Q))((())((\\\\...\\E)"); "))((())((\\\\..." match { case r186(g0) => assert((g0) == ("))((())((\\\\...")) }
 
 }}

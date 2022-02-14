@@ -61,13 +61,31 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
     case _ =>
       CharAt[R, At] match
         case "?" | "*" => true
-        case "+" => false
         case _ => false
 // end section regexNaiveIsNullable
+
 }
 
+type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
+  At match
+    case Hi => false
+    case _ =>
+      CharAt[R, At] match
+        case "?" | "*" => true
+        case _ => false
+
+// start section regexIsNullable
+type IsNullable[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Boolean =
+  CharAt[R, At] match
+    case ")" => Lvl match
+      case 0 => IsMarked[R, At + 1, Hi]
+      case _ => IsNullable[R, At + 1, Hi, Lvl - 1]
+    case "(" => IsNullable[R, At + 1, Hi, Lvl + 1]
+    case "\\" => IsNullable[R, At + 2, Hi, Lvl]
+    case _    => IsNullable[R, At + 1, Hi, Lvl]
+// end section regexIsNullable
+
 object Last {
-import Lib.IsNullable
 
 // start section regexLastIteration
 type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] =

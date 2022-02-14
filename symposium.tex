@@ -126,7 +126,8 @@ Similar to our handling of backslash characters, this implementation intentional
 \subsection{Nullability Analysis}
 
 Establishing the nullability of capturing groups is more complicated than it sounds.
-At first glance, it seems that this is simply a matter of looking for regex quantifiers in suffix position\footnote{
+At first glance, it seems that this is simply a matter of looking for regex quantifiers in suffix position
+\footnote{
 For brevity, our presentation does not account for the regex alternative operator, which also influences the nullability of capturing groups and can appear in both prefix and suffix positions.
 Similarly, we omit handling the "at least $n$ times" quantifiers which can lead to nullable capturing groups (when $n=0$).
 Our implementation accounts for both operators.
@@ -138,7 +139,10 @@ For instance, in the following naive implementation of |IsNullable|, we look for
 \noindent
 Unfortunately, this naive solution is incorrect for regular expressions with nested capturing groups.
 For example, in |(A(B)?)|, that solution incorrectly labels the first group as optional.
-To overcome this problem, we update our solution to keep track of the number of opening and closing parentheses (|Lvl|), which allows us to differentiate closing parentheses of inner and outer groups:
+To overcome this problem, we update our solution to keep track of the number of opening and closing parentheses (|Lvl|), which allows us to differentiate closing parentheses of inner and outer groups\footnote{
+For simplicity, our presentation treats all non-escaped parentheses as capturing group delimiters.
+Our implementation also takes \lstinline!\\Q...\\E! quotations into account and ignores parentheses that appear in character classes.
+}:
 
 \regexIsNullable
 

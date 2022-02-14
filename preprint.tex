@@ -397,7 +397,8 @@ Automatic conversions during equality checks can be prevented by restricting col
 
 \begin{lstlisting}
 dependent case class Column[T](k: String):
-  def ===(that: Column[T]): Column[Boolean] = Column(s"(${this.k} === ${that.k})")
+  def ===(that: Column[T]): Column[Boolean] =
+    Column(s"(${this.k} === ${that.k})")
 \end{lstlisting}
 
 Addition in Spark is defined between numeric types and characters.

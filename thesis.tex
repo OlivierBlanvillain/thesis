@@ -203,7 +203,7 @@ For example, we can define the lexicographic list ordering as follows:
 
 \noindent
 This definition is parametrized by the list's element type and by an ordering of that type, passed as an implicit parameter.
-Since |listOrdering| is itself implicit, it defines a \emph{rule}: it allows the compiler to materialize an implicit |Ordering[List[T]]|, given an implicit |Ordering[T]| (for any type |T|).
+Since |listOrdering| is itself implicit, it defines a \emph{rule}: it allows the compiler to materialize an implicit of type |Ordering[List[T]]| given an implicit type |Ordering[T]|, for any type |T|.
 
 Parametrized implicit definitions can lead to recursive implicit resolution. For example, the compiler will use |listOrdering| twice to synthesize an implicit |Ordering[List[List[T]]]|.
 This is where the (type-level) fun begins!
@@ -519,7 +519,7 @@ Beyond the scope of Scala, it will be interesting to see if our design can inspi
 \harpoonx{Definition of the auxiliary relation $\protect \⇌$, used to state inversion of subtyping.}
 
 \begin{definition*}
-  $\Γ \⊢ \S \⇌ \T$ (defined in \Cref{fig:harpoon}) represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$ with the additional constraint that this evidence was exclusively constructed using pairwise applications of \emph{\SMatch1/2}, \emph{\SMatch3/4}, and \emph{\STrans} in both directions.
+  $\Γ \⊢ \S \⇌ \T$ (defined in \Cref{fig:harpoonx}) represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$ with the additional constraint that this evidence was exclusively constructed using pairwise applications of \emph{\SMatch1/2}, \emph{\SMatch3/4}, and \emph{\STrans} in both directions.
 \end{definition*}
 
 \input{proofs/inversion-of-subtyping.tex}

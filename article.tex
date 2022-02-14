@@ -488,11 +488,11 @@ class D extends C {
 }
 \end{lstlisting}
 %
-In this example, the definition of |f| in |C| type-checks because |X & String| and |Int| are disjoint (since |String| and |Int| are disjoint) and |M[X & String]| reduces to |Int| (|M|'s second case applies).
+In this example, the definition of |f| in |C| type-checks because |X| |&| |String| and |Int| are disjoint (since |String| and |Int| are disjoint) and |M[X| |&| |String]| reduces to |Int| (|M|'s second case applies).
 Class |D| refines the definition of |C| by giving concrete definition of |X|.
-The unsoundness manifests itself in the body of class |D|, where |X & String| is a subtype of |Int| and |M[X & String]| reduces to |String| (|M|'s first case applies).
+The unsoundness manifests itself in the body of class |D|, where |X| |&| |String| is a subtype of |Int| and |M[X| |&| |String]| reduces to |String| (|M|'s first case applies).
 There, it is possible to call the function~|f| with a string argument, which would result in a runtime error.
-Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent |M[Int & String]| from reducing given that |Int & String| is not inhabited.
+Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent |M[Int| |&| |String]| from reducing given that |Int| |&| |String| is not inhabited.
 
 \subsection{Null Values}
 \label{subsec:null-values}
@@ -506,10 +506,10 @@ The plan is to make strict null checking the default in the future.
 
 Scala supports variance annotations on type parameters of higher-kinded types.
 These annotations allow programmers to specify how the subtyping of annotated parameters influences the subtyping of the higher-kinded type.
-For instance, |type F[+T]| defines a type |F| that is covariant in its first type parameter, meaning that |T1 <: T2| implies |F[T1] <: F[T2]|.
-Contravariance, written |type G[-T]|, has the opposite meaning: |T1 <: T2| implies |G[T2] <: G[T1]|.
+For instance, |type F[+T]| defines a type |F| that is covariant in its first type parameter, meaning that |T1| |<:| |T2| implies |F[T1]| |<:| |F[T2]|.
+Contravariance, written |type G[-T]|, has the opposite meaning: |T1| |<:| |T2| implies |G[T2]| |<:| |G[T1]|.
 
-It would appear that co- and contravariant types are always overlapping, given that, for all types |X|, |F[Nothing] <: F[X]| and |G[Any] <: G[X]| (where |Nothing| and |Any| are Scala's bottom and top types).
+It would appear that co- and contravariant types are always overlapping, given that, for all types |X|, |F[Nothing]| |<:| |F[X]| and |G[Any]| |<:| |G[X]| (where |Nothing| and |Any| are Scala's bottom and top types).
 However, in the case of covariant parameters, an exception can be made when the said type parameter corresponds to a field or a constructor parameter: the |Nothing| instantiation can be ruled out because no runtime program can produce a value of that type.
 
 Scala tuples, for example, fall into this category.

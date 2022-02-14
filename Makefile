@@ -33,7 +33,7 @@ publish: FORCE
 	make
 	cp thesis.pdf docs
 	rm -rf docs/benchmarks.zip
-	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py | grep -v regex)
+	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py)
 	rm -rf docs/sources.zip
 	zip docs/sources.zip -- $$(git ls-files)
 	git add -f docs/*

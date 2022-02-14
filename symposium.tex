@@ -25,9 +25,11 @@ The source code of our implementation is available online\footnote{\texttt{https
 We present our library in terms of 3 components:
 
 \begin{enumerate}
-  \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute the corresponding tuple-based type representation (\Cref{sec:type-level}).
+  \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute tuple representation of the expression's capturing groups.
+  This component takes the form of a parametric type called |Compile|, which we present in \Cref{sec:type-level}.
 
-  \item The rnutime capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation computed (\Cref{sec:term-level}).
+  \item The runtime capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation computed.
+  This component takes the form of a function called |transform|, which we present in \Cref{sec:term-level}.
 
   \item The user interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe experience.
 \end{enumerate}
@@ -39,18 +41,18 @@ We begin our presentation with the user interface, which takes the form of a rel
 The |apply| method is the entry point of our library.
 It takes a regular expression and returns an instance of |Regex|.
 Instead of directly accepting a |String| argument, that method takes a type parameter, |R|, which will be inferred by the compiler, and allows us to get our hands on a type-level instance of the regular expression's string (the |Singleton| bound is necessary to guide Scala's type inference).
-We use that type-level string to instantiate |Compile|, our type-level analysis component.
+We use that type-level string to instantiate the |Compile| type, which is our type-level analysis component.
 
 The implementation of the |Regex| class is straightforward.
 Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against the given regular expression, and to extract the content of the capturing groups when the matching succeeds.
 These operations operations take place within the |unapply| method, which is the way to define custom pattern matching extractors in Scala \citep{emir2007matching}.
 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
-By returning an optional tuple, we tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity, and that the type of those groups corresponds to the type of the tuple elements.
-We take advantage of that flexibility to enrich the results of Java's regex engine by wrapping nullable values into options.
-In our implementation, this is done via the |transform| method, which is our
-runtime processing component.
-As a result, our implementation never returns null values, which removes the null-checking burden from the user.
+In our implementation, we instantiate the type |P| to a tuple and use that type in the result type of the |unapply| method to tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity.
+Furthermore, the type of those groups corresponds to the type of the tuple elements.
+This allows us to enrich the results of Java's regex engine by wrapping nullable values into options.
+Our implementation performs this wrapping via the |transform| method, which is our runtime processing component.
+As a result, our implementation never returns null values and removes the null-checking burden from the user.
 
 For instance, in the following example usage of our library, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:
 
@@ -103,7 +105,7 @@ If we invoke |Compile| on a regular expression with a trailing backslash, the co
 \subsection{Non-Capturing Groups}
 \label{subsec:non-capturing-groups}
 
-Our first implementation of |Compile| treats every opening parenthesis as the start of a capturing group, which does not do honor to the syntax of Java's regular expression.
+Our first implementation of |Compile| treats every opening parenthesis as the start of a capturing group, which does not honor the syntax of Java's regular expression.
 Indeed, Java also supports several other special constructs which start with an opening parenthesis, for instance:
 
 \begin{itemize}
@@ -162,7 +164,7 @@ The runtime component of our library is in charge of sanitizing and packaging th
 Concretely, this component's job consists of transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
 That transformation must conform to the representation computed at the type level.
 
-In Scala, all type parameters are erased, which leads to some friction when wanting to write programs whose execution \emph{depends} types, such as in the problem at hand. In this section, we propose two different solutions to that problem.
+In Scala, all type parameters are erased, which leads to some friction when wanting to write programs whose execution \emph{depends} on types, such as in the problem at hand. In this section, we propose two different solutions to that problem.
 
 \begin{enumerate}
   \item In \Cref{subsec:we-ain-t-need-no-dependent-types}, we proceed by sheer force of code duplication: we translate the entirety of our type-level algorithm into term-level functions and use a cast to correlate the two.
@@ -170,7 +172,7 @@ In Scala, all type parameters are erased, which leads to some friction when want
   \item In \Cref{subsec:implicit-based-extractor-synthesis}, we show how to use implicits to perform type-directed code synthesis: we use the output of our type-level analysis as an input of implicit search to generate a type-specialized capturing group sanitizer.
 \end{enumerate}
 
-\subsection{We Ain't Need No Dependent Types!}
+\subsection{We Don't Need No Dependent Types!}
 \label{subsec:we-ain-t-need-no-dependent-types}
 
 The first implementation of our runtime component duplicates the type-level definitions presented in the previous section to compute a list of sanitizing functions that correspond to the given regex's capturing groups.
@@ -193,7 +195,7 @@ In principle, Scala~3's type inference should be able to solve half of that prob
 In \Cref{subsec:a-lightweight-form-of-dependent-typing}, we show an example of that ability, where the compiler type checks a small program using a match type.
 In our case, this mechanism should allow us to get rid of the unsafe cast but does not address the problem of code duplication.
 In practice, at the time of writing, this solution does not play well with predefined types from the standard library: the compiler lacks the knowledge necessary to correlate predefined types with their term-level counterpart.
-For instance, the compiler does not recognize |CharAt["foo", 0]| as a valid type for |"foo".chatAt(0)|.
+For instance, the compiler does not recognize |CharAt["foo", 0]| as a valid type for |"foo".charAt(0)|.
 
 In the long run, it would be interesting to investigate extending Scala with a "precise" mode of type inference, that would automatically infer match types and singleton types, whenever possible.
 In \Cref{chap:generalizing-singleton-types}, we demonstrated the feasibility of this approach by generalizing Scala's singleton types.

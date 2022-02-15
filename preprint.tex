@@ -341,13 +341,13 @@ In practice, our system deals with infinite loops using a fuel mechanism.
 Every evaluation step consumes a unit of fuel, and an error is reported when the compiler runs out of fuel.
 The default fuel limit can be increased via a compiler flag to enable arbitrarily long compilation times.
 
-\section{Use Case}
+\section{Case Study: A Type-Safe Database Interface}
 \label{sec:use-case}
 
 In this section, we extend the motivating example presented in \Cref{sec:motivating-example} by building a type-safe interface for Spark datasets.
 We use our Scala extension to implement a simple domain-specific type checker for the SQL-like expressions used in Spark.
 
-\subsection{A Type-Safe Database Interface}
+\subsection{Type-Safe Datasets}
 
 The type-safe interface presented in this section illustrates the expressive power of our system and is implemented purely as a library.
 For brevity, our presentation only covers a small part of Spark's dataset interface, but the approach can be scaled to cover that interface in its entirety.

@@ -1,6 +1,6 @@
 .ONESHELL:
 .PHONY: FORCE
-all: thesis.pdf
+all: thesis.pdf sigplan.pdf
 
 deps := proofs/structure.pdf
 deps += scala/code-sections.tex
@@ -11,6 +11,11 @@ deps += figures/reduce.eps
 deps += figures/2early2late.eps
 deps += figures/regex-compiletime.eps
 deps += figures/regex-runtime.eps
+
+sigplan.pdf: FORCE figures/symposium-figures.tex
+	latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out sigplan.tex
+	cp latex.out/sigplan.pdf sigplan.pdf
+	echo && ./pplatex -b -i latex.out/sigplan.log
 
 thesis.pdf: FORCE $(deps)
 	latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out thesis.tex

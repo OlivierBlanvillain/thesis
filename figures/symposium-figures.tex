@@ -1,0 +1,15 @@
+\newcommand\regexBars[1]{
+  \begin{figure*}
+    \centering
+    \begin{subfigure}[t]
+      \centering
+      \input{figures/regex-compiletime.gex}
+    \end{subfigure}%
+    \begin{subfigure}[t]
+      \centering
+      \input{figures/regex-runtime.gex}
+    \end{subfigure}
+    \caption{#1}
+    \label{fig:regexBars}
+  \end{figure*}
+}

@@ -18,7 +18,7 @@ val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
 // end section regexDocumentation
 
 // start section regexRational
-val rational = Regex("(\\d+)(?:\\.(\\d+))?")
+val rational = Regex("(\\d+)\\.?(\\d+)?")
 "3.1415" match
   case rational(i, Some(f)) =>
     val n = i.size + f.size

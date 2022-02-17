@@ -84,10 +84,9 @@ type IsNullable[R <: String, At, Hi] =
 type IsMarked[R <: String, At, Hi] =
   At match
     case Hi => false
-    case _ =>
-      CharAt[R, At] match
-        case '?' | '*' => true
-        case _ => false
+    case _ => CharAt[R, At] match
+      case '?' | '*' => true
+      case _ => false
 // end section regexNaiveIsNullable
 
 }
@@ -135,55 +134,34 @@ type Loop[R, Lo, Hi, Opt <: Int, Acc <: Tuple] =
 def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean = false
 
 // start section regexTermLvlLoop
-val identity: String => Any = { x => assert(x != null); x }
+val id: String => Any = { x => assert(x != null); x }
+val opt: String => Any = { x => Option(x) }
 
-def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int)
-    : List[String => Any] =
+def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[String => Any] =
   lo match
     case `hi` => acc
     case _  => r.charAt(lo) match
-      case ')' => loop(r, lo + 1, hi, acc, 0.max(opt - 1))
+      case ')' =>
+        loop(r, lo+1, hi, acc, 0.max(opt-1))
       case '(' => opt match
-        case 0 => isNullable(r, lo + 1, hi, 0) match
-          case true  => loop(r, lo + 1, hi, Option.apply :: acc, 1)
-          case false => loop(r, lo + 1, hi, identity :: acc, 0)
-        case _ => loop(r, lo + 1, hi, Option.apply :: acc, opt + 1)
-      case '\\' => loop(r, lo + 2, hi, acc, opt)
-      case _ => loop(r, lo + 1, hi, acc, opt)
+        case 0 => isNullable(r, lo+1, hi, 0) match
+          case true =>
+            loop(r, lo+1, hi, opt::acc, 1)
+          case false =>
+            loop(r, lo+1, hi, id::acc, 0)
+        case _ => loop(r, lo+1, hi, opt::acc, opt+1)
+      case '\\' => loop(r, lo+2, hi, acc, opt)
+      case _ => loop(r, lo+1, hi, acc, opt)
 // end section regexTermLvlLoop
 
 // start section regexTransform
-def transform[P](pattern: String, arr: Array[String]): P =
-  val fs = loop(pattern, 0, pattern.length, Nil, 0).reverse
-  val ts = Tuple.fromArray(arr.zip(fs).map { (x, f) => f(x) })
-  assert(arr.size == fs.size, "Unexpected number of capturing groups")
-  ts.asInstanceOf[P]
+def transform[P](r: String, arr: Array[String]): P =
+  val fs = loop(r, 0, r.length, Nil, 0).reverse
+  val wrapped = arr.zip(fs).map { (x, f) => f(x) }
+  val tuple = Tuple.fromArray(wrapped)
+  assert(arr.size == fs.size)
+  tuple.asInstanceOf[P]
 // end section regexTransform
-
-// start section regexSanitizerTypeClass
-abstract class Sanitizer[T](val i: Int):
-  def mutate(arr: Array[Any]): Unit
-
-object Sanitizer:
-  implicit val basecase: Sanitizer[EmptyTuple] =
-    new Sanitizer[EmptyTuple](0):
-      def mutate(arr: Array[Any]): Unit = ()
-
-  implicit def stringcase[T <: Tuple]
-    (implicit ev: Sanitizer[T]): Sanitizer[String *: T] =
-      new Sanitizer[String *: T](ev.i + 1):
-        def mutate(arr: Array[Any]): Unit =
-          assert(arr(arr.size - i) != null)
-          ev.mutate(arr)
-
-  implicit def optioncase[T <: Tuple]
-    (implicit ev: Sanitizer[T]): Sanitizer[Option[String] *: T] =
-      new Sanitizer[Option[String] *: T](ev.i + 1):
-        def mutate(arr: Array[Any]): Unit =
-          arr(arr.size - i) = Option(arr(arr.size - i))
-          ev.mutate(arr)
-// end section regexSanitizerTypeClass
-
 }
 
 def checkLib[A <: String, B](implicit ev: Lib.Compile[A] =:= B): Unit = ()

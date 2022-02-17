@@ -35,18 +35,16 @@ object Sanitizer:
     new Sanitizer[EmptyTuple](0):
       def mutate(arr: Array[Any]): Unit = ()
 
-  implicit def stringcase[T <: Tuple]
-    (implicit ev: Sanitizer[T]): Sanitizer[String *: T] =
-      new Sanitizer[String *: T](ev.i + 1):
+  implicit def stringcase[T <: Tuple](implicit ev: Sanitizer[T]): Sanitizer[String *: T] =
+      new Sanitizer[String *: T](ev.i+1):
         def mutate(arr: Array[Any]): Unit =
-          assert(arr(arr.size - i) != null)
+          assert(arr(arr.size-i) != null)
           ev.mutate(arr)
 
-  implicit def optioncase[T <: Tuple]
-    (implicit ev: Sanitizer[T]): Sanitizer[Option[String] *: T] =
-      new Sanitizer[Option[String] *: T](ev.i + 1):
+  implicit def optioncase[T <: Tuple](implicit ev: Sanitizer[T]): Sanitizer[Option[String] *: T] =
+      new Sanitizer[Option[String] *: T](ev.i+1):
         def mutate(arr: Array[Any]): Unit =
-          arr(arr.size - i) = Option(arr(arr.size - i))
+          arr(arr.size-i) = Option(arr(arr.size-i))
           ev.mutate(arr)
 // end section regexSanitizerTypeClass
 

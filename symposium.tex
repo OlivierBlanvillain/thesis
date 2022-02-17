@@ -16,7 +16,7 @@ Furthermore, the values that come out of capturing groups can be null (when usin
 Those shortcomings might appear benign on small examples, but can easily turn into bugs when dealing with a large-scale code base.
 
 In this chapter, we propose a new design for Scala's regular expression library which provides a type-safe and null-safe mechanism for capturing group extraction.
-Our design makes extensive use of match types, Scala's new feature for type-level programming, to statically analyze regular expressions during type checking.
+Our design makes extensive use of match types \paperOnly{\citep{blanvillain2022type}, Scala~3's new feature for type-level programming,} to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
 \thesisOnly{
 The source code of our implementation is available online\footnote{\texttt{https://gist.github.com/OlivierBlanvillain/418dcb74cbd2e12eb4a90b7336f40b17}}.
@@ -33,7 +33,7 @@ We present our library in terms of 3 components:
   \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute tuple representation of the expression's capturing groups.
   This component takes the form of a parametric type called |Compile|, which we present in \Cref{sec:type-level}.
 
-  \item The runtime capturing group processing, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation computed.
+  \item The runtime capturing group processing component, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation.
   This component takes the form of a function called |transform|, which we present in \Cref{sec:term-level}.
 
   \item The user interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing type-safe and null-safe experience.
@@ -234,7 +234,7 @@ In the following section, we evaluate the performance of our library and discuss
 
 \section{Evaluation}
 
-To assess the correctness of our library, we run our implementation against the QT3TS test suite \citep{w3c1994xquery}, which consists of about 1700 test cases for regular expressions \citep[perl-tests.xml]{w3c1994qt3ts}.
+To assess the correctness of our library, we run our implementation against the QT3TS test suite \citep{w3c1994xquery}, which consists of about 1700 test cases for regular expressions \citep{w3c1994qt3ts}.
 We select the subset of those tests that are positive and exercise capturing groups, totaling 183 test cases, which we then collated to form our benchmark suite.
 We use these benchmarks to evaluate the performance of our library in terms of compilation times and execution times.
 
@@ -250,7 +250,7 @@ We run our benchmarks on the latest version of Scala~3 at the time of writing (3
 This corresponds to the cost of match type reduction.
 The implicit-based variant adds another 21~ms (+0.1~ms per regex), which corresponds to the cost of implicit resolution.
 Both variants are thus relatively cheap, which validates their utility for practical uses.
-When it comes to compilation times, it would be misleading to compare increments relative to the overall time, given that the compiler spends a large portion of its time outside of type checking \citep[2.11.3]{petrashko2017design}.
+When it comes to compilation times, it would be misleading to compare increments relative to the overall time, given that the compiler spends a large portion of its time outside of type checking \citep[§ 2.11.3]{petrashko2017design}.
 
 \paragraph{Execution Times} At runtime, our code-duplicated variant adds 51~\textmu s over the baseline.
 Although this difference is three orders of magnitude smaller than at compile-time, it corresponds to a 25\% increase, which is a rather substantial price to pay for redoing an already-performed analysis.

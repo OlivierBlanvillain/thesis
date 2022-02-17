@@ -3,12 +3,37 @@ package bench
 import annotation.experimental
 import bench._
 import RegexPackage._
-import Lib.{CharAt, Reverse}
+import Lib.Reverse
+import compiletime.ops.string.Substring
 import compiletime.ops.int.Max
-import compiletime.ops.int.-
+import compiletime.ops.int.{-, +}
 
 @experimental
 object RegexExamples {
+
+type CharAt[R <: String, At <: Int] =
+  Substring[R, At, At + 1] match {
+    case ")" => ')'
+    case "(" => '('
+    case "\\" => '\\'
+    case "?" => '?'
+    case "*" => '?'
+    case "<" => '<'
+    case "=" => '='
+    case "!" => '!'
+    case _ => '_'
+  }
+
+// start section regexIsCapturing
+type IsCapturing[R <: String, At <: Int] =
+  CharAt[R, At] match
+    case "?" => CharAt[R, At + 1] match
+      case "<" => CharAt[R, At + 2] match
+        case "=" | "!" => false // lookbehinds
+        case _ => true // named-capturing group
+      case _ => false // other special constructs
+    case _ => true // unnamed-capturing group
+// end section regexIsCapturing
 
 // start section regexDocumentation
 val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
@@ -32,12 +57,12 @@ import compiletime.ops.int.+
 type Compile[R <: String] =
   Reverse[Loop[R, 0, Length[R], EmptyTuple]]
 
-type Loop[R, Lo, Hi, Acc <: Tuple] <: Tuple =
+type Loop[R, Lo, Hi, Acc <: Tuple] =
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
-      case "("  => Loop[R, Lo + 1, Hi, String *: Acc]
-      case "\\" => Loop[R, Lo + 2, Hi, Acc]
+      case '('  => Loop[R, Lo + 1, Hi, String *: Acc]
+      case '\\' => Loop[R, Lo + 2, Hi, Acc]
       case _ => Loop[R, Lo + 1, Hi, Acc]
 // end section regexFirstIteration
 
@@ -52,16 +77,16 @@ object NaiveIsNullable {
 // start section regexNaiveIsNullable
 type IsNullable[R <: String, At, Hi] =
   CharAt[R, At] match
-    case ")"  => IsMarked[R, At + 1, Hi]
-    case "\\" => IsNullable[R, At + 2, Hi]
+    case ')'  => IsMarked[R, At + 1, Hi]
+    case '\\' => IsNullable[R, At + 2, Hi]
     case _    => IsNullable[R, At + 1, Hi]
 
-type IsMarked[R <: String, At, Hi] <: Boolean =
+type IsMarked[R <: String, At, Hi] =
   At match
     case Hi => false
     case _ =>
       CharAt[R, At] match
-        case "?" | "*" => true
+        case '?' | '*' => true
         case _ => false
 // end section regexNaiveIsNullable
 
@@ -72,36 +97,39 @@ type IsMarked[R <: String, At, Hi] <: Boolean =
     case Hi => false
     case _ =>
       CharAt[R, At] match
-        case "?" | "*" => true
+        case '?' | '*' => true
         case _ => false
 
 // start section regexIsNullable
-type IsNullable[R <: String, At, Hi, Lvl <: Int] <: Boolean =
+type IsNullable[R <: String, At, Hi, Lvl <: Int] =
   CharAt[R, At] match
-    case ")" => Lvl match
+    case ')' => Lvl match
       case 0 => IsMarked[R, At + 1, Hi]
       case _ => IsNullable[R, At + 1, Hi, Lvl - 1]
-    case "(" => IsNullable[R, At + 1, Hi, Lvl + 1]
-    case "\\" => IsNullable[R, At + 2, Hi, Lvl]
+    case '(' => IsNullable[R, At + 1, Hi, Lvl + 1]
+    case '\\' => IsNullable[R, At + 2, Hi, Lvl]
     case _    => IsNullable[R, At + 1, Hi, Lvl]
 // end section regexIsNullable
 
 object Last {
 
 // start section regexLastIteration
-type Loop[R, Lo, Hi, Acc <: Tuple, Opt <: Int] =
+type Loop[R, Lo, Hi, Opt <: Int, Acc <: Tuple] =
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
-      case ")" => Loop[R, Lo + 1, Hi, Acc, Max[0, Opt - 1]]
-      case "(" =>
-        Opt match
-          case 0 => IsNullable[R, Lo + 1, Hi, 0] match
-            case true  => Loop[R, Lo + 1, Hi, Option[String] *: Acc, 1]
-            case false => Loop[R, Lo + 1, Hi, Acc, 0]
-          case _ => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Opt + 1]
-      case "\\" => Loop[R, Lo + 2, Hi, Acc, Opt]
-      case _ => Loop[R, Lo + 1, Hi, Acc, Opt]
+      case ')' =>
+        Loop[R, Lo+1, Hi, Acc, Max[0, Opt-1]]
+      case '(' => Opt match
+        case 0 => IsNullable[R, Lo+1, Hi, 0] match
+          case true =>
+            Loop[R, Lo+1, Hi, Option[String]*:Acc, 1]
+          case false =>
+            Loop[R, Lo+1, Hi, String*:Acc, 0]
+        case _ => Loop[R, Lo+1, Hi,
+                       Option[String]*:Acc, Opt+1]
+      case '\\' => Loop[R, Lo+2, Hi, Opt, Acc]
+      case _ => Loop[R, Lo+1, Hi, Opt, Acc]
 // end section regexLastIteration
 
 def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean = false

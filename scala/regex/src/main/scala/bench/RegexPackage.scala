@@ -109,16 +109,14 @@ type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] <: Tuple 
           case true  => Loop[R, Lo + 1, Hi, Option[String] *: Acc, Opt + 1]
       case _ => Loop[R, Lo + 1, Hi, Acc, Opt]
 
-// start section regexIsCapturing
 type IsCapturing[R <: String, At <: Int] <: Boolean =
   CharAt[R, At] match
     case "?" => CharAt[R, At + 1] match
       case "<" => CharAt[R, At + 2] match
         case "=" | "!" => false // lookbehinds
         case _ => true // named-capturing group
-      case _ => false  // other special constructs
-    case _ => true     // unnamed-capturing group
-// end section regexIsCapturing
+      case _ => false // other special constructs
+    case _ => true // unnamed-capturing group
 
 type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
   At match
@@ -261,7 +259,7 @@ def isPiped(r: String, at: Int, hi: Int, lvl: Int): Int =
 // those types. Furthermore, the code responsible for generating _n
 // extractors for tuples does not know about generic tuples, so we also
 // manually flattern those types here...
-type Reverse[L <: Tuple] = L match
+type Reverse[L] = L match
   case EmptyTuple => Unit
   case x1 *: EmptyTuple => x1
   case x1 *: x2 *: EmptyTuple => (x2, x1)

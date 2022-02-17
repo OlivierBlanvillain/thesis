@@ -11,15 +11,16 @@ import Lib._
 
 // start section regexUserLevel
 object Regex:
-  def apply[R <: String & Singleton](regex: R): Regex[Compile[R]] =
-    new Regex(regex)
+  def apply[R <: String & Singleton](regex: R) =
+    new Regex[Compile[R]](regex)
 
 class Regex[P] private (val regex: String):
   val pattern = Pattern.compile(regex)
   def unapply(s: String): Option[P] =
     val m = pattern.matcher(s)
     if (m.matches())
-      val a = Array.tabulate(m.groupCount)(i => m.group(i + 1))
+      val a = Array.tabulate(m.groupCount)(
+        i => m.group(i + 1))
       Some(transform[P](regex, a))
     else
       None
@@ -114,9 +115,9 @@ type IsCapturing[R <: String, At <: Int] <: Boolean =
     case "?" => CharAt[R, At + 1] match
       case "<" => CharAt[R, At + 2] match
         case "=" | "!" => false // lookbehinds
-        case _ => true          // named-capturing group
-      case _ => false           // other special constructs
-    case _ => true              // unnamed-capturing group
+        case _ => true // named-capturing group
+      case _ => false  // other special constructs
+    case _ => true     // unnamed-capturing group
 // end section regexIsCapturing
 
 type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =

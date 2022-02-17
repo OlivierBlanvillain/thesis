@@ -1,5 +1,6 @@
-\documentclass[sigplan,screen,anonymous,review,nonacm]{acmart}
+\documentclass[sigplan,screen,anonymous,review,nonacm,draft]{acmart} % draft
 \usepackage{fontspec}
+\usepackage{microtype}
 \usepackage[final]{listings}
 \usepackage[nameinlink]{cleveref}
 \usepackage{subfigure}
@@ -33,6 +34,8 @@
 \lstdefinestyle{scala}{language=scala}
 \input{scala/code-sections.tex}
 \input{figures/symposium-figures.tex}
+\newcommand\thesisOnly[1]{}
+\newcommand\paperOnly[1]{#1}
 
 %% Rights management information.  This information is sent to you
 %% when you complete the rights form.  These commands have SAMPLE
@@ -143,8 +146,6 @@ We show that our approach has a minor impact on compilation times, which makes i
 \maketitle
 
 \input{symposium.tex}
-
-\citep{blanvillain2022type}
 
 %%
 %% The next two lines define the bibliography style to be used, and

@@ -32,7 +32,7 @@ import compiletime.ops.int.+
 type Compile[R <: String] =
   Reverse[Loop[R, 0, Length[R], EmptyTuple]]
 
-type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple] <: Tuple =
+type Loop[R, Lo, Hi, Acc <: Tuple] <: Tuple =
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match
@@ -50,13 +50,13 @@ check["((B(C)))", (S, S, S)]
 
 object NaiveIsNullable {
 // start section regexNaiveIsNullable
-type IsNullable[R <: String, At <: Int, Hi <: Int] <: Boolean =
+type IsNullable[R <: String, At, Hi] =
   CharAt[R, At] match
     case ")"  => IsMarked[R, At + 1, Hi]
     case "\\" => IsNullable[R, At + 2, Hi]
     case _    => IsNullable[R, At + 1, Hi]
 
-type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
+type IsMarked[R <: String, At, Hi] <: Boolean =
   At match
     case Hi => false
     case _ =>
@@ -67,7 +67,7 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
 
 }
 
-type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
+type IsMarked[R <: String, At, Hi] <: Boolean =
   At match
     case Hi => false
     case _ =>
@@ -76,7 +76,7 @@ type IsMarked[R <: String, At <: Int, Hi <: Int] <: Boolean =
         case _ => false
 
 // start section regexIsNullable
-type IsNullable[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Boolean =
+type IsNullable[R <: String, At, Hi, Lvl <: Int] <: Boolean =
   CharAt[R, At] match
     case ")" => Lvl match
       case 0 => IsMarked[R, At + 1, Hi]
@@ -87,10 +87,9 @@ type IsNullable[R <: String, At <: Int, Hi <: Int, Lvl <: Int] <: Boolean =
 // end section regexIsNullable
 
 object Last {
-import Lib.IsNullable
 
 // start section regexLastIteration
-type Loop[R <: String, Lo <: Int, Hi <: Int, Acc <: Tuple, Opt <: Int] =
+type Loop[R, Lo, Hi, Acc <: Tuple, Opt <: Int] =
   Lo match
     case Hi => Acc
     case _  => CharAt[R, Lo] match

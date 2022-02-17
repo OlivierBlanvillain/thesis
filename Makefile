@@ -11,8 +11,9 @@ deps += figures/reduce.eps
 deps += figures/2early2late.eps
 deps += figures/regex-compiletime.eps
 deps += figures/regex-runtime.eps
+deps += figures/symposium-figures.tex
 
-sigplan.pdf: FORCE figures/symposium-figures.tex
+sigplan.pdf: FORCE $(deps)
 	latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out sigplan.tex
 	cp latex.out/sigplan.pdf sigplan.pdf
 	echo && ./pplatex -b -i latex.out/sigplan.log
@@ -33,6 +34,9 @@ cleanfigures: FORCE
 
 watch: FORCE
 	git ls-files | entr make
+
+watchs: FORCE
+	git ls-files | entr make sigplan.pdf
 
 publish: FORCE
 	make

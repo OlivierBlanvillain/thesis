@@ -10,7 +10,7 @@ The package's documentation starts with the following example:
 \noindent
 The extractor pattern, |case date(y,m,d)|, replaces the need for manually indexing into the regular expression's capturing groups, and shields users from off-by-one error.
 
-While the syntax of this example would undoubtedly make some non-Scala programmers envious, its type safety leaves much to be desired.
+While the syntax used in this example would undoubtedly make some non-Scala programmers envious, its type safety leaves much to be desired.
 First of all, the \emph{number} of variable bindings in the extractor is entirely opaque to Scala's type system, and left to the discretion of the programmer.
 Furthermore, the values that come out of capturing groups can be null (when using optional captures) and thus require an additional layer of validation.
 Those shortcomings might appear benign on small examples, but can easily turn into bugs when dealing with a large-scale code base.
@@ -18,7 +18,12 @@ Those shortcomings might appear benign on small examples, but can easily turn in
 In this chapter, we propose a new design for Scala's regular expression library which provides a type-safe and null-safe mechanism for capturing group extraction.
 Our design makes extensive use of match types, Scala's new feature for type-level programming, to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
+\thesisOnly{
 The source code of our implementation is available online\footnote{\texttt{https://gist.github.com/OlivierBlanvillain/418dcb74cbd2e12eb4a90b7336f40b17}}.
+}
+\paperOnly{
+The source code of our implementation is available in the supplementary material of this submission.
+}
 
 \section{Architecture}
 
@@ -45,10 +50,10 @@ We use that type-level string to instantiate the |Compile| type, which is our ty
 
 The implementation of the |Regex| class is straightforward.
 Similar to its standard library counterpart, that class uses an instance of |java.util.regex.Pattern| to match the given input against the given regular expression, and to extract the content of the capturing groups when the matching succeeds.
-These operations take place within the |unapply| method, which is the way to define custom pattern matching extractors in Scala \citep{emir2007matching}.
+These operations happen within the |unapply| method, which is the way to define custom pattern matching extractors in Scala \citep{emir2007matching}.
 
-The main difference between Scala's original |Regex| implementation and ours lies in the signature of the |unapply| method, which determines the nature of extraction performed by that method.
-In our implementation, we instantiate the type |P| to a tuple and use that type in the result type of the |unapply| method to tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity.
+The main difference between Scala's original |Regex| implementation and ours lies in the signature of |unapply|, which determines the nature of pattern matching extraction performed by that method.
+In our implementation, we instantiate the type |P| to a tuple and use that type in the result type of |unapply| to tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity.
 Furthermore, the type of those groups corresponds to the type of the tuple elements.
 This allows us to enrich the results of Java's regex engine by wrapping nullable values into options.
 Our implementation performs this wrapping via the |transform| method, which is our runtime processing component.
@@ -59,7 +64,7 @@ For instance, in the following example usage of our library, we use a regular ex
 \regexRational
 
 \noindent
-Here, we instantiate |Regex|'s type parameter to |P = (String, Option[String])|, which we then use in |unapply|'s return type to obtain a precise representation of the regex's capturing groups.
+Here, we instantiate |Regex|'s type parameter to |P = (String,| |Option[String])|, which we then use in |unapply|'s result type to obtain a precise representation of the regex's capturing groups.
 The resulting code is type-safe: if we change the pattern to omit the option unpacking (replacing |Some(f)| by |f|), the compiler would raise a type error on the call to |.size| (size is defined on strings but not options).
 
 In the following section, we explain our technique to analyze regular expressions and statically compute a type-level representation of the regex's capturing groups (|P| in the example above).
@@ -98,7 +103,7 @@ Attentive readers might have noticed that our handling of backslash, regex's esc
 Indeed, the |Loop| type terminates when |Lo = Hi|, but increases |Lo| by 2 to skip over escaped characters.
 
 Be reassured, this is not an oversight!
-Regular expressions with trailing backslashes are invalid and result in runtime crashes (reported as "unexpected internal error").
+Regular expressions with trailing backslashes are invalid and result in runtime crashes (reported as an "unexpected internal error").
 Even though detecting these types of errors at compile time is out of the scope of our library, doing so is still desirable.
 If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error, which is certainly better reporting than error at run-time.
 
@@ -165,7 +170,7 @@ In its final iteration, our capturing group analysis is, to the best of our know
 \label{sec:term-level}
 
 The runtime component of our library is in charge of sanitizing and packaging the results of regular expression matchings.
-Concretely, this component's job consists of transforming the string array that comes out of the regex engine into an appropriately sized tuple, with nullable elements wrapped in options.
+Concretely, this component's job consists of transforming the string array that comes out of the regex engine into an appropriately sized tuple and warpping the nullable elements in options.
 That transformation must conform to the representation computed at the type level.
 
 In Scala, all type parameters are erased, which leads to some friction when wanting to write programs whose execution \emph{depends} on types, such as in the problem at hand. In this section, we propose two different solutions to that problem.
@@ -185,7 +190,7 @@ In a nutshell, instead of accumulating |String| and |Option[String]| in a type, 
 \regexTermLvlLoop
 
 \noindent
-After having computed those functions, we simply do a pointwise application with the raw output of the regex engine, package the result into a tuple, \emph{et voilà!}
+After having computed those functions, we do a pointwise application with the raw output of the regex engine, package the result into a tuple, \emph{et voilà!}
 
 \regexTransform
 
@@ -193,23 +198,27 @@ This solution has the benefit of being conceptually simple.
 We needed to write an implementation that conforms to our type-level program, and this is literally what we did, by duplicating that program and using an unsafe cast to convince the compiler of our good intentions.
 
 The first alternative that comes to mind is perhaps to turn ourselves to a dependently typed language with support for type- and term-level polymorphism.
-In a language with shared term and type syntax, we could write our analysis generically, and derive two programs from it, one for each level.
+Using a language with shared term and type syntax would allow us to write our analysis generically, and derive two programs from it, one for each level.
 
-In principle, Scala~3's type inference should be able to solve half of that problem with its ability to correlate match types and match expressions.
+In principle, Scala~3's type inference should be able to solve half of that problem with its ability to correlate match types and match expressions\paperOnly{\citep[§ 2.1]{blanvillain2022type}}.
+\thesisOnly{
 In \Cref{subsec:a-lightweight-form-of-dependent-typing}, we show an example of that ability, where the compiler type checks a small program using a match type.
+}
 In our case, this mechanism should allow us to get rid of the unsafe cast but does not address the problem of code duplication.
 In practice, at the time of writing, this solution does not play well with predefined types from the standard library: the compiler lacks the knowledge necessary to correlate predefined types with their term-level counterpart.
-For instance, the compiler does not recognize |CharAt["foo", 0]| as a valid type for |"foo".charAt(0)|.
+For instance, the compiler does not recognize |CharAt["hello", 0]| as a valid type for the |"hello".charAt(0)|.
 
 In the long run, it would be interesting to investigate extending Scala with a "precise" mode of type inference, that would automatically infer match types and singleton types, whenever possible.
+\thesisOnly{
 In \Cref{chap:generalizing-singleton-types}, we demonstrated the feasibility of this approach by generalizing Scala's singleton types.
 A promising avenue would be to revisit that line of work with the less ambitious goal of improving Scala's type inference.
+}
 
 \subsection{Implicit-Based Extractor Synthesis}
 \label{subsec:implicit-based-extractor-synthesis}
 
 The second version of our runtime component takes a completely different approach.
-Instead of analyzing regular expressions at run-time, to reconstitute type-level analysis results, we use implicit resolution to \emph{synthesize} a type-specialized runtime.
+Instead of analyzing regular expressions at run-time, we use implicit resolution to \emph{synthesize} a type-specialized runtime, based on the results of our type-level analysis.
 That synthesis is type-directed: it generates a single-purpose program that sanitizes the output of the regex engine by following the shape of the tuple type computed at the type level.
 
 Our implementation consists of one type class, |Sanitizer|, and three implicit definitions, which will guide the compiler into generating the correct |Sanitizer[T]|, for any tuple |T| with |String| and |Option[String]| elements (here, |T| is the result of our type-level analysis).
@@ -218,7 +227,7 @@ The |Sanitizer| type class defines a single method that mutates an array in plac
 \regexSanitizerTypeClass
 
 From a design standpoint, this solution is appealing as it leads to no duplicated code or computation: we perform our capturing group analysis at the type-level, once and for all, and synthesize code accordingly.
-This combination of type-level programming and implicit-based code synthesis is reminiscent of multi-stage metaprogramming, in its compile-time variant \citep{stucki2018practical}.
+This combination of type-level programming and implicit-based code synthesis is reminiscent of multi-stage metaprogramming, in its com\-pile-time variant \citep{stucki2018practical}.
 In those terms, our approach corresponds to a multi-staged program whose stage 0 happens entirely within Scala's type checker.
 
 In the following section, we evaluate the performance of our library and discuss the trade-offs between the first and second implementation of our runtime component.
@@ -226,14 +235,14 @@ In the following section, we evaluate the performance of our library and discuss
 \section{Evaluation}
 
 To assess the correctness of our library, we run our implementation against the QT3TS test suite \citep{w3c1994xquery}, which consists of about 1700 test cases for regular expressions \citep[perl-tests.xml]{w3c1994qt3ts}.
-We select the subset of those tests that are positive (they match successfully) and exercise capturing groups, totaling 183 test cases, which we then collated to form our benchmark suite.
+We select the subset of those tests that are positive and exercise capturing groups, totaling 183 test cases, which we then collated to form our benchmark suite.
 We use these benchmarks to evaluate the performance of our library in terms of compilation times and execution times.
 
-In \Cref{fig:regexBars}, we show the results of our experiments, which compare Scala's standard regular expression library (Std) against two flavors of our library, one using our code-duplicated runtime (Dup), presented in \Cref{subsec:we-ain-t-need-no-dependent-types}, and the other using our implicit-based runtime (Impl), presented in \Cref{subsec:implicit-based-extractor-synthesis}.
+In \Cref{fig:regexBars}, we show the results of our experiments, which compare Scala's standard regular expression library (Std) against two flavors of our library, one using our code-dupli\-cated runtime (Dup), presented in \Cref{subsec:we-ain-t-need-no-dependent-types}, and the other using our implicit-based runtime (Impl), presented in \Cref{subsec:implicit-based-extractor-synthesis}.
 
 \regexBars{A comparison of the compilation time (left) and execution time (right) of Scala's standard regex library (Std) against our library with its code-duplicated runtime (Dup) and with its implicit-based runtime (Impl).}
 
-We obtained these results by averaging the measurements obtained over 2-hour runs, for each data point, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0\_212 and Linux.
+We obtained these results by averaging the measurements obtained over 2-hour runs, for each data point, which we executed on an i7-7700K Processor running Oracle JVM 1.8.0 and Linux.
 With these settings, we obtain margins of errors below \textpm1\%, with 99.9\% confidence (omitted in \Cref{fig:regexBars}).
 We run our benchmarks on the latest version of Scala~3 at the time of writing (3.1.2).
 
@@ -256,8 +265,8 @@ In view of these results, we decided to use our implicit-based runtime in the pu
 
 \section{Related Work}
 
-There is surprisingly little literature concerned with the safety of regular expression capturing groups.
-In a recent survey paper on the correctness of regular expressions, \citet{li2021ensuring} classified the publications in this area into several categories, ranging from empirical studies to regular expression synthesis and repair.
+We found surprisingly little literature concerned with the safety of regular expression capturing groups.
+In a recent survey paper on regular expression correctness, \citet{li2021ensuring} classified the publications in this area into several categories, ranging from empirical studies to regular expression synthesis and repair.
 However, they only listed a single paper about static checking: the type system developed by \citet{spishak2012type} to validate regular expression syntax and capturing group usage in Java programs.
 Their tool takes the form of a compiler plugin that enhances Java's type system to track the number of capturing groups using type annotations.
 Unlike our system, their solution is not concerned with null safety and does not detect optional capturing groups.
@@ -267,10 +276,10 @@ The Haskell ecosystem contains several packages for regular expressions, with va
 The regex-applicative package stands on the safe side of that spectrum: it allows programmers to write regular expressions using a parser combinator library, which entirely removes the need to reference capturing groups \citep{cheplyaka2011regex}.
 The main drawback of this solution lies in the library's learning curve: programmers already familiar with POSIX regular expressions~\citep{ieee2018the} are forced to learn a new syntax, which is arguably more complicated.
 
-Stephanie Weirich presented, on several occasions \citep{weirich2014examples}, a regular expression library as an example of a dependently-typed program written in Haskell.
+Stephanie Weirich presented on several occasions a regular expression library as an example of a dependently-typed program written in Haskell \citep{weirich2014examples}.
 The library provides safety guarantees similar to ours, but from the slightly different angle of named-capturing groups.
 To make that possible, her implementation makes heavy use of Haskell's advanced type system features and requires no less than 20 language extensions to compile.
-In contrast, our implementation does not use metaprogramming and compiles with vanilla Scala~3.
+In contrast, our implementation does not use metaprogramming and compiles with vanilla Scala.
 An important conceptual difference is that our approach only focuses on type checking (we rely on Java's regular expressions at run-time), whereas her library also contains a complete regular expression engine.
 
 \section{Conclusion}
@@ -283,5 +292,5 @@ We evaluated our implementation by running it against the QT3TS test suite and s
 \paragraph{Future Work}
 We propose to extend our approach with a dedicated data type for the regex alternative operator.
 In our current design, we map every capturing group to an |Option[String]|, which does not always accurately reflect the structure of regular expressions.
-For instance, in \lstinline!"(A)(B)|(C)"! (which matches either |AB| or |C|), our system represents the capturing groups as a 3-tuple, |(Option[String],| |Option[String],| |Option[String])|. This representation fails to account for the fact that the first two groups have identical nullability status, and that this status is opposite to the nullability of the third group.
+For instance, when confronted with \lstinline!"(A)(B)|(C)"!, our system represents this expression's capturing groups as a 3-tuple, |(Option[String],| |Option[String],| |Option[String])|. This representation fails to account for the fact that the first two groups have identical nullability status, and that this status is opposite to the nullability of the third group.
 Instead, we could represent those capturing groups as |Either[(String,| |String),| |String]|, which is isomorphic to the structure of the regular expression.

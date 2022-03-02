@@ -24,6 +24,16 @@ type CharAt[R <: String, At <: Int] =
     case _ => '_'
   }
 
+// start section elemExample
+type Elem[X] = X match
+  case String => Char
+  case Iterable[t] => Elem[t]
+  case Any => X
+// end section elemExample
+
+val rev0test: Reverse0[String *: Int *: EmptyTuple, EmptyTuple]
+  = (1, "")
+
 // start section regexIsCapturing
 type IsCapturing[R <: String, At <: Int] =
   CharAt[R, At] match
@@ -135,7 +145,7 @@ def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean = false
 
 // start section regexTermLvlLoop
 val id: String => Any = { x => assert(x != null); x }
-val opt: String => Any = { x => Option(x) }
+val option: String => Any = { x => Option(x) }
 
 def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[String => Any] =
   lo match
@@ -146,10 +156,10 @@ def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[
       case '(' => opt match
         case 0 => isNullable(r, lo+1, hi, 0) match
           case true =>
-            loop(r, lo+1, hi, opt::acc, 1)
+            loop(r, lo+1, hi, option::acc, 1)
           case false =>
             loop(r, lo+1, hi, id::acc, 0)
-        case _ => loop(r, lo+1, hi, opt::acc, opt+1)
+        case _ => loop(r, lo+1, hi, option::acc, opt+1)
       case '\\' => loop(r, lo+2, hi, acc, opt)
       case _ => loop(r, lo+1, hi, acc, opt)
 // end section regexTermLvlLoop

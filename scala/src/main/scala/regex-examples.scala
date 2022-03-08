@@ -27,12 +27,27 @@ type CharAt[R <: String, At <: Int] =
 // start section elemExample
 type Elem[X] = X match
   case String => Char
-  case Iterable[t] => Elem[t]
+  case Array[t] => Elem[t]
   case Any => X
 // end section elemExample
 
-val rev0test: Reverse0[String *: Int *: EmptyTuple, EmptyTuple]
+object Rev {
+
+// start section tupleReverseA
+type Reverse[T <: Tuple] = Rev[T, EmptyTuple]
+// end section tupleReverseA
+
+// start section tupleReverseB
+type Rev[T <: Tuple, Acc <: Tuple] <: Tuple =
+  T match
+    case x *: xs => Rev[xs, x *: Acc]
+    case EmptyTuple => Acc
+// end section tupleReverseB
+
+val rev0test: Rev[String *: Int *: EmptyTuple, EmptyTuple]
   = (1, "")
+
+}
 
 // start section regexIsCapturing
 type IsCapturing[R <: String, At <: Int] =

@@ -23,20 +23,12 @@ In this \thesisOnly{chapter}\paperOnly{paper}, we propose a new design for Scala
 Our design makes extensive use of match types\paperOnly{~\citep{blanvillain2022type}, Scala~3's new feature for type-level programming,} to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
 
-Our presentation is structured as follows:
-
-\begin{itemize}
-  \item
-\Cref{sec:background}
-  \item
-\Cref{sec:architecture},~\ref{sec:type-level} and~\ref{sec:term-level}
-  \item
-\Cref{sec:evaluation}
-  \item
-\Cref{sec:related}
-\Cref{sec:conclusion}
-
-\end{itemize}
+This paper is structured as follows.
+In \Cref{sec:background}, we give an introduction to match types and generic tuples, two recent additions to Scala's type system which we rely on in our implementation.
+In \Cref{sec:architecture},~\ref{sec:type-level} and~\ref{sec:term-level}, we present our library for type-safe regular expressions.
+In \Cref{sec:evaluation}, we evaluate the performance of our implementation in terms of compilation times and execution times.
+In \Cref{sec:related}, we discuss related work.
+We conclude the paper in \Cref{sec:conclusion}.
 
 \thesisOnly{
 The source code of our implementation is available online\footnote{\texttt{https://gist.github.com/OlivierBlanvillain/418dcb74cbd2e12eb4a90b7336f40b17}}.
@@ -48,40 +40,60 @@ The source code of our implementation is available in the supplementary material
 \section{Background}
 \label{sec:background}
 
-\subection{Match Types}
+In this section, we give a brief introduction to two recent additions to Scala's type system: match types and generic tuples.
+Our regular expression library makes extensive use those two features to enable type-safe and null-safe capturing group extraction.
 
-In this section, we give a brief introduction to match types by inspecting the following example:
+\subsection{Match Types}
+
+Match types provide first-class support for type-level computations by allowing programmers to perform pattern matching on types:
 
 \elemExample
 % type Elem[X] = X match
 %   case String => Char
-%   case Iterable[t] => Elem[t]
+%   case Array[t] => Elem[t]
 %   case Any => X
 
 \noindent
 This example defines a type |Elem| parametrized by one type parameter |X|.
-The right-hand side is defined in terms of a match on that type parameter---a match type.
+The right-hand side is defined in terms of a match on that type parameter -- a match type.
 A match type reduces to one of its right-hand sides, depending on the type of its scrutinee.
 For example, the above type reduces as follows:
 
 \begin{lstlisting}
-Elem[String] ~> Char
-Elem[Int] ~> Int
-Elem[Iterable[Int]] ~> Int
+Elem[String] =:= Char
+Elem[Int] =:= Int
+Elem[Array[Int]] =:= Int
 \end{lstlisting}
 
 \noindent
 To reduce a match type, the scrutinee is compared to each pattern, one after the other, using subtyping.
 For example, although |String| is a subtype of both |String| and |Any|, the |Elem[String]| type reduces to |Char| because the corresponding case appears first.
 
-\subection{The Generic View of Tuples}
+\subsection{Generic Tuples}
+\label{subsec:generic-tuples}
 
-% https://www.scala-lang.org/2021/02/26/tuples-bring-generic-programming-to-scala-3.html
+Scala's tuples were originally defined as plain old data types.
+In Scala~3, tuples got enhanced with a generic representation~\citep{bazzucchi2021tuples}, similar to heterogeneous lists~\citep{kiselyov2004strongly}.
+This representation uses two types, |EmptyTuple| and |*:|, to describe tuples in a list-like fashion.
+The compiler treats those new types and the traditional class-based representation of tuples interchangeably.
+A 2-tuple of integers, for example, has two equivalent representations:
+
+\begin{lstlisting}
+(Int, Int) =:= Int *: Int *: EmptyTuple
+\end{lstlisting}
+
+\noindent
+This new tuple representation is especially useful at the type level, where it allows programmers to manipulate tuples in a recursive manner.
+For example, the following match type reverses the order of a tuple's elements:
+
+\tupleReverseA
+\vspace{-3pt}
+\tupleReverseB
 
 \section{Architecture}
 \label{sec:architecture}
 
-We present our library in terms of 3 components:
+We present our library for type-safe regular expressions in terms of 3 components:
 
 \begin{enumerate}
   \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute tuple representation of the expression's capturing groups.
@@ -148,8 +160,7 @@ The implementation is straightforward, it iterates through the regex's character
 \noindent
 The |Length| and |CharAt| types (from |ops.string|) are special-cased by the compiler: when their first argument is a known string literal, the compiler evaluates those types via their corresponding term-level implementation.
 Similarly, the |+| type (from |ops.int|) allows us to manipulate integers just like we would at the term level.
-The |EmptyTuple| and |*:| types are Scala~3's new generic representation of tuples.
-Those types remove the need for heterogeneous lists and let us manipulate tuples directly.
+The |EmptyTuple| and |*:| types are Scala~3's new generic representation of tuples, presented in \Cref{subsec:generic-tuples}.
 
 \subsection{Out-Of-Bound Errors}
 
@@ -339,10 +350,21 @@ To make that possible, her implementation makes heavy use of Haskell's advanced 
 In contrast, our implementation does not use metaprogramming and compiles with vanilla Scala.
 An important conceptual difference is that our approach only focuses on type checking (we rely on Java's regular expressions at run-time), whereas her library also contains a complete regular expression engine.
 
+The typed-regex~\citep{akshay2021typed} Typescript library provides a type-safe API for extracting named capturing groups of regular expressions.
+The implementation uses conditional types~\citep{microsoft2020typescript}, Typescript's type-level ternary operator, to statically analyze regular expressions.
+Their approach, like ours, identifies optional capturing groups and marks them as such (using Typescript's optional properties).
+At the time of writing, the library is still in an early stages of development and only supports a subset of the regular expression syntax, and notably lacks support for nested optional capturing group detection.
+
+The safe-regex-rs~\citep{leonhard2021safe} Rust library takes a different approach towards the same goal: it uses Rust macros to code generate arity-specific extractors.
+Unlike the
+Their implementation is
+
+Rust \url{https://gitlab.com/leonhard-llc/safe-regex-rs}
+
 \section{Conclusion}
 \label{sec:conclusion}
 
-In this \thesisOnly{chapter}\paperOnly{paper}, we introduced a new design for type-safe regular expressions in Scala.
+In this \thesisOnly{chapter}\paperOnly{paper}, we introduce a new design for type-safe regular expressions in Scala.
 We presented our type-level analysis, which identifies capturing groups and computes their nullability.
 We built our library following the design of Scala's original regular expression API, in order to provide a frictionless migration path for programmers interested in the additional type safety.
 We evaluated our implementation by running it against the QT3TS test suite and showed that, on those benchmarks, our type-level analysis only has a marginal impact on compilation times.

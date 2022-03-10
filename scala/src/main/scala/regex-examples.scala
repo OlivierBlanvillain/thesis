@@ -61,14 +61,14 @@ type IsCapturing[R <: String, At <: Int] =
 // end section regexIsCapturing
 
 // start section regexDocumentation
-val date = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
+val date = Regex("""(\d{4})-(\d{2})-(\d{2})""")
 "2004-01-20" match
   case date(y, m, d) =>
     s"$y was a good year for PLs."
 // end section regexDocumentation
 
 // start section regexRational
-val rational = Regex("(\\d+)\\.?(\\d+)?")
+val rational = Regex("""(\d+)(?:\.(\d+))?""")
 "3.1415" match
   case rational(i, Some(f)) =>
     val n = i.size + f.size
@@ -160,7 +160,7 @@ def isNullable(r: String, at: Int, hi: Int, lvl: Int): Boolean = false
 
 // start section regexTermLvlLoop
 val id: String => Any = { x => assert(x != null); x }
-val option: String => Any = { x => Option(x) }
+val nu: String => Any = { x => Option(x) }
 
 def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[String => Any] =
   lo match
@@ -171,10 +171,10 @@ def loop(r: String, lo: Int, hi: Int, acc: List[String => Any], opt: Int): List[
       case '(' => opt match
         case 0 => isNullable(r, lo+1, hi, 0) match
           case true =>
-            loop(r, lo+1, hi, option::acc, 1)
+            loop(r, lo+1, hi, nu::acc, 1)
           case false =>
             loop(r, lo+1, hi, id::acc, 0)
-        case _ => loop(r, lo+1, hi, option::acc, opt+1)
+        case _ => loop(r, lo+1, hi, nu::acc, opt+1)
       case '\\' => loop(r, lo+2, hi, acc, opt)
       case _ => loop(r, lo+1, hi, acc, opt)
 // end section regexTermLvlLoop

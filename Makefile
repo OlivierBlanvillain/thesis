@@ -1,6 +1,6 @@
 .ONESHELL:
 .PHONY: FORCE
-all: thesis.pdf sigplan.pdf
+all: thesis.pdf sigplan.pdf slides.pdf
 
 deps := proofs/structure.pdf
 deps += scala/code-sections.tex
@@ -12,6 +12,11 @@ deps += figures/2early2late.eps
 deps += figures/regex-compiletime.eps
 deps += figures/regex-runtime.eps
 deps += figures/symposium-figures.tex
+
+slides.pdf: FORCE scala/code-sections.tex
+	latexmk -shell-escape -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out slides.tex
+	cp latex.out/slides.pdf slides.pdf
+	echo && ./pplatex -b -i latex.out/slides.log
 
 sigplan.pdf: FORCE $(deps)
 	latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out sigplan.tex
@@ -36,7 +41,7 @@ watch: FORCE
 	git ls-files | entr make
 
 watchs: FORCE
-	git ls-files | entr make sigplan.pdf
+	git ls-files | entr make slides.pdf
 
 publish: FORCE
 	make

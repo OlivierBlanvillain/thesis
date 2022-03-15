@@ -1,3 +1,4 @@
+\def\paper{\thesisOnly{chapter}\paperOnly{paper}}
 \section{Introduction}
 
 Capturing groups allow programmers to extract substrings matched by parts of a regular expression.
@@ -19,22 +20,22 @@ First of all, the \emph{number} of variable bindings in the extractor is entirel
 Furthermore, the values that come out of capturing groups can be null (when using optional captures) and thus require an additional layer of validation.
 Those shortcomings might appear benign on small examples, but can easily turn into bugs when dealing with a large-scale codebase.
 
-In this \thesisOnly{chapter}\paperOnly{paper}, we propose a new design for Scala's regular expression library which provides a type-safe and null-safe mechanism for capturing group extraction.
+In this \paper, we propose a new design for Scala's regular expression library which provides a type-safe and null-safe mechanism for capturing group extraction.
 Our design makes extensive use of match types\paperOnly{~\citep{blanvillain2022type}, Scala~3's new feature for type-level programming,} to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
 
-This paper is structured as follows.
+This \paper is structured as follows.
 In \Cref{sec:background}, we give an introduction to match types and generic tuples, two recent additions to Scala's type system which we rely on in our implementation.
 In \Cref{sec:architecture},~\ref{sec:type-level} and~\ref{sec:term-level}, we present our library for type-safe regular expressions.
 In \Cref{sec:evaluation}, we evaluate the performance of our implementation in terms of compilation times and execution times.
 In \Cref{sec:related}, we discuss related work.
-We conclude the paper in \Cref{sec:conclusion}.
+We conclude the \paper in \Cref{sec:conclusion}.
 
 \thesisOnly{
-The source code of our implementation is available online\footnote{\texttt{https://gist.github.com/OlivierBlanvillain/418dcb74cbd2e12eb4a90b7336f40b17}}.
+The source code of our implementation is available online\footnote{\texttt{https://github.com/OlivierBlanvillain/regsafe}} under the MIT licence.
 }
 \paperOnly{
-The source code of our implementation is available in the supplementary material of this submission.
+The source code of our implementation is available online\footnote{This URL is hidden for the purpose of the double-blind review process.} under the MIT licence.
 }
 
 \section{Background}
@@ -362,7 +363,7 @@ Safety-wise, code generation provides a straightforward solution to safe capturi
 \section{Conclusion}
 \label{sec:conclusion}
 
-In this \thesisOnly{chapter}\paperOnly{paper}, we introduce a new design for type-safe regular expressions in Scala.
+In this \paper, we introduce a new design for type-safe regular expressions in Scala.
 We presented our type-level analysis, which identifies capturing groups and computes their nullability.
 We built our library following the design of the original Scala regular expression API, in order to provide a frictionless migration path for programmers interested in the additional type safety.
 We evaluated our implementation by running it against the QT3TS test suite and showed that, on those benchmarks, our type-level analysis only has a marginal impact on compilation times.

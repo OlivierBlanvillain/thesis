@@ -13,7 +13,7 @@ deps += figures/regex-compiletime.eps
 deps += figures/regex-runtime.eps
 deps += figures/symposium-figures.tex
 
-slides.pdf: FORCE scala/code-sections.tex
+slides.pdf: FORCE $(deps)
 	latexmk -shell-escape -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out slides.tex
 	cp latex.out/slides.pdf slides.pdf
 	echo && ./pplatex -b -i latex.out/slides.log

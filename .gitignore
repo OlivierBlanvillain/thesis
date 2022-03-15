@@ -20,3 +20,4 @@ target/
 *.lof
 *.toc
 *.bsp/
+_minted-slides

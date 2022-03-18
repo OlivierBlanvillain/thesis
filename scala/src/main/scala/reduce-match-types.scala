@@ -7,10 +7,9 @@ case object Ø extends Shape
 // cheating a little bit here, but there's a footnote to explain it!
 object SimplifiedShape {
 // start section shapeEnum
-enum Shape {
+enum Shape:
   case #:[H <: Int, T <: Shape](head: H, tail: T)
   case Ø
-}
 // end section shapeEnum
 }
 
@@ -36,10 +35,9 @@ def multiply[T, S <: Shape](x: NDArray[T, S], y: NDArray[T, S]): NDArray[T, S] =
 import scala.compiletime.ops.int.*
 // start section numelementsType
 type NumElements[X <: Shape] <: Int =
-  X match {
+  X match
     case Ø => 1
     case head #: tail => head * NumElements[tail]
-  }
 // end section numelementsType
 
 // start section reshapeDef
@@ -50,24 +48,20 @@ def reshape[T, From <: Shape, To <: Shape](arr: NDArray[T, From], newshape: To)
 import scala.compiletime.ops.int.+
 // start section reduceType
 type ReduceAxes[S <: Shape, Axes <: None | Shape] <: Shape =
-  Axes match {
+  Axes match
     case None => Ø
     case Shape => Loop[S, Axes, 0]
-  }
 // end section reduceType
 
 // start section reduceLoop
 type Loop[S <: Shape, Axes <: Shape, I <: Int] <: Shape =
-  S match {
-    case head #: tail => Contains[Axes, I] match {
+  S match
+    case head #: tail => Contains[Axes, I] match
       case true => Loop[tail, Remove[Axes, I], I + 1]
       case false => head #: Loop[tail, Axes, I + 1]
-    }
-    case Ø => Axes match {
+    case Ø => Axes match
       case Ø => Ø
       // otherwise, do not reduce further
-    }
-  }
 // end section reduceLoop
 
 type Contains[Haystack <: Shape, Needle <: Int] <: Boolean = Haystack match {

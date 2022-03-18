@@ -317,7 +317,7 @@ It would be interesting to explore the addition of an effect system to our Scala
 
 Our extension does not model virtual dispatch explicitly in singleton types.
 Instead, the result type of a method call |t.m(|\ldots{}|)| is always the result type of |m| in |t|'s static type.
-Consequently, |dependent| methods effectively become |final|, given that only a provably-equivalent implementation could be used to override it.
+Consequently, |dependent| methods effectively become |final|, given that only a provably-equivalent implementation could be used to override it, modulo side effects.
 
 Special care must be taken when an imprecisely-typed method is overridden with a dependent one.
 In this situation, the result type of a method invocation can lose precision depending on type of the receiver.
@@ -514,3 +514,5 @@ Their goals are very much aligned with ours: using type-level programming to inc
 Given the extremely dynamic nature of Ruby, it is unsurprising that their solution greatly differs from ours.
 In their work, type checking happens entirely at runtime and has to be performed at every function invocation to account for possible changes in function definitions.
 Safety is obtained by inserting dynamic checks, similarly to gradual typing.
+
+% TODO: Compare to pure subtype systems

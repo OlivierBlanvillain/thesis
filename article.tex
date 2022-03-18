@@ -18,11 +18,10 @@ This chapter presents an alternative construct for type-level programming based 
 As the name suggests, match types allow programmers to express types that perform pattern matching on types:
 %
 \begin{lstlisting}
-type Elem[X] = X match {
+type Elem[X] = X match
   case String => Char
   case List[t] => Elem[t]
   case Any => X
-}
 \end{lstlisting}
 %
 The example, which we explain in detail in \Cref{sec:overview}, defines the type |Elem| by matching on the type parameter |X|.
@@ -58,11 +57,10 @@ In summary, this chapter makes the following contributions:
 In this section, we offer a brief introduction of match types in Scala by inspecting the example from the previous section in more detail:
 %
 \begin{lstlisting}
-type Elem[X] = X match {
+type Elem[X] = X match
   case String => Char
   case List[t] => Elem[t]
   case Any => X
-}
 \end{lstlisting}
 %
 This example defines a type |Elem| parametrized by one type parameter |X|. The right-hand side is defined in terms of a match on the type parameter -- a \emph{match type}.
@@ -89,11 +87,10 @@ Match types enable a lightweight form of dependent typing, since term-level patt
 Consider the following function definition:
 %
 \begin{lstlisting}
-def elem[X](x: X): Elem[X] = x match {
+def elem[X <: Singleton](x: X): Elem[X] = x match
   case x: String => x.charAt(0)
   case x: List[t] => elem(x.head)
   case x: Any => x
-}
 \end{lstlisting}
 %
 This definition is well-typed because the match expression in |elem|'s body has the exact same scrutinee and pattern types as |Elem[X]| (the function's return type).
@@ -475,17 +472,14 @@ To account for this, our implementation uses an additional \emph{inhabitance che
 To show why empty types are problematic, we can construct an example where, in the absence of an inhabitance check, the same match type could be reduced differently in two different contexts:
 %
 \begin{lstlisting}
-type M[X] = X match {
+type M[X] = X match
   case Int => String
   case String => Int
-}
-class C {
+class C:
   type X
   def f(bad: M[X & String]): Int = bad
-}
-class D extends C {
+class D extends C:
   type X = Int
-}
 \end{lstlisting}
 %
 In this example, the definition of |f| in |C| type-checks because |X| |&| |String| and |Int| are disjoint (since |String| and |Int| are disjoint) and |M[X| |&| |String]| reduces to |Int| (|M|'s second case applies).
@@ -814,14 +808,12 @@ In their introductory example,~\citeauthor{weirich2011generative} show how type 
 Their presentation also includes a hypothetical translation of their example to Standard ML, which translates directly to Scala as follows:
 %
 \begin{lstlisting}
-trait AgeClass {
+trait AgeClass:
   type Age
   def addAge(a: Age, i: Int): Int
-}
-object AgeObject extends AgeClass {
+object AgeObject extends AgeClass:
   type Age = Int
   def addAge(a: Age, i: Int): Int = a + i
-}
 \end{lstlisting}
 %
 In this example, type |Age| is abstract in |AgeClass| and concrete in |AgeObject|.
@@ -833,10 +825,9 @@ The reason comes from the use of subtyping (and disjointness), which shields our
 Consider the following match type definition (directly translated from the Haskell example):
 %
 \begin{lstlisting}
-type M[X] = X match {
+type M[X] = X match
   case Age => Char
   case Int => Bool
-}
 \end{lstlisting}
 %
 Our algorithm would not reduce |M[Int]| to |Bool| in |AgeClass| as this reduction would require evidence that |Age| and |Int| are disjoint, which cannot be constructed when |Age| is an unbounded abstract type.

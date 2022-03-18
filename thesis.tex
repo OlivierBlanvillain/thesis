@@ -224,7 +224,7 @@ For example, the term |::(1,::(2,HNil()))| can be typed as |::[1,::[2,HNil]]|, w
 
 Scala's implicits allow us to define type-level operations for heterogeneous lists.
 We develop the example presented in \Cref{chap:introduction} by looking into the remove operation on |HList|s.
-Remove operation takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
+The remove operation takes as argument an element and a list, and returns that list with the first occurrence of the element removed.
 This operation should yield an error if the element is not part of the list.
 
 An implicit-based type-level operation typically takes the form of a trait, the operation's entry point, and several implicit definitions, one for each "case" of the operation's algorithm.
@@ -325,6 +325,8 @@ To work around that ambiguity, we split those definitions into two different sco
 Concretely, we define low priority implicits in a separate trait, and have |RemoveAll|'s companion object extend that trait:
 
 \removeAllPrioritized
+
+% TODO: Add a paragraph about the evolution of the "rule for picking a most specific alternative" during implicit resolution, see https://dotty.epfl.ch/docs/reference/changed-features/implicit-resolution.html
 
 \section{Conclusion}
 

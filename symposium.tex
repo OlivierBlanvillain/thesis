@@ -242,6 +242,8 @@ That transformation must conform to the representation computed at the type leve
 
 In Scala, all type parameters are erased, which leads to some friction when wanting to write programs whose execution \emph{depends} on types, such as in the problem at hand. In this section, we propose two different solutions to that problem.
 
+% TODO: consider inline functions as a 3rd alternative
+
 \begin{enumerate}
   \item In \Cref{subsec:we-ain-t-need-no-dependent-types}, we proceed by sheer force of code duplication: we translate the entirety of our type-level algorithm into term-level functions and use a cast to correlate the two.
 
@@ -314,7 +316,7 @@ We obtained these results by averaging the measurements obtained over 2-hour run
 With these settings, we obtain margins of errors below \textpm1\%, with 99.9\% confidence (omitted in \Cref{fig:regexBars}).
 We run our benchmarks on the latest version of Scala~3 at the time of writing (3.1.2).
 
-\paragraph{Compilation Times} Our library in its code-duplicated variant adds a total of 53~ms over the baseline (an average of +0.3~ms per regex).
+\paragraph{Compilation Times} Our library in its code-duplicated variant adds a total of 53~ms over the baseline's total compilation time (an average of +0.3~ms per regex).
 This corresponds to the cost of match type reduction.
 The implicit-based variant adds another 21~ms (+0.1~ms per regex), which corresponds to the cost of implicit resolution.
 Both variants are thus relatively cheap, which validates their utility for practical uses.

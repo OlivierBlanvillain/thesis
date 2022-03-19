@@ -89,13 +89,13 @@
 
 \maketitle
 
-\begin{slide}{Example 1: Database queries (2016)}
+\begin{slide}{Example 1: database queries (2016)}
 \begin{center}
 \includegraphics[width=0.3\textwidth]{figures/spark.pdf}
 \end{center}
 \end{slide}
 
-\begin{slide}{Example 1: Database queries (2016)}
+\begin{slide}{Example 1: database queries (2016)}
 Spark APIs are practically untyped:
 \begin{code}
 class DataFrame {
@@ -113,7 +113,7 @@ class DF[X] {
 \end{code}
 \end{slide}
 
-\begin{slide}{Example 2: Regular expressions (2022)}
+\begin{slide}{Example 2: regular expressions (2022)}
 Regular expressions in Scala's standard library:
 \begin{code}
 val rational = new Regex("(\\d+)\\.?(\\d+)?")
@@ -149,13 +149,13 @@ class Regex(pattern: String) {
 \end{slide}
 
 \begin{slide}{What changed between 2016 and 2022?}
-Example 1 uses a hack, implicits:
+The Spark library uses a hack, implicits:
 \begin{itemize}
   \item convoluted to use
   \item slow to compile
 \end{itemize}
 
-Example 2 uses a new language construct, match types, one of the main contributions of this thesis.
+The regex library uses match types, a new language construct introduced in this thesis.
 \end{slide}
 
 \begin{slide}{Compilation times for the type-level join operation}
@@ -183,7 +183,7 @@ Scala supports a few singleton types:
 Question: How much of the language can we represent in types?
 \end{slide}
 
-\begin{slide}{Generalized singleton types: A proposal}
+\begin{slide}{Generalized singleton types: a proposal}
 Our proposal consists of 3 changes:
 \begin{enumerate}
   \item new types for if-then-else, pattern matching, constructors, functions calls
@@ -201,7 +201,7 @@ What's the type of | if (x == 0) "zero" else "one"|?
   \pause\item |{ if (x == 0) "zero" else "one" }| ~(proposed, syntactic sugar)
 \end{itemize}
 \pause
-Similarly, we add new types for other constructs: |Match[]|, |New[]| and |Call[]|, and the corresponding syntactic sugar.
+Similarly, we add new types for other constructs: |Match[]|, |New[]|, |Call[]|, |TypeTest[]|, and the corresponding syntactic sugar.
 \end{slide}
 
 \begin{slide}{"Precise mode" of type inference}
@@ -236,7 +236,7 @@ def int2str(x: Int)
 dependent
 def int2str(x: Int)
   : If[x.type @\tp{== 0}@, "zero", "one"]
-  =   if (x == 0) "zero" else "one"
+  = if (x == 0) "zero" else "one"
 \end{code}
 
 \onslide<6>
@@ -244,7 +244,7 @@ def int2str(x: Int)
 dependent
 def int2str(x: Int)
   : If[x.type @\tp{== 0}@, "zero", String]
-  =   if (x == 0) "zero" else readString()
+  = if (x == 0) "zero" else readString()
 \end{code}
 
 \onslide<7>
@@ -268,7 +268,6 @@ dependent def concat(xs: List, ys: List) <: List =
     case x :: xs => x :: concat(xs, ys)
     case Nil => ys
 \end{code}
-\pause
 \begin{overprint}
 \onslide<1-2>
 \begin{code}
@@ -306,20 +305,20 @@ A <: B  iff  eval(A) <: eval(B)
 
 Straightforward for if-then-else:
 \begin{code}
-eval(If[true, A, B]) = A
+eval(If[true,  A, B]) = A
 eval(If[false, A, B]) = B
 \end{code}
 \pause
 
 More interesting for pattern matching: we "desugar" pattern matching expressions into if-then-else \& type tests.
-\pause
-\smallskip
-
+\end{slide}
+\begin{slide}{Type evaluation: type tests}
 We evaluate type tests using subtyping and type disjointness:
-\begin{code}
-eval(@\tp{x.asInstanceOf}@[Foo]) = true   iff  x.type <: Foo
-eval(@\tp{x.asInstanceOf}@[Foo]) = false  iff  disj(x.type, Foo)
-\end{code}
+\begin{itemize}
+  \item |eval(@\tp{x.isInstanceOf}@[T]) = true@ @| \quad if |x.type| is a subtype of |@\tp{T}@|
+  \item |eval(@\tp{x.isInstanceOf}@[T]) = false| \quad if |x.type| and |@\tp{T}@| are disjoint
+  \item |eval(@\tp{x.isInstanceOf}@[T]) = @\tp{x.isInstanceOf}@[T]| \quad otherwise
+\end{itemize}
 \end{slide}
 
 \begin{slide}{Type evaluation: pattern matching example}
@@ -336,7 +335,7 @@ dependent val foo(x: Any) =
 dependent val foo(x: Any): {
   x match
     case s: String => @\tp{s}@
-    @\tp{case i: Int}@ => @\tp{i+1}@
+    @\tp{case i: Int}@ @=>@ @\tp{i+1}@
 } =
   x match
     case s: String => s
@@ -355,41 +354,21 @@ dependent val foo(x: Any): {
 \end{code}
 \end{overprint}
 \bigskip
+\pause\pause\pause
 
-\begin{overprint}
-\onslide<4>
-|foo(42): { foo(42) }|
-\onslide<5>
-|foo(42): { 42.asInstanceOf[Int] + 1 }|
-\onslide<6>
-|foo(42): { 42 + 1 }|
-\onslide<7>
 |foo(42): { 43 }|
-\onslide<8->
-|foo(42): 43|
-\end{overprint}
+\pause
 
-\begin{overprint}
-\onslide<9>
-|foo(readString())|
-\onslide<10>
-|foo(readString()): { foo(_: String) }|
-\onslide<11>
-|foo(readString()): { (_: String).asInstanceOf[String] }|
-\onslide<12>
-|foo(readString()): { (_: String) }|
-\onslide<13>
-|foo(readString()): String|
-\end{overprint}
+|foo(readInt(): { (_: Int) + 1 })|
 \end{slide}
 
-\begin{slide}{Generalized Singletons: Recap}
+\begin{slide}{Generalized singletons: recap}
 
-We proposed the following 3 changes:
+We proposed a generalization of Scala's singleton types:
 \begin{enumerate}
   \item lift a subset of Scala's language constructs to the type level
   \item add a "precise mode" of type inference
-  \item evaluate those types during subtyping
+  \item evaluate types during subtyping
 \end{enumerate}
 \end{slide}
 
@@ -400,30 +379,98 @@ We proposed the following 3 changes:
 \timeline{80}{80}{0}{80}{80}
 \end{slide}
 
-\begin{slide}{Overview}
+\begin{slide}{Pattern matching on types}
 \begin{code}
 type Elem[X] = X match
   case String => Char
   case List[t] => Elem[t]
   case Any => X
 \end{code}
+
+\medskip
+
+\begin{overprint}
+\onslide<2-5>
+\begin{code}
+Elem[String] =:= Char
+\end{code}
+
+\onslide<3-5>
+\begin{code}
+Elem[String] =:= Char
+Elem[Int] =:= Int
+\end{code}
+
+\onslide<4-5>
+\begin{code}
+Elem[String] =:= Char
+Elem[Int] =:= Int
+Elem[List[Int]] =:= Int
+\end{code}
+
+\onslide<5>
+\begin{code}
+Elem[String] =:= Char
+Elem[Int] =:= Int
+Elem[List[Int]] =:= Int
+Elem[Seq[Int]] =:= Elem[Seq[Int]]
+\end{code}
+
+\onslide<6>
+We evaluate type tests using subtyping and type disjointness:
+\begin{itemize}
+  \item |eval(@\tp{x.isInstanceOf}@[T]) = true@ @| \quad if |x.type| is a subtype of |@\tp{T}@|
+  \item |eval(@\tp{x.isInstanceOf}@[T]) = false| \quad if |x.type| and |@\tp{T}@| are disjoint
+  \item |eval(@\tp{x.isInstanceOf}@[T]) = @\tp{x.isInstanceOf}@[T]| \quad otherwise
+\end{itemize}
+
+\onslide<7>
+Match types can be explained in terms of generalized singletons:
+
+\medskip
+\begin{code}
+type Elem[X] = { (_: X) match
+  case _: String => (_: Char)
+  case _: List[t] @=>@ (_: Elem[t])
+  case _: Any => (_: X)
+}
+\end{code}
+
+\onslide<8>
+The type/term correspondence dictates match type semantics:
+
+\medskip
+\begin{code}
+def elem[X <: Singleton](x: X): Elem[X] = x match
+  case x: String => x.charAt(0)
+  case x: List[t] @=>@ elem(x.head)
+  case x: Any => x
+\end{code}
+
+\onslide<9>
+The type/term correspondence dictates match type semantics:
+
+\medskip
+\begin{code}
+def elem[X <: Singleton](x: X): Elem[X] = x match
+  case x: String => x.charAt(0)
+  case x: List[t] => elem(x.head)
+  case x: Any => x
+
+elem[Any]("foo")
+\end{code}
+\vspace{-20pt}
+\end{overprint}
 \end{slide}
 
-\begin{slide}{Disjointness}
-|Elem[Seq[Int]]| is stuck
-\end{slide}
-
-\begin{slide}{Relating match terms and types: a defining property}
-|Elem[Seq[Int]]| is stuck
-\end{slide}
-
-\begin{slide}{Formalizing Match Types}
+\begin{slide}{Formalization}
 System FM is an extension of System \Fsub with
 \begin{itemize}
   \item pattern matching
   \item opaque classes
   \item match types
 \end{itemize}
+\pause
 Design goals:
 \begin{itemize}
   \item explain the essence of match types
@@ -445,7 +492,6 @@ FM(C, $\Psi$, $\Xi$)
 For example:
 
 \begin{tabular}{@{}llll@{}}
-|class A|          &$\C = \{\A\}$     & $\Psi = \varnothing$  & $\Xi = \varnothing$\\
 |class A; class B extends @\tp{A}@| &$\C = \{\A, \B\}$ & $\Psi = \{(\B, \A)\}$ & $\Xi = \varnothing$\\
 |class A; class D| &$\C = \{\A, \D\}$ & $\Psi = \varnothing$  & $\Xi = \{(\A, \D)\}$\\
 |class A; trait T| &$\C = \{\A, \T\}$ & $\Psi = \varnothing$  & $\Xi = \varnothing$\\
@@ -490,7 +536,7 @@ Our proof comes in two versions:
 \end{center}
 \end{slide}
 
-\begin{slide}{Empty Types}
+\begin{slide}{Empty types}
 Our system does not like empty types.
 
 |Nothing|, in particular, is both subtype and disjoint from every type.
@@ -529,8 +575,13 @@ case class Some[+A](value: A)
 
 \end{slide}
 
-\begin{slide}{Match Types, Conclusion}
-TODO
+\begin{slide}{Match types: recap}
+We presented match types, a new language construct for type-level programming:
+\begin{itemize}
+  \item implemented in the Scala 3 compiler
+  \item formalized in an extension of System \Fsub
+  \item already in active use
+\end{itemize}
 \end{slide}
 
 \begin{slide}{Thank you!}
@@ -539,7 +590,7 @@ TODO
 
 \appendix
 
-\begin{slide}{Type-Safe Regular Expressions (simplified)}
+\begin{slide}{Type-safe regular expressions (simplified)}
 \begin{code}
 val rational = new Regex("(\\d+)\\.(\\d+)")
 rational.unapply("3.1415"): Option[(String, String)]
@@ -557,5 +608,4 @@ type Loop[P, Lo, Hi, Acc <: Tuple] =
 \end{code}
 \end{slide}
 
-% \appendix
 \end{document}

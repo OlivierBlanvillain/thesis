@@ -14,7 +14,7 @@
   \catcode`#2=13
   \begingroup%
   \lccode`\~=`#2
-  \lowercase{\endgroup\protected\def~{\mintinline{#1}~}}%
+  \lowercase{\endgroup\protected\def~{\mintinline[escapeinside=@@]{#1}~}}%
 }
 \renewcommand{\fcolorbox}[4][]{#4}
 
@@ -28,7 +28,11 @@
 
 \usepackage{xspace}
 \usepackage{mathtools}
+\def\A{\normalfont\text{A}}
+\def\B{\normalfont\text{B}}
 \def\C{\normalfont\text{C}}
+\def\D{\normalfont\text{D}}
+\def\T{\normalfont\text{T}}
 \def\<:{\allowbreak\operatorname{\normalfont\text{<}:}\allowbreak}
 \def\Fsub{\normalfont{F}\ensuremath{_{\<:}}\xspace}
 
@@ -40,7 +44,7 @@
 \definecolor{implColor}{HTML}{57B5E8}
 \definecolor{singColor}{HTML}{009E73}
 \definecolor{mtpeColor}{HTML}{9400D4}
-\newcommand{\tp}{\color{typeColor}}
+\newcommand{\tp}[1]{\color{typeColor}#1}
 
 \usepackage{tikz}
 \usetikzlibrary{decorations.pathreplacing,positioning, arrows.meta}
@@ -223,7 +227,7 @@ def int2str(x: Int): String =
 \begin{code}
 dependent
 def int2str(x: Int)
-  : { if (x @\tp{}== 0@) "zero" @\tp{}else@ "one" }
+  : { if (x @\tp{== 0}@) "zero" @\tp{else}@ "one" }
   =   if (x == 0) "zero" else "one"
 \end{code}
 
@@ -231,7 +235,7 @@ def int2str(x: Int)
 \begin{code}
 dependent
 def int2str(x: Int)
-  : If[x.type @\tp{}== 0@, "zero", "one"]
+  : If[x.type @\tp{== 0}@, "zero", "one"]
   =   if (x == 0) "zero" else "one"
 \end{code}
 
@@ -239,7 +243,7 @@ def int2str(x: Int)
 \begin{code}
 dependent
 def int2str(x: Int)
-  : If[x.type @\tp{}== 0@, "zero", String]
+  : If[x.type @\tp{== 0}@, "zero", String]
   =   if (x == 0) "zero" else readString()
 \end{code}
 
@@ -247,7 +251,7 @@ def int2str(x: Int)
 \begin{code}
 dependent
 def int2str(x: Int)
-  : { if (x @\tp{}== 0@) "zero" @\tp{}else@ (_: String) }
+  : { if (x @\tp{== 0}@) "zero" @\tp{else}@ (_: String) }
   =   if (x == 0) "zero" else readString()
 \end{code}
 \end{overprint}
@@ -257,7 +261,7 @@ def int2str(x: Int)
 The "precise mode" is best effort: it lifts whatever possible to the type level and approximates the rest.
 \end{slide}
 
-\begin{slide}{List concatenation with generalized singleton types}
+\begin{slide}{"Precise mode" of type inference: list concatenation example}
 \begin{code}
 dependent def concat(xs: List, ys: List) <: List =
   xs match
@@ -313,8 +317,8 @@ More interesting for pattern matching: we "desugar" pattern matching expressions
 
 We evaluate type tests using subtyping and type disjointness:
 \begin{code}
-eval(@\tp{}x.asInstanceOf@[Foo]) = true   iff  x.type <: Foo
-eval(@\tp{}x.asInstanceOf@[Foo]) = false  iff  disj(x.type, Foo)
+eval(@\tp{x.asInstanceOf}@[Foo]) = true   iff  x.type <: Foo
+eval(@\tp{x.asInstanceOf}@[Foo]) = false  iff  disj(x.type, Foo)
 \end{code}
 \end{slide}
 
@@ -331,8 +335,8 @@ dependent val foo(x: Any) =
 \begin{code}
 dependent val foo(x: Any): {
   x match
-    case s: String => @\tp{}s@
-    @\tp{}case i: Int@ => @\tp{}i+1@
+    case s: String => @\tp{s}@
+    @\tp{case i: Int}@ => @\tp{i+1}@
 } =
   x match
     case s: String => s
@@ -342,8 +346,8 @@ dependent val foo(x: Any): {
 \begin{code}
 dependent val foo(x: Any): {
   if (x.isInstanceOf[String]) x.asInstanceOf[String]
-  @\tp{}else if @(@\tp{}x.isInstanceOf@[@\tp{}Int@]) @\tp{}x.asInstanceOf@[Int] @\tp{}+ 1@
-  @\tp{}else throw new@ MatchError()
+  @\tp{else if }@(@\tp{x.isInstanceOf}@[@\tp{Int}@]) @\tp{x.asInstanceOf}@[Int] @\tp{+ 1}@
+  @\tp{else throw new}@ MatchError()
 } =
   x match
     case s: String => s
@@ -351,21 +355,44 @@ dependent val foo(x: Any): {
 \end{code}
 \end{overprint}
 \bigskip
+
 \begin{overprint}
 \onslide<4>
-|foo(readString())|
+|foo(42): { foo(42) }|
 \onslide<5>
-|foo(readString()): { foo(_: String) }|
+|foo(42): { 42.asInstanceOf[Int] + 1 }|
 \onslide<6>
-|foo(readString()): { (_: String).asInstanceOf[String] }|
+|foo(42): { 42 + 1 }|
 \onslide<7>
+|foo(42): { 43 }|
+\onslide<8->
+|foo(42): 43|
+\end{overprint}
+
+\begin{overprint}
+\onslide<9>
+|foo(readString())|
+\onslide<10>
+|foo(readString()): { foo(_: String) }|
+\onslide<11>
+|foo(readString()): { (_: String).asInstanceOf[String] }|
+\onslide<12>
 |foo(readString()): { (_: String) }|
-\onslide<8>
+\onslide<13>
 |foo(readString()): String|
 \end{overprint}
 \end{slide}
 
-\begin{slide}{Generalized Singletons: Conclusion}
+\begin{slide}{Generalized Singletons: Recap}
+
+We proposed the following 3 changes:
+\begin{enumerate}
+  \item lift a subset of Scala's language constructs to the type level
+  \item add a "precise mode" of type inference
+  \item evaluate those types during subtyping
+\end{enumerate}
+\end{slide}
+
 TODO
 \end{slide}
 
@@ -417,83 +444,119 @@ FM(C, $\Psi$, $\Xi$)
   \item $\Psi \coloneqq$ class inheritance relation
   \item $\Xi \hspace{1.1pt} \coloneqq$ class disjointness relation
 \end{itemize}
-
+\pause
 For example:
 
-|class A|                    -> C={A}, $\Psi$={}, $\Xi$={}
-|class A; class B extends A| -> C={A, B}, $\Psi$={(A, B)}, $\Xi$={}
-|class A; class D|           -> C={A, D}, $\Psi$={}, $\Xi$={(A, D)}
-|class A; trait T|           -> C={A, T}, $\Psi$={}, $\Xi$={}
+\begin{tabular}{@{}llll@{}}
+|class A|          &$\C = \{\A\}$     & $\Psi = \varnothing$  & $\Xi = \varnothing$\\
+|class A; class B extends @\tp{A}@| &$\C = \{\A, \B\}$ & $\Psi = \{(\B, \A)\}$ & $\Xi = \varnothing$\\
+|class A; class D| &$\C = \{\A, \D\}$ & $\Psi = \varnothing$  & $\Xi = \{(\A, \D)\}$\\
+|class A; trait T| &$\C = \{\A, \T\}$ & $\Psi = \varnothing$  & $\Xi = \varnothing$\\
+\end{tabular}
 \end{slide}
 
 \begin{slide}{System FM's syntax}
 \includegraphics[width=\textwidth]{figures/FMSyntax.pdf}
 \end{slide}
 
-\begin{slide}{System FM's disjointness relation}
-\includegraphics[width=\textwidth]{figures/FMDisjointness.pdf}
+\begin{slide}{System FM's pattern matching evaluation}
+Given a concrete scrutinee, we evaluate match expressions with a few lookups in the inheritance relation:
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/FMEMatch.pdf}
+\end{center}
 \end{slide}
 
-\begin{slide}{System FM's new subtyping rules}
-\includegraphics[width=\textwidth]{figures/FMSubtyping.pdf}
+\begin{slide}{System FM's disjointness relation}
+\begin{center}
+\includegraphics[width=0.9\textwidth]{figures/FMDisjointness.pdf}
+\end{center}
+\end{slide}
+
+\begin{slide}{System FM's match types evaluation rule (subtyping)}
+\includegraphics[width=\textwidth]{figures/FMSMatch.pdf}
 \end{slide}
 
 
 \begin{slide}{System FM's type safety}
-theorems
+We show type safety through the progress and preservation.
 
-two versions of the proof, pen and paper and Coq
+Our proof comes in two versions:
+\begin{enumerate}
+  \item Pen and paper (\textasciitilde30 pages)
+  \item Coq mechanization (\textasciitilde6000 LOC)
+\end{enumerate}
 \end{slide}
 
 \begin{slide}{Structure of the type safety proof}
-\includegraphics[width=\textwidth]{figures/FMProofStructure.pdf}
-\end{slide}
-
-\begin{slide}{Limitations}
-- type binders
-- higher-kinded types
-- recursion
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/FMProofStructure.pdf}
+\end{center}
 \end{slide}
 
 \begin{slide}{Empty Types}
+Our system does not like empty types.
+
+|Nothing|, in particular, is both subtype and disjoint from every type.
+
+Intersections require special care.
+
+\pause
+
 \begin{code}
 type M[X] = X match
   case Int => String
   case String => Int
+
 class C:
   type X
   def f(bad: M[X & String]): Int = bad
+
 class D extends C:
   type X = Int
 \end{code}
 \end{slide}
 
 \begin{slide}{Variance}
-\begin{code}
-F[+T]: T1 <: T2 => F[T1] <: F[T2]
-G[-T]: T1 <: T2 => G[T1] >: G[T2]
+At first glance, we can't prove disjointness when variance is involved.
 
-case class Tuple2[+T1, +T2](_1: T1, _2: T2)
+|F[+T]:| \quad |T1 <: T2| \quad implies \quad |F[T1] <: F[T2]|\\
+|G[-T]:| \quad |T1 <: T2| \quad implies \quad |G[T1] >: G[T2]|
+\pause
+
+We make an exception for covariant type that are used as class fields:
+\begin{code}
+case class Some[+A](value: A)
 \end{code}
+
+|Some[String]| and |Some[Int]| are disjoint, since there is no runtime value of type |Some[Nothing]|.
+
 \end{slide}
 
 \begin{slide}{Match Types, Conclusion}
 TODO
 \end{slide}
 
-\begin{slide}{Type-Safe Regular Expressions}
-\timeline{80}{80}{80}{0}{80}
+\begin{slide}{Thank you!}
+\timeline{0}{0}{0}{0}{0}
 \end{slide}
 
-\begin{slide}{Type-Safe Regular Expressions (2022)}
-\begin{code}
-val rational = new Regex("(\\d+)\\.?(\\d+)?")
-rational.unapply("3.1415"): Option[(String, Option[String])]
-\end{code}
-\pause
-\begin{code}
-type GroupsOf[P <: String] = ...
+\appendix
 
+\begin{slide}{Type-Safe Regular Expressions (simplified)}
+\begin{code}
+val rational = new Regex("(\\d+)\\.(\\d+)")
+rational.unapply("3.1415"): Option[(String, String)]
+
+type GroupsOf[P <: String] =
+  Reverse[Loop[P, 0, Length[P], EmptyTuple]]
+
+type Loop[P, Lo, Hi, Acc <: Tuple] =
+  Lo match
+    case Hi => Acc
+    case _ => CharAt[P, Lo] match
+      case '('  => Loop[P, Lo + 1, Hi, String *: Acc]
+      case '\\' => Loop[P, Lo + 2, Hi, Acc]
+      case _ => Loop[P, Lo + 1, Hi, Acc]
 \end{code}
 \end{slide}
 

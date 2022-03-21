@@ -26,6 +26,7 @@
 \setbeamercolor{progress bar in section page}{bg=black, fg=black}
 \setbeamercovered{transparent}
 
+\usepackage{ulem}
 \usepackage{xspace}
 \usepackage{mathtools}
 \def\A{\normalfont\text{A}}
@@ -155,12 +156,12 @@ The Spark library uses a hack, implicits:
   \item slow to compile
 \end{itemize}
 
-The regex library uses match types, a new language construct introduced in this thesis.
+The regex library uses technology developed in this thesis.
 \end{slide}
 
 \begin{slide}{Compilation times for the type-level join operation}
 \begin{center}
-\input{figures/join.gex}
+\input{figures/join-slides.gex}
 \end{center}
 \end{slide}
 
@@ -173,14 +174,20 @@ The regex library uses match types, a new language construct introduced in this 
 \end{slide}
 
 \begin{slide}{Singleton types}
-Scala supports a few singleton types:
+\begin{block}{Definition}
+A singleton type is a type that contains exactly one value.
+\end{block}
+
+\pause
+
+Scala has a few of those:
 \begin{itemize}
   \item |x.type|, the type of the variable |x| (since forever)
   \item |42|, the type of the integer literal |42| (since 2016)
   \item |+|, the type of integer addition (since 2020)
 \end{itemize}
 \pause
-Question: How much of the language can we represent in types?
+Question: How much more of the language can we represent as singleton types?
 \end{slide}
 
 \begin{slide}{Generalized singleton types: a proposal}
@@ -268,28 +275,29 @@ dependent def concat(xs: List, ys: List) <: List =
     case x :: xs => x :: concat(xs, ys)
     case Nil => ys
 \end{code}
+
 \begin{overprint}
-\onslide<1-2>
+\onslide<1>
 \begin{code}
-dependent val l1 = "A" :: Nil
-dependent val l2 = "B" :: Nil
-dependent val l3 = concat(l1, l2)
+dependent val l1 @=@ "A" :: Nil
+dependent val l2 @=@ "B" :: Nil
+dependent val l3 @=@ concat(l1, l2)
 l3: { "A" :: "B" :: Nil }
+\end{code}
+
+\onslide<2>
+\begin{code}
+val l1: List     @=@ "A" :: Nil
+dependent val l2 @=@ "B" :: Nil
+dependent val l3 @=@ concat(l1, l2)
+l3: { concat(l1, l2) }
 \end{code}
 
 \onslide<3>
 \begin{code}
-val l1: List     = "A" :: Nil
-dependent val l2 = "B" :: Nil
-dependent val l3 = concat(l1, l2)
-l3: { concat(l1, l2) }
-\end{code}
-
-\onslide<4>
-\begin{code}
-dependent val l1 = "A" :: Nil
-val l2: List     = "B" :: Nil
-dependent val l3 = concat(l1, l2)
+dependent val l1 @=@ "A" :: Nil
+val l2: List     @=@ "B" :: Nil
+dependent val l3 @=@ concat(l1, l2)
 l3: { "A" :: l2 }
 \end{code}
 
@@ -298,16 +306,16 @@ l3: { "A" :: l2 }
 
 \begin{slide}{Type evaluation}
 During subtyping, we evaluate both sides:
-\begin{code}
-A <: B  iff  eval(A) <: eval(B)
-\end{code}
+\begin{itemize}
+  \item |A <: B|  \quad if \quad eval(|A|) |<:| eval(|B|)
+\end{itemize}
 \pause
 
 Straightforward for if-then-else:
-\begin{code}
-eval(If[true,  A, B]) = A
-eval(If[false, A, B]) = B
-\end{code}
+\begin{itemize}
+  \item eval(|If[true, A, B]|) = |A|
+  \item eval(|If[false, A, B]|) = |B|
+\end{itemize}
 \pause
 
 More interesting for pattern matching: we "desugar" pattern matching expressions into if-then-else \& type tests.
@@ -315,9 +323,9 @@ More interesting for pattern matching: we "desugar" pattern matching expressions
 \begin{slide}{Type evaluation: type tests}
 We evaluate type tests using subtyping and type disjointness:
 \begin{itemize}
-  \item |eval(@\tp{x.isInstanceOf}@[T]) = true@ @| \quad if |x.type| is a subtype of |@\tp{T}@|
-  \item |eval(@\tp{x.isInstanceOf}@[T]) = false| \quad if |x.type| and |@\tp{T}@| are disjoint
-  \item |eval(@\tp{x.isInstanceOf}@[T]) = @\tp{x.isInstanceOf}@[T]| \quad otherwise
+  \item eval(|@\tp{x.isInstanceOf}@[T]|) = |true@ @| \quad if |x.type| is a subtype of |@\tp{T}@|
+  \item eval(|@\tp{x.isInstanceOf}@[T]|) = |false| \quad if |x.type| and |@\tp{T}@| are disjoint
+  \item eval(|@\tp{x.isInstanceOf}@[T]|) = |@\tp{x.isInstanceOf}@[T]| \quad otherwise
 \end{itemize}
 \end{slide}
 
@@ -359,11 +367,30 @@ dependent val foo(x: Any): {
 |foo(42): { 43 }|
 \pause
 
-|foo(readInt(): { (_: Int) + 1 })|
+|foo(readInt()): { (_: Int) + 1 }|
+\end{slide}
+
+\begin{slide}{Generalized, or not singleton at all?}
+\begin{code}
+dependent
+def int2str(x: Int)
+  : { if (x @\tp{== 0}@) "zero" @\tp{else}@ (_: String) }
+  =   if (x == 0) "zero" else readString()
+\end{code}
+\begin{overprint}
+\onslide<1>
+\begin{block}{Definition}
+A singleton type is a type that contains exactly one value.
+\end{block}
+
+\onslide<2>
+\begin{block}{Definition}
+\sout{A singleton type is a type that contains exactly one value.}
+\end{block}
+\end{overprint}
 \end{slide}
 
 \begin{slide}{Generalized singletons: recap}
-
 We proposed a generalization of Scala's singleton types:
 \begin{enumerate}
   \item lift a subset of Scala's language constructs to the type level
@@ -372,8 +399,8 @@ We proposed a generalization of Scala's singleton types:
 \end{enumerate}
 \end{slide}
 
-% Termination
-% Virtual dispatch
+% % Termination
+% % Virtual dispatch
 
 \begin{slide}{Part II: Match Types}
 \timeline{80}{80}{0}{80}{80}
@@ -390,41 +417,7 @@ type Elem[X] = X match
 \medskip
 
 \begin{overprint}
-\onslide<2-5>
-\begin{code}
-Elem[String] =:= Char
-\end{code}
-
-\onslide<3-5>
-\begin{code}
-Elem[String] =:= Char
-Elem[Int] =:= Int
-\end{code}
-
-\onslide<4-5>
-\begin{code}
-Elem[String] =:= Char
-Elem[Int] =:= Int
-Elem[List[Int]] =:= Int
-\end{code}
-
-\onslide<5>
-\begin{code}
-Elem[String] =:= Char
-Elem[Int] =:= Int
-Elem[List[Int]] =:= Int
-Elem[Seq[Int]] =:= Elem[Seq[Int]]
-\end{code}
-
-\onslide<6>
-We evaluate type tests using subtyping and type disjointness:
-\begin{itemize}
-  \item |eval(@\tp{x.isInstanceOf}@[T]) = true@ @| \quad if |x.type| is a subtype of |@\tp{T}@|
-  \item |eval(@\tp{x.isInstanceOf}@[T]) = false| \quad if |x.type| and |@\tp{T}@| are disjoint
-  \item |eval(@\tp{x.isInstanceOf}@[T]) = @\tp{x.isInstanceOf}@[T]| \quad otherwise
-\end{itemize}
-
-\onslide<7>
+\onslide<2>
 Match types can be explained in terms of generalized singletons:
 
 \medskip
@@ -436,38 +429,46 @@ type Elem[X] = { (_: X) match
 }
 \end{code}
 
-\onslide<8>
+\onslide<3>
+We evaluate type tests using subtyping and type disjointness:
+\begin{itemize}
+  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |true@ @| \quad if |@\tp{X}@| is a subtype of |@\tp{T}@|
+  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |false| \quad if |@\tp{X}@| and |@\tp{T}@| are disjoint
+  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |@\tp{X.isInstanceOf}@[T]| \quad otherwise
+\end{itemize}
+
+\onslide<4>
 The type/term correspondence dictates match type semantics:
 
 \medskip
 \begin{code}
-def elem[X <: Singleton](x: X): Elem[X] = x match
+def elem[X](x: X): Elem[X] = x match
   case x: String => x.charAt(0)
   case x: List[t] @=>@ elem(x.head)
   case x: Any => x
 \end{code}
 
-\onslide<9>
+\onslide<5>
 The type/term correspondence dictates match type semantics:
 
 \medskip
 \begin{code}
-def elem[X <: Singleton](x: X): Elem[X] = x match
+def elem[X](x: X): Elem[X] = x match
   case x: String => x.charAt(0)
-  case x: List[t] => elem(x.head)
+  case x: List[t] @=>@ elem(x.head)
   case x: Any => x
 
 elem[Any]("foo")
 \end{code}
-\vspace{-20pt}
+\vspace{-10pt}
 \end{overprint}
 \end{slide}
 
 \begin{slide}{Formalization}
 System FM is an extension of System \Fsub with
 \begin{itemize}
+  \item classes (defined externally)
   \item pattern matching
-  \item opaque classes
   \item match types
 \end{itemize}
 \pause
@@ -502,23 +503,24 @@ For example:
 \includegraphics[width=\textwidth]{figures/FMSyntax.pdf}
 \end{slide}
 
-\begin{slide}{System FM's pattern matching evaluation}
-Given a concrete scrutinee, we evaluate match expressions with a few lookups in the inheritance relation:
-\begin{center}
-\includegraphics[width=0.8\textwidth]{figures/FMEMatch.pdf}
-\end{center}
-\end{slide}
-
 \begin{slide}{System FM's disjointness relation}
 \begin{center}
-\includegraphics[width=0.9\textwidth]{figures/FMDisjointness.pdf}
+\includegraphics[width=\textwidth]{figures/FMDisjointness.pdf}
 \end{center}
 \end{slide}
 
-\begin{slide}{System FM's match types evaluation rule (subtyping)}
-\includegraphics[width=\textwidth]{figures/FMSMatch.pdf}
-\end{slide}
+\begin{slide}{System FM's evaluation rules}
+We evaluate term-level matches by querying the class inheritance relation:
+\begin{center}
+\includegraphics{figures/FMEMatch.pdf}
+\end{center}
 
+\visible<2>{We evaluate type-level matches using subtyping and disjointness:}
+
+\begin{center}
+\visible<2>{\includegraphics{figures/FMSMatch.pdf}}
+\end{center}
+\end{slide}
 
 \begin{slide}{System FM's type safety}
 We show type safety through the progress and preservation.
@@ -537,11 +539,16 @@ Our proof comes in two versions:
 \end{slide}
 
 \begin{slide}{Empty types}
+
+\begin{block}{Definition}
+An empty type is a type that contains no values.
+\end{block}
+
+\pause
+
 Our system does not like empty types.
 
 |Nothing|, in particular, is both subtype and disjoint from every type.
-
-Intersections require special care.
 
 \pause
 
@@ -560,10 +567,18 @@ class D extends C:
 \end{slide}
 
 \begin{slide}{Variance}
-At first glance, we can't prove disjointness when variance is involved.
+\begin{block}{Definitions}
+|F| is covariant in |@\tp{T}@|, written |F[+T]|, if |@\tp{T1}@| |<:| |@\tp{T2}@| implies |F[T1]| |<:| |F[T2]|.\\
+|G| is contravariant in |@\tp{T}@|, |G[-T]|, if |@\tp{T1}@| |<:| |@\tp{T2}@| implies |G[T1]| |>:| |G[T2]|.
+\end{block}
 
-|F[+T]:| \quad |T1 <: T2| \quad implies \quad |F[T1] <: F[T2]|\\
-|G[-T]:| \quad |T1 <: T2| \quad implies \quad |G[T1] >: G[T2]|
+\pause
+
+We cannot prove disjointness when variance is involved:
+
+$\forall$ |T1|, |T2|. \quad  |F[Nothing] <: F[T1]| \quad  and  \quad |F[Nothing] <: F[T2]|\\
+$\forall$ |T1|, |T2|. \quad  |    G[Any] <: G[T1]|  \quad and  \quad |    G[Any] <: G[T2]|
+
 \pause
 
 We make an exception for covariant type that are used as class fields:
@@ -588,24 +603,24 @@ We presented match types, a new language construct for type-level programming:
 \timeline{0}{0}{0}{0}{0}
 \end{slide}
 
-\appendix
+% \appendix
 
-\begin{slide}{Type-safe regular expressions (simplified)}
-\begin{code}
-val rational = new Regex("(\\d+)\\.(\\d+)")
-rational.unapply("3.1415"): Option[(String, String)]
+% \begin{slide}{Type-safe regular expressions (simplified)}
+% \begin{code}
+% val rational = new Regex("(\\d+)\\.(\\d+)")
+% rational.unapply("3.1415"): Option[(String, String)]
 
-type GroupsOf[P <: String] =
-  Reverse[Loop[P, 0, Length[P], EmptyTuple]]
+% type GroupsOf[P <: String] =
+%   Reverse[Loop[P, 0, Length[P], EmptyTuple]]
 
-type Loop[P, Lo, Hi, Acc <: Tuple] =
-  Lo match
-    case Hi => Acc
-    case _ => CharAt[P, Lo] match
-      case '('  => Loop[P, Lo + 1, Hi, String *: Acc]
-      case '\\' => Loop[P, Lo + 2, Hi, Acc]
-      case _ => Loop[P, Lo + 1, Hi, Acc]
-\end{code}
-\end{slide}
+% type Loop[P, Lo, Hi, Acc <: Tuple] =
+%   Lo match
+%     case Hi => Acc
+%     case _ => CharAt[P, Lo] match
+%       case '('  => Loop[P, Lo + 1, Hi, String *: Acc]
+%       case '\\' => Loop[P, Lo + 2, Hi, Acc]
+%       case _ => Loop[P, Lo + 1, Hi, Acc]
+% \end{code}
+% \end{slide}
 
 \end{document}

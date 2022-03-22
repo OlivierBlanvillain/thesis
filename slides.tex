@@ -26,6 +26,14 @@
 \setbeamercolor{progress bar in section page}{bg=black, fg=black}
 \setbeamercovered{transparent}
 
+\usepackage[sorting=none, backend=biber, maxbibnames=9]{biblatex}
+\settowidth\labelnumberwidth{\usebeamertemplate*{bibliography item}}
+\AtEveryBibitem{\clearfield{note}}
+\AtEveryBibitem{\clearfield{volume}}
+\AtBeginBibliography{\small}
+\bibliography{bibliography}
+
+\usepackage{textpos}
 \usepackage{ulem}
 \usepackage{xspace}
 \usepackage{mathtools}
@@ -156,7 +164,12 @@ The Spark library uses a hack, implicits:
   \item slow to compile
 \end{itemize}
 
-The regex library uses technology developed in this thesis.
+The regex library uses a first-class language construct:
+\begin{itemize}
+  \item easier to use
+  \item faster to compile
+\end{itemize}
+
 \end{slide}
 
 \begin{slide}{Compilation times for the type-level join operation}
@@ -166,11 +179,29 @@ The regex library uses technology developed in this thesis.
 \end{slide}
 
 \begin{slide}{Timeline of my PhD}
+\begin{overprint}
+\onslide<1>
 \timeline{0}{0}{0}{0}{0}
-\end{slide}
-
-\begin{slide}{Part I: Generalized Singleton Types}
+\onslide<2>
+\timeline{80}{80}{80}{0}{80}
+\vspace{-10pt}
+\begin{refsection}%
+\raggedright
+\phantom{\cite{blanvillain2022regular}}%
+\printbibliography[heading=subbibliography]%
+\end{refsection}
+\vspace{-40pt}
+\onslide<3>
 \timeline{80}{0}{80}{80}{80}
+\onslide<4>
+\timeline{80}{0}{80}{80}{80}
+\vspace{-10pt}
+\begin{refsection}%
+\phantom{\cite{schmid2020coming}}%
+\printbibliography[heading=subbibliography]%
+\end{refsection}
+\vspace{-40pt}
+\end{overprint}
 \end{slide}
 
 \begin{slide}{Singleton types}
@@ -370,26 +401,6 @@ dependent val foo(x: Any): {
 |foo(readInt()): { (_: Int) + 1 }|
 \end{slide}
 
-\begin{slide}{Generalized, or not singleton at all?}
-\begin{code}
-dependent
-def int2str(x: Int)
-  : { if (x @\tp{== 0}@) "zero" @\tp{else}@ (_: String) }
-  =   if (x == 0) "zero" else readString()
-\end{code}
-\begin{overprint}
-\onslide<1>
-\begin{block}{Definition}
-A singleton type is a type that contains exactly one value.
-\end{block}
-
-\onslide<2>
-\begin{block}{Definition}
-\sout{A singleton type is a type that contains exactly one value.}
-\end{block}
-\end{overprint}
-\end{slide}
-
 \begin{slide}{Generalized singletons: recap}
 We proposed a generalization of Scala's singleton types:
 \begin{enumerate}
@@ -403,7 +414,18 @@ We proposed a generalization of Scala's singleton types:
 % % Virtual dispatch
 
 \begin{slide}{Part II: Match Types}
+\begin{overprint}
+\onslide<1>
 \timeline{80}{80}{0}{80}{80}
+\onslide<2>
+\timeline{80}{80}{0}{80}{80}
+\vspace{-10pt}
+\begin{refsection}%
+\phantom{\cite{blanvillain2022type}}%
+\printbibliography[heading=subbibliography]%
+\end{refsection}
+\vspace{-40pt}
+\end{overprint}
 \end{slide}
 
 \begin{slide}{Pattern matching on types}
@@ -418,6 +440,23 @@ type Elem[X] = X match
 
 \begin{overprint}
 \onslide<2>
+Some examples of reduction:
+\begin{itemize}
+  \item |Elem[String] =:= Char|
+  \item |Elem[Int] =:= Int|
+  \item |Elem[List[Int]] =:= Int|
+  \item |Elem[Any] =:= Elem[Any]|
+\end{itemize}
+
+\onslide<3>
+We evaluate type tests using subtyping and type disjointness:
+\begin{itemize}
+  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |true@ @| \quad if |@\tp{X}@| is a subtype of |@\tp{T}@|
+  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |false| \quad if |@\tp{X}@| and |@\tp{T}@| are disjoint
+  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |@\tp{X.isInstanceOf}@[T]| \quad otherwise
+\end{itemize}
+
+\onslide<4>
 Match types can be explained in terms of generalized singletons:
 
 \medskip
@@ -429,15 +468,7 @@ type Elem[X] = { (_: X) match
 }
 \end{code}
 
-\onslide<3>
-We evaluate type tests using subtyping and type disjointness:
-\begin{itemize}
-  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |true@ @| \quad if |@\tp{X}@| is a subtype of |@\tp{T}@|
-  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |false| \quad if |@\tp{X}@| and |@\tp{T}@| are disjoint
-  \item eval(|@\tp{X.isInstanceOf}@[T]|) = |@\tp{X.isInstanceOf}@[T]| \quad otherwise
-\end{itemize}
-
-\onslide<4>
+\onslide<5>
 The type/term correspondence dictates match type semantics:
 
 \medskip
@@ -448,7 +479,7 @@ def elem[X](x: X): Elem[X] = x match
   case x: Any => x
 \end{code}
 
-\onslide<5>
+\onslide<6>
 The type/term correspondence dictates match type semantics:
 
 \medskip
@@ -460,7 +491,6 @@ def elem[X](x: X): Elem[X] = x match
 
 elem[Any]("foo")
 \end{code}
-\vspace{-10pt}
 \end{overprint}
 \end{slide}
 
@@ -538,6 +568,16 @@ Our proof comes in two versions:
 \end{center}
 \end{slide}
 
+\begin{slide}{Formalization vs implementation}
+Our implementation goes much further than System FM:
+\begin{itemize}
+  \item recursion / non-termination
+  \item type parameter bindings (|case List[t]|)
+  \item empty types
+  \item variance
+\end{itemize}
+\end{slide}
+
 \begin{slide}{Empty types}
 
 \begin{block}{Definition}
@@ -574,7 +614,7 @@ class D extends C:
 
 \pause
 
-We cannot prove disjointness when variance is involved:
+We cannot prove disjointness when variance is involved, |F[T1]| and |F[T2]| always overlap:
 
 $\forall$ |T1|, |T2|. \quad  |F[Nothing] <: F[T1]| \quad  and  \quad |F[Nothing] <: F[T2]|\\
 $\forall$ |T1|, |T2|. \quad  |    G[Any] <: G[T1]|  \quad and  \quad |    G[Any] <: G[T2]|

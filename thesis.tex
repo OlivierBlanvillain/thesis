@@ -235,6 +235,7 @@ Let us consider the implementation of the remove operation in more detail:
 \noindent
 The |Remove| trait takes 3 type parameters: 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the element removed).
 The two implicit definitions, |casehead| and |casetail|, correspond to the base case and the recursive case of the list removal operation, respectively.
+The right-hand side of those definitions is devoid of meaning, instances of the |Remove| trait merely act as placeholders (the type parameters of those constructor calls are inferred from their expected type).
 The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and an unconstrained output type.
 
 When the given element is not part of the list, implicit resolution fails with an "implicit not found" error, which indicates the incorrect use of |Remove|.
@@ -253,7 +254,7 @@ Instead of specifying that constraint in the documentation, we can represent the
 \addEventListenerImplicitDef
 
 \noindent
-The |Singleton| type bound is a marker that instructs type inference to preserve literal singleton types (by default, the compiler widens those types).
+The |Singleton| type bound is a marker that instructs type inference to preserve union types and literal singleton types (by default, the compiler widens those types).
 The "|?|" type is Scala~3's new syntax for wildcard types~\citep[Wildcard Arguments in Types]{odersky2013scala}.
 
 With this updated signature, the compiler is able to detect invalid event types at compile time.
@@ -356,6 +357,8 @@ The said report covers more material than what is included in this chapter, in p
 
 \chapter{Match Types}
 \label{chap:match-types}
+
+% TODO: Compare to singleton types
 
 Type-level programming is becoming more and more popular in the realm of functional programming.
 However, the combination of type-level programming and subtyping remains largely unexplored in practical programming languages.

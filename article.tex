@@ -718,7 +718,7 @@ We use a match type called |ReduceAxes| to compute the return shape of the opera
 
 We implement reductions along a given list of indices with logic similar to two nested loops.
 The outer loop, |Loop|, traverses the shape and counts the current index.
-The inner loops are implemented using |Contains| and |Remove|, standard operations on HLists (omitted).
+The inner loops are implemented using the standard |Contains| and |Remove| operations.
 When |Loop| reaches the end of the list, if there are still axes to remove, these are out of bounds for the initial shape: the match type intentionally gets stuck in such cases.
 %
 \reduceType

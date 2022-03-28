@@ -245,7 +245,7 @@ As a result, these custom extractors can contain arbitrary side effects.
 Our implementation limits the kind of patterns available in types to the two simplest forms: decomposition of case classes and the type-tests/type-casts patterns.
 
 During type normalization, our system evaluates pattern matching expressions according to Scala's runtime semantics.
-Patterns are checked top-to-bottom, and type-tests are evaluated using runtime type information available after type erasure.
+Patterns are checked top-to-bottom, and type-tests are evaluated using subtyping checks.
 
 For example, consider the following pattern matching expression:
 
@@ -285,7 +285,8 @@ our system infers the following result type:
 \end{lstlisting}
 
 \noindent
-We could have equivalently defined |getName| by omitting the |dependent| qualifier and writing its result type  explicitly.
+We could have equivalently defined |getName| by omitting the |dependent| qualifier and writing its result type explicitly.
+The difference between the two would only be matter of syntax.
 
 Scala requires recursive methods to have an explicit result type, and this restriction also applies to |dependent| methods.
 However, in the case of a |dependent| method, an explicit result type is only used as an upper bound for the actual precise result type and will only be used to type-check the method's body.
@@ -304,7 +305,7 @@ However, we can still assign singleton types to expressions containing |z|, for 
 Similarly to how we model other side effects, exceptions are approximated in types.
 Our type-inference algorithm uses a new error type, |Error(e)|, which we infer when raising an exception with |throw e|.
 Exception handlers are typed imprecisely using the default mode of type-inference.
-Exceptions thrown in statement positions are not reflected in singleton types, since the type of |{e1; e2}| is simply |{ e2 }|.
+Exceptions thrown in statement positions are not reflected in singleton types, since the type of |{ e1; e2 }| is simply |{ e2 }|.
 However, exceptions thrown in tail positions (such as in remove from \Cref{sec:motivating-example}) can lead to types normalizing to |Error(e)|.
 In these cases, our type system can prove that the program execution will encounter exceptional behavior, and report a compilation error.
 This approach is conservative in that it might reject programs that recover from exceptions.

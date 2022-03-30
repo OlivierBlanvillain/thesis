@@ -411,7 +411,7 @@ Dependent types can be used to precisely model these conversions.
 We define a type function to compute the result type of additions:
 
 \begin{lstlisting}
-def addRes(a: Any, b: Any) =
+dependent def addRes(a: Any, b: Any) =
   (a, b) match
     case (_: Char, _: Char | Byte | Int  | Long | Double) => _: Double
     case (_: Byte, _: Byte | Int  | Long | Double)        => b

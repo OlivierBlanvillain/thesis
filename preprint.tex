@@ -332,7 +332,7 @@ We distinguish two important aspects of termination: the termination of type-che
 Proving termination or totality of programs is a non-goal of our system.
 Unlike proof assistants, Scala programs do not manipulate proof terms.
 Consequently, the lack of totality checks does not affect Scala's present notion of safety.
-Exceptions or infinite loops in the evaluation of a `dependent` method would prevent the completion of type-checking.
+Exceptions or infinite loops in the evaluation of a |dependent| method would prevent the completion of type-checking.
 
 The second question is termination of our type checker.
 Non-termination of type checking implies that the type checker can give three possible answers, "type correct", "type incorrect" or "do not know" (when type checking times out).
@@ -516,4 +516,18 @@ Given the extremely dynamic nature of Ruby, it is unsurprising that their soluti
 In their work, type checking happens entirely at runtime and has to be performed at every function invocation to account for possible changes in function definitions.
 Safety is obtained by inserting dynamic checks, similarly to gradual typing.
 
-% TODO: Compare to pure subtype systems
+Dependently-typed lambda calculi with subtyping were described at least as far back as 1988~\citep{cardelli1988structural}.
+His type system is much more expressive than ours and allows bounded quantification over both types and terms using the notion of a |Type| type and power types.
+Unlike our system, which is designed with the concrete evaluation of types in mind, Cardelli does not provide a semantics for his system and leaves the equivalence relation among types unspecified.
+
+In~\citep{aspinall1994subtyping} Aspinall introduces a dependently-typed system with subtyping \emph{and} singleton types that resembles ours in its type language.
+His equivalence relation on types is more powerful and is not syntax-directed, unlike our type evaluation relation.
+Furthermore, singleton types in his work are indexed by the type through which equality is "viewed", thereby enabling a form of polymorphism beyond ours.
+Aspinall's system also has primitives types and allows for atomic subtyping among them, but no congruence rules, so partially-widened forms like |(_: Any) :: Nil| cannot be represented.
+
+Pure subtype systems~\citep{hutchins2010pure} are different in that they only contain a single syntactic category for both terms and types, and a single relation, subtyping, that subsumes typing, subtyping and type evaluation of our system.
+However, their system allows for partially-widened types similar to ours and also enables the computation with different levels of precision.
+For instance, it is able to conclude that |Int + 5| can be approximated as |Int|.
+
+Dependent-object types~\citep{amin2017type} model the core of Scala's type system and include type members and path-dependent types, which are not represented in our formalism.
+Though they introduce a form of dependency, path-dependent types were not designed for type-level computation, rendering their goals largely orthogonal to ours.

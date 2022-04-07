@@ -273,8 +273,7 @@ The following non-standard lemma is necessary to prevent overlap between the \SM
 %
 If such overlap would be allowed, match types could reduce in several different ways, resulting in an unsound system.
 We prove \Cref{lem:disjointness-subtyping-exclusivity} by contradiction.
-% TODO: Define Λ and V
-Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P \= \{ \Λ, \V \} \∪ \C$.
+Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P \= \{ \Λ, \V \} \∪ \C$, where $\Λ$ and $\V$ are equivalence class representative for abstractions and type abstractions, respectively.
 Elements of $\P$ can be understood as equivalence classes for \Fm's types.
 We show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness in $\P$.
 This set-theoretical view lets us conclude the desired result directly.

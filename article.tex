@@ -116,6 +116,8 @@ Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s 
 
 \Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
 
+% TODO: define Ψ and Ξ
+% TODO: cite the precise figure in Pierce 2002
 \FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
 
 \FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
@@ -271,6 +273,7 @@ The following non-standard lemma is necessary to prevent overlap between the \SM
 %
 If such overlap would be allowed, match types could reduce in several different ways, resulting in an unsound system.
 We prove \Cref{lem:disjointness-subtyping-exclusivity} by contradiction.
+% TODO: Define Λ and V
 Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P \= \{ \Λ, \V \} \∪ \C$.
 Elements of $\P$ can be understood as equivalence classes for \Fm's types.
 We show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness in $\P$.
@@ -283,6 +286,7 @@ In our Coq mechanization, we axiomatize this lemma and delegate to the pen-and-p
 The following \Cref{lem:inversion-of-subtyping} allows us to perform inversion on the subtyping relation,
 which is important to show canonical forms (\Cref{lem:canonical-forms}) and inversion of typing (\Cref{lem:inversion-of-typing}).
 Stating the lemma requires the definition of a new relation denoted $\Γ \⊢ \S \⇌ \T$, defined in \Cref{fig:harpoon}.
+% TODO: clarify that harpoon is asymmetric (and so it disj)
 It represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$ with the additional constraint that this evidence was exclusively constructed using pairwise applications of \SMatch1/2, \SMatch3/4, and \STrans in both directions.
 Intuitively, $\Γ \⊢ \S \⇌ \T$ is handier than two independent derivations of $\Γ \⊢ \S \<: \T$ and $\Γ \⊢ \T \<: \S$ because it allows simultaneous induction on both subtyping directions.
 %
@@ -552,11 +556,12 @@ This restriction is reflected in our formalism by the difference between the eva
 
 In \SystemFmB (\Cref{subsec:type-binding-extension}), match expressions support two sorts of parametric patterns: they can be either instantiated (\!\!$\match \{ \xs \: \List~\Int \}$, where $\Int \∈ \A$), or use a binding pattern variable (\!\!$\match \[\X] \{ \xs \: \List~\X \}$, where $\X$ is a pattern variable).
 In this sense, \SystemFmB is \emph{more expressive} than Scala, where instantiated patterns are not available at the term level due to type erasure.
+% TODO: say that our approach would not work in a system with full type erasure
 
 \subsection{Non-Termination}
 \label{subsec:non-termination}
 
-Unlike our calculus, the Scala implementation also allows match types to be defined recursively.
+Unlike our calculus, the Scala implementation also allows match type definitions to be recursive.
 Recursive match types can cause subtyping checks to loop indefinitely.
 Our implementation does not check match types for termination, as any such check would necessarily limit expressiveness or convenience.
 Instead, we detect divergence during match type reduction using a fuel mechanism.
@@ -572,6 +577,7 @@ This mechanism is completely standard and already used in other programing langu
 Pattern matching in Scala supports many sorts of patterns~\citep{emir2007matching}, most of which do not have a match type counterpart.
 Furthermore, typing match expressions as match types is not enabled by default in order to preserve backward compatibility.
 Instead, explicit type annotations must be provided.
+% TODO: Add examples
 
 \subsection{Caching}
 \label{subsec:caching}

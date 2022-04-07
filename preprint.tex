@@ -19,6 +19,8 @@ With these goals in mind, we extended Scala's type system to lift programs to th
 Users can manipulate those types either directly, using new syntactic forms in Scala's type language, or have them inferred automatically using a new language keyword.
 This effectively allows users to execute programs involving functions and pattern matching at the type level.
 
+% TODO: Add a sentence about the state of adoptions of these ideas
+
 The remaining of the chapter is organized as follows:
 
 \begin{itemize}
@@ -287,9 +289,10 @@ our system infers the following result type:
 \noindent
 We could have equivalently defined |getName| by omitting the |dependent| qualifier and writing its result type explicitly.
 The difference between the two would only be matter of syntax.
+% TODO: say something about the fact that generalized singleton types are not singletons...
 
 Scala requires recursive methods to have an explicit result type, and this restriction also applies to |dependent| methods.
-However, in the case of a |dependent| method, an explicit result type is only used as an upper bound for the actual precise result type and will only be used to type-check the method's body.
+However, in the case of a |dependent| method, an explicit result type only serves as an upper bound used to type-check the method's body.
 At other call sites, the (precise) inferred result type is used.
 Bounds of dependent methods are written using a special syntax (|<: T|).
 
@@ -301,6 +304,7 @@ The situation is analogous for |dependent| methods.
 Since we uniformly approximate all side effects, we avoid the situation where a type refers to a value that may be modified during the program execution.
 For instance, if |z| is a mutable integer variable, we will never introduce |z| in a singleton type.
 However, we can still assign singleton types to expressions containing |z|, for example, we can type |Cons(z, Nil())| as |{ Cons(_: Int, Nil()) }|.
+% TODO: More generally, when dependently typed functions call into a non-dependently typed one, ...
 
 Similarly to how we model other side effects, exceptions are approximated in types.
 Our type-inference algorithm uses a new error type, |Error(e)|, which we infer when raising an exception with |throw e|.
@@ -313,6 +317,8 @@ Also note that this is a sanity check, rather than a guarantee of no exceptions 
 That is, depending on which rules are used during subtyping, it is possible to succeed without entering type normalization, resulting in such errors going undetected.
 Despite these shortcomings, our treatment of exceptions results in a practical way to raise compile-time errors.
 It would be interesting to explore the addition of an effect system to our Scala extension.
+
+% TODO: Add an example
 
 \subsection{Virtual Dispatch}
 

@@ -273,6 +273,7 @@ Scala's implicit resolution relies on an intricate priority system to establish 
 Implicit-based programs sometimes rely on ambiguities and priorities of implicit definition, as we will see in this section through a series of examples.
 
 \subsection{Implicit Ambiguities}
+\label{subsec:implicit-ambiguities}
 
 The Scala compiler rejects programs with \emph{ambiguous} implicit definitions.
 For instance, if we write two identically-typed implicit definitions in the same scope, the compiler will consider them ambiguous and report an error:
@@ -302,11 +303,12 @@ We can use a "negative" implicit evidence to simplify the definition of |NotIn| 
 \memImplicitNotGiven
 
 \subsection{Implicit Priorities}
+\label{subsec:implicit-priorities}
 
 When looking for implicits, the Scala compiler visits scopes sequentially, in a precisely defined order.
 At any point in the search, if the implicits defined in the subset of scopes considered so far can fulfill the implicit query, the search succeeds and immediately terminates.
 This incremental process has two consequences.
-First, it allows the compiler to efficiently look for implicits by naturally pruning some of the search space.
+First, it allows the compiler to efficiently look for implicits by naturally pruning the search space.
 Second, it provides an ad-hoc mechanism to disambiguate implicits.
 Scala programmer can artificially partition their implicit definitions into multiple scopes to implement a priority system.
 
@@ -327,7 +329,10 @@ Concretely, we define low priority implicits in a separate trait, and have |Remo
 
 \removeAllPrioritized
 
-% TODO: Add a paragraph about the evolution of the "rule for picking a most specific alternative" during implicit resolution, see https://dotty.epfl.ch/docs/reference/changed-features/implicit-resolution.html
+In Scala~3, the rules for implicit ambiguities changed to take implicit parameters into account, thus introducing another, more direct, disambiguation mechanism.
+All else being equal, an implicit definition that takes some implicit parameters is considered to be less specific than an implicit definition that takes none~\citep[Changes in Implicit Resolution]{odersky2013scala}.
+As a result, implicit-based type-level programs written in Scala~3 do not need to use the patterns of ambiguities and priorities presented in this section (\ref{subsec:implicit-priorities} and \ref{subsec:implicit-ambiguities}).
+TODO
 
 \section{Conclusion}
 

@@ -242,8 +242,6 @@ That transformation must conform to the representation computed at the type leve
 
 In Scala, all type parameters are erased, which leads to some friction when wanting to write programs whose execution \emph{depends} on types, such as in the problem at hand. In this section, we propose two different solutions to that problem.
 
-% TODO: consider inline functions as a 3rd alternative
-
 \begin{enumerate}
   \item In \Cref{subsec:we-ain-t-need-no-dependent-types}, we proceed by sheer force of code duplication: we translate the entirety of our type-level algorithm into term-level functions and use a cast to correlate the two.
 

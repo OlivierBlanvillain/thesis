@@ -533,27 +533,23 @@ Non-exhaustive patterns are compiled with an additional "catch-all" case which t
 \subsection{Types at Runtime}
 \label{subsec:types-at-runtime}
 
-% \olivier{
-% Type erasure is the process by which type arguments of generic types (type constructors) are removed from programs during compilation.
-% Scala's erasure affects pattern matching because it prevents certain patterns from being checked at runtime.
-% For instance, both `List[String]` and `List[Int]` erase to `List[Object]`, which makes them indistinguishable at runtime.
-% This limitation is intrinsic to the JVM and affects Scala's pattern matching in general.
-% Match types reduce during type checking (before erasure) and are not affected by this limitation.
-% Erasure thus creates an expressivity gap between pattern matching at the term and at the type level.
-% }
-
 Scala's primary platform is the Java virtual machine (JVM).
-On the JVM, Scala is compiled using \emph{partial erasures}, where parts of types are preserved and translated to the JVM's type systems, and other parts are erased~\citep{schinz2005compiling}.
-For instance, ground classes are compiled directly to JVM classes, but type parameters and type variables are erased and replaced by their bounds.
+On the JVM, Scala is compiled using \emph{partial erasures}~\citep{schinz2005compiling}, a process which preserves some types by translating them to the JVM's type systems, and removes other types by erasing them to |Object|, the JVM's top type.
+Scala's type erasure directly affects pattern matching because it prevents certain patterns from being checked at runtime.
+For instance, both |List[String]| and |List[Int]| erase to |List[Object]|, which makes them indistinguishable from the JVM's perspective.
+This limitation is intrinsic to the JVM and affects Scala's pattern matching in general.
+Match types reduce during type checking (before erasure) and are thus not affected by this limitation.
+Erasure thus creates an expressivity gap between pattern matching at the term and at the type level.
 
-Erasure directly affects the type tests that can be performed at runtime.
-For example, while |case xs: List[Int] =>| is a syntactically valid pattern, it will lead to a compiler warning since the |Int| type parameter is eliminated by erasure and cannot be checked at runtime.
+In practice, the Scala compiler copes with this limitation by emitting warnings for unchecked patterns.
+For example, while |case xs: List[Int] =>| is a syntactically valid pattern, it compiles with a warning the |Int| type parameter is eliminated by erasure and cannot be checked at runtime.
 
 This restriction is reflected in our formalism by the difference between the evaluation rules for match expressions and the reduction rules for match types: evaluation is limited to inheritance checks on statically defined classes ($\(\C, \C_n) \∈ \Ψ$ in \EMatch2/3), as opposed to the match type reduction rules which are defined using the subtyping and type disjointness relations ($\Γ \⊢ \T_s \<: \S_n$ and $\Γ \⊢ \disj(\T_s, \S_m)$ in \SMatch1/2/3/4).
 
 In \SystemFmB (\Cref{subsec:type-binding-extension}), match expressions support two sorts of parametric patterns: they can be either instantiated (\!\!$\match \{ \xs \: \List~\Int \}$, where $\Int \∈ \A$), or use a binding pattern variable (\!\!$\match \[\X] \{ \xs \: \List~\X \}$, where $\X$ is a pattern variable).
 In this sense, \SystemFmB is \emph{more expressive} than Scala, where instantiated patterns are not available at the term level due to type erasure.
-% TODO: say that our approach would not work in a system with full type erasure
+
+In a language with full type erasure, match types would have no term-level counterparts and the \TMatch rule would thus be pointless.
 
 \subsection{Non-Termination}
 \label{subsec:non-termination}

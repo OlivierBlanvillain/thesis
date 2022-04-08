@@ -116,11 +116,9 @@ Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s 
 
 \Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
 
-% TODO: define Ψ and Ξ
-% TODO: cite the precise figure in Pierce 2002
-\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
+\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$. The $\Ψ$ relation is a partial order on $\C$ that describes the inheritance between classes. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
 
-\FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ \\and class disjointness $\Ξ$. \hl{\text{Highlights}} correspond to additions to \SystemFsub.}
+\FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$. $\Ψ$ is a partial order on $\C$ that describes the inheritance between classes. $\Ξ$ is symmetric relation over $\C$ that relates classes which share no inhabitants. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
 
 \section{Formalization}
 \label{sec:formalization}

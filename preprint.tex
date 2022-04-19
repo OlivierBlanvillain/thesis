@@ -304,7 +304,7 @@ The situation is analogous for |dependent| methods.
 Since we uniformly approximate all side effects, we avoid the situation where a type refers to a value that may be modified during the program execution.
 For instance, if |z| is a mutable integer variable, we will never introduce |z| in a singleton type.
 However, we can still assign singleton types to expressions containing |z|, for example, we can type |Cons(z, Nil())| as |{ Cons(_: Int, Nil()) }|.
-% TODO: More generally, when dependently typed functions call into a non-dependently typed one, ...
+More generally, when a dependently-typed function call into a non-dependently-typed one, we approximate the type of that call to |(_: T)|, where |T| is the  declared result type of the non-dependently-typed function.
 
 Similarly to how we model other side effects, exceptions are approximated in types.
 Our type-inference algorithm uses a new error type, |Error(e)|, which we infer when raising an exception with |throw e|.

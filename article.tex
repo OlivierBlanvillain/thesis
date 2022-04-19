@@ -570,7 +570,27 @@ This mechanism is completely standard and already used in other programing langu
 Pattern matching in Scala supports many sorts of patterns~\citep{emir2007matching}, most of which do not have a match type counterpart.
 Furthermore, typing match expressions as match types is not enabled by default in order to preserve backward compatibility.
 Instead, explicit type annotations must be provided.
-% TODO: Add examples
+
+For example, consider the following function definition:
+
+\begin{lstlisting}
+def foo[X](x: X) = x match
+  case x: Int => x.toString
+  case x: String => x.toInt
+\end{lstlisting}
+
+In the absence of result type annotation, Scala's type inference will first assign \lstinline!String | Int! for the match expression, and then immediately widen that union to the least upper bound of left- and right-hand-side, |Any|, which will then be used as |foo|'s (inferred) result type.
+To obtain a precise result type for this method, users should annotate it explicitly:
+
+\begin{lstlisting}
+type Foo[X] = X match
+  case Int => String
+  case String => Int
+
+def foo[X](x: X): Foo[X] = x match
+  case x: Int => x.toString
+  case x: String => x.toInt
+\end{lstlisting}
 
 \subsection{Caching}
 \label{subsec:caching}

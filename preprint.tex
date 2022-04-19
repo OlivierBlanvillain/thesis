@@ -272,8 +272,7 @@ When inferring the result type of a |dependent| method, our system lifts the met
 This lifting will be precise for the subset of expressions that is representable in types, and approximative for the rest.
 When we encounter an unsupported construct, we compute its type using the default mode, yielding a type |T| which we then integrate in the lifted body as |_: T|\footnotemark.
 \footnotetext{%
-When a generalized singleton type contains a component of form |_: T|, then that type is not singleton: it contains more than one value.
-}
+When a generalized singleton type contains a component of form \texttt{(\_: T)}, then that type is not singleton: it might contains more than one value.}
 
 For example, given the following definition:
 

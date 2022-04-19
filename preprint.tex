@@ -270,7 +270,10 @@ Concretely, users opt into our new inference mode using the |dependent| qualifie
 
 When inferring the result type of a |dependent| method, our system lifts the method's body into a generalized singleton type.
 This lifting will be precise for the subset of expressions that is representable in types, and approximative for the rest.
-When we encounter an unsupported construct, we compute its type using the default mode, yielding a type |T| which we then integrate in the lifted body as |_: T|.
+When we encounter an unsupported construct, we compute its type using the default mode, yielding a type |T| which we then integrate in the lifted body as |_: T|\footnotemark.
+\footnotetext{%
+When a generalized singleton type contains a component of form |_: T|, then that type is not singleton: it contains more than one value.
+}
 
 For example, given the following definition:
 
@@ -289,7 +292,6 @@ our system infers the following result type:
 \noindent
 We could have equivalently defined |getName| by omitting the |dependent| qualifier and writing its result type explicitly.
 The difference between the two would only be matter of syntax.
-% TODO: say something about the fact that generalized singleton types are not singletons...
 
 Scala requires recursive methods to have an explicit result type, and this restriction also applies to |dependent| methods.
 However, in the case of a |dependent| method, an explicit result type only serves as an upper bound used to type-check the method's body.

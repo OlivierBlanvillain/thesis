@@ -489,7 +489,15 @@ The unsoundness manifests itself in the body of class |D|, where |X| |&| |String
 There, it is possible to call the function~|f| with a string argument, which would result in a runtime error.
 Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent |M[Int| |&| |String]| from reducing given that |Int| |&| |String| is not inhabited.
 
-% TODO: tell the truth about empty types
+In practice, it would be quite restrictive to only reduce match types with provably inhabited scrutinees since it would disallow matching on abstract types.
+Instead, our implementation incorporates non-emptyness in the
+definition of the disjointness relation:
+
+$disj(T1, T2) = T1 nonempty and \forall e \in T1. e \notin T2$
+
+This updated definition allows us to maintain the property of \Cref{lem:disjointness-subtyping-exclusivity} in the presence of empty types (disjointness/subtyping exclusivity).
+
+% TODO: tell the truth about empty types?
 
 \subsection{Null Values}
 \label{subsec:null-values}
@@ -541,7 +549,7 @@ This limitation is intrinsic to the JVM and affects Scala's pattern matching in 
 Match types reduce during type checking (before erasure) and are thus not affected by this limitation.
 Erasure thus creates an expressivity gap between pattern matching at the term and at the type level.
 
-In practice, the Scala compiler copes with this limitation by emitting warnings for unchecked patterns.
+In practice, the Scala compiler handles this limitation by emitting warnings for unchecked patterns.
 For example, while |case xs: List[Int] =>| is a syntactically valid pattern, it compiles with a warning the |Int| type parameter is eliminated by erasure and cannot be checked at runtime.
 
 This restriction is reflected in our formalism by the difference between the evaluation rules for match expressions and the reduction rules for match types: evaluation is limited to inheritance checks on statically defined classes ($\(\C, \C_n) \∈ \Ψ$ in \EMatch2/3), as opposed to the match type reduction rules which are defined using the subtyping and type disjointness relations ($\Γ \⊢ \T_s \<: \S_n$ and $\Γ \⊢ \disj(\T_s, \S_m)$ in \SMatch1/2/3/4).
@@ -579,7 +587,7 @@ def foo[X](x: X) = x match
   case x: String => x.toInt
 \end{lstlisting}
 
-In the absence of result type annotation, Scala's type inference will first assign \lstinline!String | Int! for the match expression, and then immediately widen that union to the least upper bound of left- and right-hand-side, |Any|, which will then be used as |foo|'s (inferred) result type.
+In the absence of result type annotation, Scala's type inference will first assign \lstinline!String|Int! for the match expression, and then immediately widen that union to the least upper bound of left- and right-hand-side, |Any|, which will then be used as |foo|'s (inferred) result type.
 To obtain a precise result type for this method, users should annotate it explicitly:
 
 \begin{lstlisting}

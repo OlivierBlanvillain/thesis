@@ -468,7 +468,8 @@ An important limitation of \SystemFm compared to Scala's type system is that it 
 The bottom of Scala's subtyping lattice, called |Nothing|, provides a direct way to refer to empty sets of values.
 Intersection types also provide a way to construct uninhabited types given that Scala does not forbid intersecting two disjoint types.
 Empty types are problematic for the match type reduction algorithm as they break the fundamental assumption that two types cannot be both disjoint and subtypes (\Cref{lem:disjointness-subtyping-exclusivity}).
-To account for this, our implementation uses an additional \emph{inhabitance check} on scrutinee types before attempting any reduction.
+To account for this, our implementation uses an additional \emph{inhabitance check} on scrutinee types before attempting to prove types disjoint.
+This updated definition of disjointness allows us to maintain the property of \Cref{lem:disjointness-subtyping-exclusivity} in the presence of empty types (disjointness/subtyping exclusivity).
 
 To show why empty types are problematic, we can construct an example where, in the absence of an inhabitance check, the same match type could be reduced differently in two different contexts:
 %
@@ -488,16 +489,6 @@ Class |D| refines the definition of |C| by giving concrete definition of |X|.
 The unsoundness manifests itself in the body of class |D|, where |X| |&| |String| is a subtype of |Int| and |M[X| |&| |String]| reduces to |String| (|M|'s first case applies).
 There, it is possible to call the function~|f| with a string argument, which would result in a runtime error.
 Checking for scrutinee inhabitance prevents this class of errors. In this example, it would prevent |M[Int| |&| |String]| from reducing given that |Int| |&| |String| is not inhabited.
-
-In practice, it would be quite restrictive to only reduce match types with provably inhabited scrutinees since it would disallow matching on abstract types.
-Instead, our implementation incorporates non-emptyness in the
-definition of the disjointness relation:
-
-$disj(T1, T2) = T1 nonempty and \forall e \in T1. e \notin T2$
-
-This updated definition allows us to maintain the property of \Cref{lem:disjointness-subtyping-exclusivity} in the presence of empty types (disjointness/subtyping exclusivity).
-
-% TODO: tell the truth about empty types?
 
 \subsection{Null Values}
 \label{subsec:null-values}

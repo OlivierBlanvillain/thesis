@@ -19,8 +19,6 @@ With these goals in mind, we extended Scala's type system to lift programs to th
 Users can manipulate those types either directly, using new syntactic forms in Scala's type language, or have them inferred automatically using a new language keyword.
 This effectively allows users to execute programs involving functions and pattern matching at the type level.
 
-% TODO: Add a sentence about the state of adoptions of these ideas
-
 The remaining of the chapter is organized as follows:
 
 \begin{itemize}
@@ -37,6 +35,9 @@ The remaining of the chapter is organized as follows:
 \end{itemize}
 
 Our original presentation of generalized singleton types contains a formalization \citep[Section 3 and 4]{schmid2020coming}, which is out of the scope of this chapter.
+
+A prototype of our Scala extension is available online, in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
+Although the ideas presented in this did not reach the production stage, our prototype influenced the design of match types (\Cref{chap:match-types}) which are now part of the Scala 3 language.
 
 \section{Motivating Example}
 \label{sec:motivating-example}
@@ -318,8 +319,6 @@ Also note that this is a sanity check, rather than a guarantee of no exceptions 
 That is, depending on which rules are used during subtyping, it is possible to succeed without entering type normalization, resulting in such errors going undetected.
 Despite these shortcomings, our treatment of exceptions results in a practical way to raise compile-time errors.
 It would be interesting to explore the addition of an effect system to our Scala extension.
-
-% TODO: Add an example
 
 \subsection{Virtual Dispatch}
 

@@ -499,6 +499,7 @@ To allow easy migration from older versions, the strict treatment of nulls is st
 The plan is to make strict null checking the default in the future.
 
 \subsection{Disjointness of Variant Types}
+\label{subsec:disjointness-of-variant-types}
 
 Scala supports variance annotations on type parameters of higher-kinded types.
 These annotations allow programmers to specify how the subtyping of annotated parameters influences the subtyping of the higher-kinded type.
@@ -521,7 +522,47 @@ There is no such reasoning available for contravariant types: our algorithm can 
 
 \subsection{Match Type Variance}
 
-% TODO Incorporate email discussion on match types co- and contravariance.
+In \Cref{subsec:disjointness-of-variant-types} we discussed how our match type reduction algorithm handles variance annotation of higher-kinded types.
+In this section, we discuss the orthogonal problem of supporting variance annotations on match type definitions.
+
+At the time of writing, our implementation does not support variance annotations on match types (all match types are invariant).
+However, it would be conceivably to lift this restriction in the future, as shown by the analysis presented in this section.
+
+Consider the following definition of a match type |M|:
+%
+\begin{lstlisting}
+type M[X] = X match
+  case P1 => E1
+  case P2 => E2
+  case P3 => E3
+\end{lstlisting}
+%
+In \Cref{sec:formalization}, we define the semantics of this type in terms of subtyping rules.
+Given this particular definition of |M|, we can write a direct semantic definition of |M| with equations:
+%
+\begin{itemize}
+ \item |M[X] = E1| \quad if |X <: P1|
+ \item |M[X] = E2| \quad if |disj(X, P1)| and |X <: P2|
+ \item |M[X] = E3| \quad if |disj(X, P1)| and |disj(X, P2)| and |X <: P3|
+\end{itemize}
+%
+This equational definition is consistent under the assumptions of \Cref{lem:disjointness-subtyping-exclusivity}.
+
+We show that |M[X]| is covariant if |E1|, |E2|, and |E3| are covariant with respect to |X|.
+Given |T1 <: T2|, we proceed by case analysis on |M[T2]|:
+%
+\begin{itemize}
+  \item If |M[T2] = E1|, then |M[T1] = E1| by subtyping transitivity and the result follows from the covariance of |E1|.
+
+  \item If |M[T2] = E2|, then (|disj(T2, P1)| and |T1 <: T2|) implies |disj(T1, P1)| (using D-SUB), and (|T2 <: P2| and |T1 <: T2|) implies |T1 <: P2|, which yields |M[T1] = E2|.
+  The result follows from the covariance of |E2|.
+
+  \item |M[T2] = E3| is analogous.
+\end{itemize}
+%
+Similarly, we can show that |M[X]| is contravariant if |E1|, |E2|, and |E3| are contravariant with respect to |X|.
+
+In practice, it would be hard to show that |E1|, |E2|, and |E3| are co-/contravariant when type bindings get into the picture. For non-binding cases, that analysis is straightforward and analogous to the variance checks that are already in place in the compiler.
 
 \subsection{Pattern Matching Exhaustivity}
 \label{subsec:pattern-matching-exhaustivity}

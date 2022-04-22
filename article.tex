@@ -122,9 +122,20 @@ Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s 
 
 \subsection{Comparison to Generalized Singleton Types}
 
-% In \Cref{chap:generalizing-singleton-types}
-
-% TODO: Compare to singleton types
+In \Cref{chap:generalizing-singleton-types}, we presented a generalization of singleton types for type-level programing.
+Generalized singletons and match types share some similarities, such as the notion of disjointness which plays an important role in both features.
+The two features relate on deeper level: we can explain match types in terms of generalized singletons.
+For example, the we can give an alternative definition of |Elem| match type using a generalized singleton:
+%
+\begin{lstlisting}
+type Elem[X] = { (_: X) match
+  case _: String => (_: Char)
+  case _: List[t] => (_: Elem[t])
+  case _: Any => (_: X)
+}
+\end{lstlisting}
+%
+This definition makes the term/type correspondence evident: the |Elem[X]| type reduces in the way than the corresponding match expression.
 
 \section{Formalization}
 \label{sec:formalization}

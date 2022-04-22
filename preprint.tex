@@ -36,10 +36,8 @@ The remaining of the chapter is organized as follows:
 
 Our original presentation of generalized singleton types contains a formalization \citep[Section 3 and 4]{schmid2020coming}, which is out of the scope of this chapter.
 
-\begin{diff}
 A prototype of our Scala extension is available online, in a branch of the dotty-staging repository\footnote{\texttt{git clone git@github.com:dotty-staging/dotty.git --branch add-transparent-7}}.
 Although the ideas presented in this chapter did not reach the production stage, our prototype influenced the design of match types (\Cref{chap:match-types}) which are now part of the Scala language.
-\end{diff}
 
 \section{Motivating Example}
 \label{sec:motivating-example}
@@ -273,11 +271,9 @@ Concretely, users opt into our new inference mode using the |dependent| qualifie
 
 When inferring the result type of a |dependent| method, our system lifts the method's body into a generalized singleton type.
 This lifting will be precise for the subset of expressions that is representable in types, and approximative for the rest.
-\begin{diff}
 When we encounter an unsupported construct, we compute its type using the default mode, yielding a type |T| which we then integrate in the lifted body as |_: T|\footnotemark.
 \footnotetext{%
 When a generalized singleton type contains a component of form \texttt{(\_: T)}, that type is not singleton: it might contains more than one value.}
-\end{diff}
 
 For example, given the following definition:
 
@@ -298,9 +294,7 @@ We could have equivalently defined |getName| by omitting the |dependent| qualifi
 The difference between the two would only be matter of syntax.
 
 Scala requires recursive methods to have an explicit result type, and this restriction also applies to |dependent| methods.
-\begin{diff}
 However, in the case of a |dependent| method, an explicit result type only serves as an upper bound used to type-check the method's body.
-\end{diff}
 At other call sites, the (precise) inferred result type is used.
 Bounds of dependent methods are written using a special syntax (|<: T|).
 
@@ -312,9 +306,7 @@ The situation is analogous for |dependent| methods.
 Since we uniformly approximate all side effects, we avoid the situation where a type refers to a value that may be modified during the program execution.
 For instance, if |z| is a mutable integer variable, we will never introduce |z| in a singleton type.
 However, we can still assign singleton types to expressions containing |z|, for example, we can type |Cons(z, Nil())| as |{ Cons(_: Int, Nil()) }|.
-\begin{diff}
 More generally, when a dependently-typed function calls into a non-dependently-typed one, we approximate the type of that call to |(_: T)|, where |T| is the  declared result type of the non-dependently-typed function.
-\end{diff}
 
 Similarly to how we model other side effects, exceptions are approximated in types.
 Our type-inference algorithm uses a new error type, |Error(e)|, which we infer when raising an exception with |throw e|.
@@ -530,7 +522,6 @@ Given the extremely dynamic nature of Ruby, it is unsurprising that their soluti
 In their work, type checking happens entirely at runtime and has to be performed at every function invocation to account for possible changes in function definitions.
 Safety is obtained by inserting dynamic checks, similarly to gradual typing.
 
-\begin{diff}
 Dependently-typed lambda calculi with subtyping were described at least as far back as 1988~\citep{cardelli1988structural}.
 \citeauthor{cardelli1988structural}'s type system is much more expressive than ours and allows bounded quantification over both types and terms, using the notion of a |Type| type and power types.
 Unlike our system, which is designed with the concrete evaluation of types in mind, Cardelli does not provide a semantics for his system and leaves the equivalence relation among types unspecified.
@@ -546,4 +537,3 @@ For instance, it is able to conclude that |Int + 5| can be approximated as |Int|
 
 Dependent-object types~\citep{amin2017type} model the core of Scala's type system and include type members and path-dependent types, which are not represented in our formalism.
 Though they introduce a form of dependency, path-dependent types were not designed for type-level computations, rendering their goals largely orthogonal to ours.
-\end{diff}

@@ -123,9 +123,9 @@ Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s 
 \subsection{Comparison to Generalized Singleton Types}
 
 In \Cref{chap:generalizing-singleton-types}, we presented a generalization of singleton types for type-level programing.
-Generalized singletons and match types share some similarities, such as the notion of disjointness which plays an important role in both features.
-The two features relate on deeper level: we can explain match types in terms of generalized singletons.
-For example, the we can give an alternative definition of |Elem| match type using a generalized singleton:
+Generalized singletons and match types share some similarities, such as the notion of disjointness, which plays an important role in both features.
+The two features relate on a deeper level: we can explain match types in terms of generalized singletons.
+For example, we can give an alternative definition of the |Elem| match type using a generalized singleton:
 %
 \begin{lstlisting}
 type Elem[X] = { (_: X) match
@@ -135,7 +135,7 @@ type Elem[X] = { (_: X) match
 }
 \end{lstlisting}
 %
-This definition makes the term/type correspondence evident: the |Elem[X]| type reduces in the way than the corresponding match expression.
+This definition makes the term/type correspondence evident: the |Elem[X]| type reduces analogously to the corresponding match expression.
 
 \section{Formalization}
 \label{sec:formalization}
@@ -442,13 +442,13 @@ sealed trait Part
 final class Wheel extends Part
 final class DiscBrake extends Part
 \end{lstlisting}%
-\vspace{-3pt}%
+\vspace{-1pt}%
 \begin{lstlisting}
 trait Vehicle
 class Bicycle extends Vehicle
 class RoadBike extends Bicycle
 \end{lstlisting}%
-\vspace{-3pt}%
+\vspace{-1pt}%
 \begin{lstlisting}
 class Helmet
 \end{lstlisting}%

@@ -116,10 +116,6 @@ Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s 
 
 \Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
 
-\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$. The $\Ψ$ relation is a partial order on $\C$ that describes the inheritance between classes. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
-
-\FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$. $\Ψ$ is a partial order on $\C$ that describes the inheritance between classes. $\Ξ$ is symmetric relation over $\C$ that relates classes which share no inhabitants. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
-
 \subsection{Comparison to Generalized Singleton Types}
 
 In \Cref{chap:generalizing-singleton-types}, we presented a generalization of singleton types for type-level programing.
@@ -131,11 +127,14 @@ For example, we can give an alternative definition of the |Elem| match type usin
 type Elem[X] = { (_: X) match
   case _: String => (_: Char)
   case _: List[t] => (_: Elem[t])
-  case _: Any => (_: X)
-}
+  case _: Any => (_: X) }
 \end{lstlisting}
 %
 This definition makes the term/type correspondence evident: the |Elem[X]| type reduces analogously to the corresponding match expression.
+
+\FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$. The $\Ψ$ relation is a partial order on $\C$ that describes the inheritance between classes. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
+
+\FMTypingRules{\SystemFm type system for a given set of classes $\C$ with class inheritance $\Ψ$ and class disjointness $\Ξ$. $\Ψ$ is a partial order on $\C$ that describes the inheritance between classes. $\Ξ$ is symmetric relation over $\C$ that relates classes which share no inhabitants. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
 
 \section{Formalization}
 \label{sec:formalization}
@@ -528,12 +527,7 @@ It would appear that co- and contravariant types are always overlapping, given t
 However, in the case of covariant parameters, an exception can be made when the said type parameter corresponds to a field or a constructor parameter: the |Nothing| instantiation can be ruled out because no runtime program can produce a value of that type.
 
 Scala tuples, for example, fall into this category.
-|Tuple2|, the class for pairs, is defined as follows:
-%
-\begin{lstlisting}
-case class Tuple2[+T1, +T2](_1: T1, _2: T2)
-\end{lstlisting}
-%
+|Tuple2|, the class for pairs, is defined as follows: |case class Tuple2[+T1, +T2](_1: T1, _2: T2)|.
 Given two instantiations of this this type, |Tuple2[Int,X]| and |Tuple2[String,X]|, although |Tuple2[Nothing,X]| is a subtype of both, there is no runtime value of type |Tuple2[Nothing,X]| (since |Nothing| is uninhabited), and, as a result, those two types are disjoint.
 Our disjointness algorithm implements this kind of reasoning to conclude disjointness in the presence of covariant type parameters.
 There is no such reasoning available for contravariant types: our algorithm can never conclude that |G[X]| and |G[Y]| are disjoint for a contravariant type |G|.
@@ -632,12 +626,14 @@ Furthermore, typing match expressions as match types is not enabled by default i
 Instead, explicit type annotations must be provided.
 
 For example, consider the following function definition:
-%
+
+\begin{minipage}{\linewidth}
 \begin{lstlisting}
 def foo[X](x: X) = x match
   case x: Int => x.toString
   case x: String => x.toInt
 \end{lstlisting}
+\end{minipage}
 %
 In the absence of a result type annotation, Scala's type inference will first assign \lstinline!String|Int! for the match expression, and then immediately widen that union to the least upper bound of left- and right-hand-side, |Any|, which will then be used as |foo|'s (inferred) result type.
 To obtain a precise result type for this method, users should annotate it explicitly:
@@ -804,9 +800,11 @@ We implement reductions along a given list of indices with logic similar to two 
 The outer loop, |Loop|, traverses the shape and counts the current index.
 The inner loops are implemented using the standard |Contains| and |Remove| operations.
 When |Loop| reaches the end of the list, if there are still axes to remove, these are out of bounds for the initial shape: the match type intentionally gets stuck in such cases.
-%
+
+\begin{minipage}{\linewidth}
 \reduceType
 \reduceLoop
+\end{minipage}
 
 \subsection{Shape safety}
 \label{sec:shape-safety}

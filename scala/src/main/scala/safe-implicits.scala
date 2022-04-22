@@ -187,8 +187,7 @@ addEventListener("mouseover", myHandler) // implicitly
 // start section addEventListenerImplicitCall
 addEventListener("mouseover", myHandler)(
   // Evidence that "mouseover" is a valid event type, infered automatically.
-  Remove.casetail(Remove.casetail(Remove.casehead))
-)
+  Remove.casetail(Remove.casetail(Remove.casehead)))
 // end section addEventListenerImplicitCall
 
 }

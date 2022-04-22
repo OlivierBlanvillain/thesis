@@ -60,8 +60,7 @@ type Loop[S <: Shape, Axes <: Shape, I <: Int] <: Shape =
       case true => Loop[tail, Remove[Axes, I], I + 1]
       case false => head #: Loop[tail, Axes, I + 1]
     case Ø => Axes match
-      case Ø => Ø
-      // otherwise, do not reduce further
+      case Ø => Ø // otherwise, do not reduce further
 // end section reduceLoop
 
 type Contains[Haystack <: Shape, Needle <: Int] <: Boolean = Haystack match {

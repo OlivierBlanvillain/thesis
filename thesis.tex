@@ -331,7 +331,7 @@ Concretely, we define low priority implicits in a separate trait, and have |Remo
 
 \begin{diff}
 In Scala~3, the rules for implicit ambiguities changed to take implicit parameters into account, thus introducing another, more direct, disambiguation mechanism.
-All else being equal, an implicit definition that takes some implicit parameters is considered to be less specific than an implicit definition that takes none~\citep[Changes in Implicit Resolution]{odersky2013scala}.
+All else being equal, an implicit definition that takes implicit parameters is considered less specific than an implicit definition does not take implicit parameters~\citep[Changes in Implicit Resolution]{odersky2013scala}.
 As a result, implicit-based type-level programs written in Scala~3 do not need to use the patterns of ambiguities and priorities presented in this section (\ref{subsec:implicit-priorities} and \ref{subsec:implicit-ambiguities}).
 \end{diff}
 
@@ -363,8 +363,6 @@ The said report covers more material than what is included in this chapter, in p
 
 \chapter{Match Types}
 \label{chap:match-types}
-
-% TODO: Compare to singleton types
 
 Type-level programming is becoming more and more popular in the realm of functional programming.
 However, the combination of type-level programming and subtyping remains largely unexplored in practical programming languages.
@@ -508,8 +506,6 @@ In this figure, we compare the compilation times of the match type Reduce benchm
 
 \chapter{Conclusion}
 \label{chap:conclusion}
-
-% TODO you could write a bit more. Maybe move some of the text of the conclusions of individual chapters there?
 
 In this thesis, we presented three techniques for type-level programming in Scala: implicits, generalized singleton types, and match types.
 We showed that programming with implicits can be relatively cumbersome, both for programmers and compilers, which led us to the following question: \emph{can we do better?}

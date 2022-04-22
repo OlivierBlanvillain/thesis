@@ -347,7 +347,9 @@ The main drawback of this solution lies in the library's learning curve: program
 
 Stephanie Weirich presented on several occasions a regular expression library as an example of a dependently-typed program written in Haskell \citep{weirich2014examples}.
 The library provides safety guarantees similar to ours, but from the slightly different angle of named-capturing groups.
+\begin{diff}
 An important conceptual difference between both approaches is ours only focuses on type checking (we rely on Java's regular expressions at run-time), whereas hers also includes a fully-fledged regular expression engine.
+\end{diff}
 
 The typed-regex~\citep{akshay2021typed} Typescript library provides a type-safe API for extracting named capturing groups of regular expressions.
 The implementation uses conditional types \citep{microsoft2020typescript}, Typescript's type-level ternary operator, to statically analyze regular expressions.

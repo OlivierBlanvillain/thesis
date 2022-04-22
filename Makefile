@@ -1,6 +1,6 @@
 .ONESHELL:
 .PHONY: FORCE
-all: thesis.pdf
+all: thesis.pdf sigplan.pdf slides.pdf
 
 deps := proofs/structure.pdf
 deps += scala/code-sections.tex

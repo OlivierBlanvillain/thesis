@@ -329,9 +329,11 @@ Concretely, we define low priority implicits in a separate trait, and have |Remo
 
 \removeAllPrioritized
 
+\begin{diff}
 In Scala~3, the rules for implicit ambiguities changed to take implicit parameters into account, thus introducing another, more direct, disambiguation mechanism.
 All else being equal, an implicit definition that takes some implicit parameters is considered to be less specific than an implicit definition that takes none~\citep[Changes in Implicit Resolution]{odersky2013scala}.
 As a result, implicit-based type-level programs written in Scala~3 do not need to use the patterns of ambiguities and priorities presented in this section (\ref{subsec:implicit-priorities} and \ref{subsec:implicit-ambiguities}).
+\end{diff}
 
 \section{Conclusion}
 
@@ -395,7 +397,9 @@ We show that our approach has a minor impact on compilation times, which makes i
 This chapter is inspired by Andrea Veneziano's semester project entitled "Strongly-typed regular expressions in Dotty".
 In his project, Andrea implemented a regex library in two different flavors, one based on match types and the other based on generalized singleton types, with the objective to compare the two approaches in terms of expressivity and ease of use.
 The present chapter is a reboot of the match-type side of that project.
+\begin{diff}
 This work is under submission at the Scala Symposium (2022).
+\end{diff}
 
 \newcommand\thesisOnly[1]{#1}
 \newcommand\paperOnly[1]{}

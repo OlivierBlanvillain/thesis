@@ -287,7 +287,9 @@ The following non-standard lemma is necessary to prevent overlap between the \SM
 %
 If such overlap would be allowed, match types could reduce in several different ways, resulting in an unsound system.
 We prove \Cref{lem:disjointness-subtyping-exclusivity} by contradiction.
+\begin{diff}
 Our proof uses a mapping from \SystemFm's types into non-empty subsets of a newly defined set $\P \= \{ \Λ, \V \} \∪ \C$, where $\Λ$ and $\V$ are equivalence class representatives for abstractions and type abstractions, respectively.
+\end{diff}
 Elements of $\P$ can be understood as equivalence classes for \Fm's types.
 We show that the subtyping relation in \Fm corresponds to a subset relation in $\P$, and that the type disjointness relation in \Fm ($\disj$) corresponds to set disjointness in $\P$.
 This set-theoretical view lets us conclude the desired result directly.
@@ -299,9 +301,11 @@ In our Coq mechanization, we axiomatize this lemma and delegate to the pen-and-p
 The following \Cref{lem:inversion-of-subtyping} allows us to perform inversion on the subtyping relation,
 which is important to show canonical forms (\Cref{lem:canonical-forms}) and inversion of typing (\Cref{lem:inversion-of-typing}).
 Stating the lemma requires the definition of a new relation denoted $\Γ \⊢ \S \⇌ \T$, defined in \Cref{fig:harpoon}.
+\begin{diff}
 This relation represents evidence of the mutual subtyping between a match type $\S$ and a type $\T$, with the additional constraint that this evidence was exclusively constructed using pairwise applications of \SMatch1/2, \SMatch3/4, and \STrans in both directions.
 Intuitively, $\Γ \⊢ \S \⇌ \T$ is handier than two independent derivations of $\Γ \⊢ \S \<: \T$ and $\Γ \⊢ \T \<: \S$ because it allows simultaneous induction on both subtyping directions.
 Although $\Γ \⊢ \S \⇌ \T$ witnesses mutual subtyping between $\S$ and $\T$, that relation is asymmetric, since its left-hand side is always a match type.
+\end{diff}
 %
 \input{proofs/inversion-of-subtyping.tex}
 %
@@ -485,8 +489,10 @@ An important limitation of \SystemFm compared to Scala's type system is that it 
 The bottom of Scala's subtyping lattice, called |Nothing|, provides a direct way to refer to empty sets of values.
 Intersection types also provide a way to construct uninhabited types given that Scala does not forbid intersecting two disjoint types.
 Empty types are problematic for the match type reduction algorithm as they break the fundamental assumption that two types cannot be both disjoint and subtypes (\Cref{lem:disjointness-subtyping-exclusivity}).
+\begin{diff}
 To account for this, our implementation uses an additional \emph{inhabitance check} on scrutinee types before attempting to prove types disjoint.
 This updated definition of disjointness allows us to maintain the property of \Cref{lem:disjointness-subtyping-exclusivity} (disjointness/subtyping exclusivity) in the presence of empty types.
+\end{diff}
 
 To show why empty types are problematic, we can construct an example where, in the absence of an inhabitance check, the same match type could be reduced differently in two different contexts:
 %
@@ -530,10 +536,13 @@ Scala tuples, for example, fall into this category.
 |Tuple2|, the class for pairs, is defined as follows: |case class Tuple2[+T1, +T2](_1: T1, _2: T2)|.
 Given two instantiations of this this type, |Tuple2[Int,X]| and |Tuple2[String,X]|, although |Tuple2[Nothing,X]| is a subtype of both, there is no runtime value of type |Tuple2[Nothing,X]| (since |Nothing| is uninhabited), and, as a result, those two types are disjoint.
 Our disjointness algorithm implements this kind of reasoning to conclude disjointness in the presence of covariant type parameters.
+\begin{diff}
 There is no such reasoning available for contravariant types: our algorithm can never conclude that |G[X]| and |G[Y]| are disjoint for a contravariant type |G|.
+\end{diff}
 
 \subsection{Match Type Variance}
 
+\begin{diff}
 In \Cref{subsec:disjointness-of-variant-types} we discussed how our match type reduction algorithm handles variance annotations of higher-kinded types.
 In this section, we discuss the orthogonal problem of supporting variance annotations on match type definitions.
 
@@ -575,6 +584,7 @@ In practice, it would be hard to show that |E1|, |E2|, and |E3| are co-/contrava
 
 At the time of writing, our implementation does not support variance annotations on match types (all match types are invariant).
 However, it would be conceivable to lift this restriction in the future, as shown by the analysis presented in this section.
+\end{diff}
 
 \subsection{Pattern Matching Exhaustivity}
 \label{subsec:pattern-matching-exhaustivity}
@@ -587,6 +597,7 @@ Non-exhaustive patterns are compiled with an additional "catch-all" case which t
 \subsection{Types at Runtime}
 \label{subsec:types-at-runtime}
 
+\begin{diff}
 Scala's primary platform is the Java virtual machine (JVM).
 On the JVM, Scala is compiled using \emph{partial erasures}~\citep{schinz2005compiling}, a process which preserves some types by translating them to the JVM's type systems, and removes other types by erasing them to |Object|, the JVM's top type.
 Scala's type erasure directly affects pattern matching because it prevents certain patterns from being checked at runtime.
@@ -597,13 +608,16 @@ Erasure hence creates an expressivity gap between pattern matching at the term a
 
 In practice, the Scala compiler handles this limitation by emitting warnings for unchecked patterns.
 For example, while |case xs: List[Int] =>| is a syntactically valid pattern, it compiles with a warning that the |Int| type parameter is eliminated by erasure and cannot be checked at runtime.
+\end{diff}
 
 This restriction is reflected in our formalism by the difference between the evaluation rules for match expressions and the reduction rules for match types: evaluation is limited to inheritance checks on statically defined classes ($\(\C, \C_n) \∈ \Ψ$ in \EMatch2/3), as opposed to the match type reduction rules which are defined using the subtyping and type disjointness relations ($\Γ \⊢ \T_s \<: \S_n$ and $\Γ \⊢ \disj(\T_s, \S_m)$ in \SMatch1/2/3/4).
 
 In \SystemFmB (\Cref{subsec:type-binding-extension}), match expressions support two sorts of parametric patterns: they can be either instantiated (\!\!$\match \{ \xs \: \List~\Int \}$, where $\Int \∈ \A$), or use a binding pattern variable (\!\!$\match \[\X] \{ \xs \: \List~\X \}$, where $\X$ is a pattern variable).
 In this sense, \SystemFmB is \emph{more expressive} than Scala, where instantiated patterns are not available at the term level due to type erasure.
 
+\begin{diff}
 In a language with full type erasure, match types would have no term-level counterparts and the \TMatch rule would thus be pointless.
+\end{diff}
 
 \subsection{Non-Termination}
 \label{subsec:non-termination}
@@ -625,6 +639,7 @@ Pattern matching in Scala supports many sorts of patterns~\citep{emir2007matchin
 Furthermore, typing match expressions as match types is not enabled by default in order to preserve backward compatibility.
 Instead, explicit type annotations must be provided.
 
+\begin{diff}
 For example, consider the following function definition:
 
 \begin{minipage}{\linewidth}
@@ -647,6 +662,7 @@ def foo[X](x: X): Foo[X] = x match
   case x: Int => x.toString
   case x: String => x.toInt
 \end{lstlisting}
+\end{diff}
 
 \subsection{Caching}
 \label{subsec:caching}

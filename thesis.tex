@@ -235,7 +235,9 @@ Let us consider the implementation of the remove operation in more detail:
 \noindent
 The |Remove| trait takes 3 type parameters: 2 inputs, |V| (the element to remove) and |Ps| (the list), and one output, |Out| (the list, with the element removed).
 The two implicit definitions, |casehead| and |casetail|, correspond to the base case and the recursive case of the list removal operation, respectively.
+\begin{diff}
 The right-hand side of those definitions is devoid of meaning, instances of the |Remove| trait merely act as placeholders (the type parameters of those constructor calls are inferred from their expected type).
+\end{diff}
 The |Remove| trait is intended to be used as an implicit parameter, with constrained input types, and an unconstrained output type.
 
 When the given element is not part of the list, implicit resolution fails with an "implicit not found" error, which indicates the incorrect use of |Remove|.

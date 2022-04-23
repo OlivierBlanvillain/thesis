@@ -117,7 +117,7 @@ Without disjointness, |Elem[Seq[Int]]| would reduce to |Seq[Int]| (via |Elem|'s 
 \Cref{subsub:subtyping-and-disjointness} revisits this counterexample in a formal setting. \Cref{subsec:disjointness-in-scala} discusses our implementation of disjointness in the Scala compiler.
 
 \subsection{Comparison to Generalized Singleton Types}
-
+\begin{diff}
 In \Cref{chap:generalizing-singleton-types}, we presented a generalization of singleton types for type-level programing.
 Generalized singletons and match types share some similarities, such as the notion of disjointness, which plays an important role in both features.
 The two features relate on a deeper level: we can explain match types in terms of generalized singletons.
@@ -131,6 +131,7 @@ type Elem[X] = { (_: X) match
 \end{lstlisting}
 %
 This definition makes the term/type correspondence evident: the |Elem[X]| type reduces analogously to the corresponding match expression.
+\end{diff}
 
 \FMSyntaxEvaluation{\SystemFm syntax and evaluation rules for a given set of classes $\C$ with class inheritance $\Ψ$. The $\Ψ$ relation is a partial order on $\C$ that describes the inheritance between classes. \hl{\text{Highlights}} correspond to additions to \SystemFsub, as per \citep[Figure 26-1]{pierce2002types}.}
 
@@ -534,9 +535,9 @@ However, in the case of covariant parameters, an exception can be made when the 
 
 Scala tuples, for example, fall into this category.
 |Tuple2|, the class for pairs, is defined as follows: |case class Tuple2[+T1, +T2](_1: T1, _2: T2)|.
+\begin{diff}
 Given two instantiations of this this type, |Tuple2[Int,X]| and |Tuple2[String,X]|, although |Tuple2[Nothing,X]| is a subtype of both, there is no runtime value of type |Tuple2[Nothing,X]| (since |Nothing| is uninhabited), and, as a result, those two types are disjoint.
 Our disjointness algorithm implements this kind of reasoning to conclude disjointness in the presence of covariant type parameters.
-\begin{diff}
 There is no such reasoning available for contravariant types: our algorithm can never conclude that |G[X]| and |G[Y]| are disjoint for a contravariant type |G|.
 \end{diff}
 

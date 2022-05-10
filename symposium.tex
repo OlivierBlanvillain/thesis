@@ -1,18 +1,14 @@
 \def\paper{\thesisOnly{chapter}\paperOnly{paper}}
 \section{Introduction}
 
-\begin{diff}
 Capturing groups allow programmers to extract substrings matched by parts of a regular expression.
 For example, the regex |"A(B)?"| matches both |"A"| and |"AB"|.
 In the first case, the capturing group is empty, and in the second case, the capturing group contains |"B"|.
-\end{diff}
 
 The Scala standard library contains a package to manipulate regular expressions.
 This package is based on Java's implementation, and thus benefits from the high performance of the JVM's regex engine.
-\begin{diff}
 The Scala implementation innovates in its presentation: it improves upon Java's solution by providing an ergonomic API based on pattern matching that is both elegant and concise.
 The package's documentation starts with the following example:
-\end{diff}
 
 \regexDocumentation
 
@@ -28,14 +24,12 @@ In this \paper, we propose a new design for Scala's regular expression library w
 Our design makes extensive use of match types\paperOnly{~\citep{blanvillain2022type}, Scala~3's new feature for type-level programming,} to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
 
-\begin{diff}
 This \paper is structured as follows.
 In \Cref{sec:background}, we give an introduction to match types and generic tuples, two recent additions to Scala's type system which we rely on in our implementation.
 In \Cref{sec:architecture},~\ref{sec:type-level} and~\ref{sec:term-level}, we present our library for type-safe regular expressions.
 In \Cref{sec:evaluation}, we evaluate the performance of our implementation in terms of compilation times and execution times.
 In \Cref{sec:related}, we discuss related work.
 We conclude the \paper in \Cref{sec:conclusion}.
-\end{diff}
 
 \thesisOnly{
 The source code of our implementation is available online\footnote{\texttt{https://github.com/OlivierBlanvillain/regsafe}} under the MIT licence.
@@ -44,7 +38,6 @@ The source code of our implementation is available online\footnote{\texttt{https
 The source code of our implementation is available online\footnote{This URL is hidden for the purpose of the double-blind review process.} under the MIT licence.
 }
 
-\begin{diff}
 \section{Background}
 \label{sec:background}
 
@@ -97,14 +90,11 @@ For example, the following match type reverses the order of a tuple's elements:
 \tupleReverseA
 \vspace{-3pt}
 \tupleReverseB
-\end{diff}
 
 \section{Architecture}
 \label{sec:architecture}
 
-\begin{diff}
 We present our library for type-safe regular expressions in terms of 3 components:
-\end{diff}
 
 \begin{enumerate}
   \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute tuple representation of the expression's capturing groups.
@@ -359,6 +349,7 @@ Stephanie Weirich presented on several occasions a regular expression library as
 The library provides safety guarantees similar to ours, but from the slightly different angle of named-capturing groups.
 \begin{diff}
 An important conceptual difference between the two approaches is that ours only focuses on type checking (we rely on Java's regular expressions at run-time), whereas hers also includes a fully-fledged regular expression engine.
+\end{diff}
 
 The typed-regex~\citep{akshay2021typed} Typescript library provides a type-safe API for extracting named capturing groups of regular expressions.
 The implementation uses conditional types \citep{microsoft2020typescript}, Typescript's type-level ternary operator, to statically analyze regular expressions.
@@ -368,7 +359,6 @@ At the time of writing, the library is still in the early stages of development 
 The safe-regex~\citep{leonhard2021safe} Rust library takes a different approach towards the same goal: it uses Rust macros to statically compile regular expressions and generate arity-specific extractors.
 Performance-wise, macros improve over the status quo since they remove the need to compile regular expressions at runtime.
 Safety-wise, code generation provides a straightforward solution to safe capturing group extraction.
-\end{diff}
 
 \section{Conclusion}
 \label{sec:conclusion}

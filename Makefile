@@ -41,7 +41,7 @@ watch: FORCE
 	git ls-files | entr make
 
 watchs: FORCE
-	git ls-files | entr make slides.pdf
+	git ls-files | entr make sigplan.pdf
 
 publish: FORCE
 	make

@@ -1,4 +1,5 @@
-\def\paper{\thesisOnly{chapter}\paperOnly{paper}}
+\def\paper{\thesisOnly{chapter}\paperOnly{paper}\xspace}
+
 \section{Introduction}
 
 Capturing groups allow programmers to extract substrings matched by parts of a regular expression.
@@ -24,12 +25,12 @@ In this \paper, we propose a new design for Scala's regular expression library w
 Our design makes extensive use of match types\paperOnly{~\citep{blanvillain2022type}, Scala~3's new feature for type-level programming,} to statically analyze regular expressions during type checking.
 We build our interface to mimic Scala's original regular expression API so that Scala programmers can use it as a drop-in replacement and enjoy the additional safety with minimal migration costs.
 
-This \paper is structured as follows.
+This \begin{diff}\paper is\end{diff} structured as follows.
 In \Cref{sec:background}, we give an introduction to match types and generic tuples, two recent additions to Scala's type system which we rely on in our implementation.
 In \Cref{sec:architecture},~\ref{sec:type-level} and~\ref{sec:term-level}, we present our library for type-safe regular expressions.
 In \Cref{sec:evaluation}, we evaluate the performance of our implementation in terms of compilation times and execution times.
 In \Cref{sec:related}, we discuss related work.
-We conclude the \paper in \Cref{sec:conclusion}.
+We conclude the \begin{diff}\paper in\end{diff} \Cref{sec:conclusion}.
 
 \thesisOnly{
 The source code of our implementation is available online\footnote{\texttt{https://github.com/OlivierBlanvillain/regsafe}} under the MIT licence.
@@ -100,7 +101,7 @@ We present our library for type-safe regular expressions in terms of 3 component
   \item The type-level capturing group analysis, which uses match types to inspect the user-provided regular expression and compute tuple representation of the expression's capturing groups.
   This component takes the form of a parametric type called |Compile|, which we present in \Cref{sec:type-level}.
 
-  \item The runtime capturing group processing component, which extracts and sanitizes the output of the regex engine, in accordance with the previously computed type-level representation.
+  \item The runtime capturing group processing component, which extracts and sanitizes the output of the \begin{diff}JVM's\end{diff} regex engine, in accordance with the previously computed type-level representation.
   This component takes the form of a function called |transform|, which we present in \Cref{sec:term-level}.
 
   \item The user interface, which ties everything together to compile, execute, and extract the results of a regular expression, while providing a type-safe and null-safe experience.
@@ -113,6 +114,7 @@ We begin our presentation with the user interface, which takes the form of a rel
 The |apply| method is the entry point of our library.
 It takes a regular expression and returns an instance of |Regex|.
 Instead of directly accepting a |String| argument, that method takes a type parameter, |R|, which will be inferred by the compiler, and allows us to get our hands on a type-level instance of the regular expression's string (the |Singleton| bound is necessary to guide Scala's type inference).
+% TODO: could you explain in more detail why "the Singleton bound is necessary to guide Scala’s type inference"?
 We use that type-level string to instantiate the |Compile| type, which is our type-level analysis component.
 
 The implementation of the |Regex| class is straightforward.
@@ -122,6 +124,7 @@ These operations happen within the |unapply| method, which is the way to define 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of |unapply|, which determines the nature of pattern matching extraction performed by that method.
 In our implementation, we instantiate the type |P| to a tuple and use that type in the result type of |unapply| to tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity.
 Furthermore, the type of those groups corresponds to the type of the tuple elements.
+% TODO L196: "Furthermore, the type of those groups corresponds to the type of the tuple elements." This part is a bit hard to understand at a first reading, because only later on L236, the reader learns that matched values can only be of type String or Option String, and there's a singular/plural mismatch ("the type" is singular but applies to each of "those groups"). It might help to rephrase this sentence and already mention "String or Option String".
 This allows us to enrich the results of Java's regex engine by wrapping nullable values into options.
 Our implementation performs this wrapping via the |transform| method, which is our runtime processing component.
 As a result, our implementation never returns null values and removes the null-checking burden from the user.
@@ -169,9 +172,15 @@ Attentive readers might have noticed that our handling of backslash, regex's esc
 Indeed, the |Loop| type terminates when |Lo = Hi|, but increases |Lo| by 2 to skip over escaped characters.
 
 Rest assured, this is not an oversight!
-Regular expressions with trailing backslashes are invalid and result in runtime crashes (reported as an "unexpected internal error").
-Even though detecting these types of errors at compile time is out of the scope of our library, doing so is still desirable.
+Regular expressions with trailing backslashes are invalid and result in runtime crashes (reported as an "unexpected internal error", on the JVM).
+\begin{diff}
+Even though systematic detecting of invalid regular expressions is out of the scope of our library, doing so when possible is still desirable.
+\end{diff}
 If we invoke |Compile| on a regular expression with a trailing backslash, the compiler will run into a call to |charAt| with an out of bounds argument, catch the corresponding exception and report it as a compilation error, which is certainly better reporting that same error at run-time.
+\begin{diff}
+At the time of writing, the Scala~3 compiler does not support the customization of match type errors.
+% TODO
+\end{diff}
 
 \subsection{Non-Capturing Groups}
 \label{subsec:non-capturing-groups}
@@ -233,6 +242,10 @@ This concludes the development of our nullability analysis and completes our pre
 Despite the scarcity of Scala's standard library at the type level, we managed to achieve our ends while keeping our implementation relatively concise and, hopefully, understandable.
 In its final iteration, our capturing group analysis is, to the best of our knowledge, on par with Java's implementation of regular expression.
 
+
+% TODO: How understandable are the compiler's error messages if the programmer makes a regex-related mistake? In particular, what's the error message if the programmer provides an incorrect number of arguments to an extractor? What's the error message in case of unbalanced parentheses in the regex? What about other forms of invalid regexes? Could you list the kinds of regex-library-related error messages to be expected?
+
+
 \section{Term-Level}
 \label{sec:term-level}
 
@@ -273,7 +286,7 @@ In \Cref{subsec:a-lightweight-form-of-dependent-typing}, we show an example of t
 }%
 In our case, this mechanism should allow us to get rid of the unsafe cast but does not address the problem of code duplication.
 In practice, at the time of writing, this solution does not play well with predefined types from the standard library: the compiler lacks the knowledge necessary to correlate predefined types with their term-level counterpart.
-For instance, the compiler does not recognize |CharAt["hello", 0]| as a valid type for the |"hello".charAt(0)|.
+For instance, the compiler does not recognize |CharAt["hello", 0]| as a valid type for the |"hello".charAt(0)| \begin{diff}expression\end{diff}.
 
 In the long run, it would be interesting to investigate extending Scala with a "precise" mode of type inference, that would automatically infer match types and singleton types, whenever possible.
 \thesisOnly{
@@ -346,8 +359,8 @@ The regex-applicative package stands on the safe side of that spectrum: it allow
 The main drawback of this solution lies in the library's learning curve: programmers already familiar with POSIX regular expressions~\citep{ieee2018the} are forced to learn a new syntax, which is arguably more complicated.
 
 Stephanie Weirich presented on several occasions a regular expression library as an example of a dependently-typed program written in Haskell \citep{weirich2014examples}.
-The library provides safety guarantees similar to ours, but from the slightly different angle of named-capturing groups.
-An important conceptual difference between the two approaches is that ours only focuses on type checking (we rely on Java's regular expressions at run-time), whereas hers also includes a fully-fledged regular expression engine.
+The library provides safety guarantees similar to ours, but from the slightly different \begin{diff}angle of named-capturing groups.
+An important conceptual\end{diff} difference between the two approaches is that ours only focuses on type checking (we rely on Java's regular expressions at run-time), whereas hers also includes a fully-fledged regular expression engine.
 
 The typed-regex~\citep{akshay2021typed} Typescript library provides a type-safe API for extracting named capturing groups of regular expressions.
 The implementation uses conditional types \citep{microsoft2020typescript}, Typescript's type-level ternary operator, to statically analyze regular expressions.
@@ -357,6 +370,9 @@ At the time of writing, the library is still in the early stages of development 
 The safe-regex~\citep{leonhard2021safe} Rust library takes a different approach towards the same goal: it uses Rust macros to statically compile regular expressions and generate arity-specific extractors.
 Performance-wise, macros improve over the status quo since they remove the need to compile regular expressions at runtime.
 Safety-wise, code generation provides a straightforward solution to safe capturing group extraction.
+
+% Another type-safe regex library that is not discussed in related work is Tyre: https://github.com/Drup/tyre
+% TODO \citep{radanne2020tyre}
 
 \section{Conclusion}
 \label{sec:conclusion}

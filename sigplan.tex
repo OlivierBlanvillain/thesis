@@ -3,6 +3,7 @@
 \usepackage{microtype}
 \usepackage[final]{listings}
 \usepackage[nameinlink]{cleveref}
+\usepackage{xspace}
 \usepackage{subfigure}
 \setmonofont{Ubuntu Mono}
 \lstMakeShortInline{|}
@@ -36,6 +37,9 @@
 \input{figures/symposium-figures.tex}
 \newcommand\thesisOnly[1]{}
 \newcommand\paperOnly[1]{#1}
+
+\usepackage[autostyle=false, style=english]{csquotes}
+\MakeOuterQuote{"}
 
 \definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
 \def\diff{\color{darkblue}}

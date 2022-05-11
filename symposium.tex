@@ -113,8 +113,14 @@ We begin our presentation with the user interface, which takes the form of a rel
 
 The |apply| method is the entry point of our library.
 It takes a regular expression and returns an instance of |Regex|.
-Instead of directly accepting a |String| argument, that method takes a type parameter, |R|, which will be inferred by the compiler, and allows us to get our hands on a type-level instance of the regular expression's string (the |Singleton| bound is necessary to guide Scala's type inference).
-% TODO: could you explain in more detail why "the Singleton bound is necessary to guide Scala’s type inference"?
+Instead of directly accepting a |String| argument, that method takes a type parameter, |R|, which will be inferred by the compiler, and allows us to get our hands on a type-level instance of the regular expression's string\footnote{
+\begin{diff}
+The \texttt{Singleton} bound is a marker that instructs type inference to preserve unions and literal singleton types.
+By default, the compiler widens those types, notably in method applications.
+For instance, given \texttt{1} \texttt{::} \texttt{Nil}, Scala's default type inference yield \texttt{List[Int]} instead of the more precise \texttt{List[1]}.
+To alter this behavior, one could mark \texttt{::}'s type argument with the \texttt{Singleton} bound.
+\end{diff}
+}.
 We use that type-level string to instantiate the |Compile| type, which is our type-level analysis component.
 
 The implementation of the |Regex| class is straightforward.
@@ -222,7 +228,7 @@ For example, in |"(A(B)?)"|, that solution incorrectly labels the first group as
 To overcome this problem, we update our solution to keep track of the number of opening and closing parentheses (|Lvl|), which allows us to differentiate closing parentheses of inner and outer groups%
 \footnote{
 For simplicity, our presentation treats all non-escaped parentheses as capturing group delimiters.
-Our implementation also takes \lstinline!\\Q...\\E! quotations into account and ignores parentheses that appear in character classes.
+Our implementation also takes \texttt{\textbackslash{}Q...\textbackslash{}E} quotations into account and ignores parentheses that appear in character classes.
 }:
 
 \regexIsNullable

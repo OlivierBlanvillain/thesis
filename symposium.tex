@@ -129,10 +129,11 @@ These operations happen within the |unapply| method, which is the way to define 
 
 The main difference between Scala's original |Regex| implementation and ours lies in the signature of |unapply|, which determines the nature of pattern matching extraction performed by that method.
 In our implementation, we instantiate the type |P| to a tuple and use that type in the result type of |unapply| to tell the compiler that a successful matching consists of exactly $n$ capturing groups, where $n$ is the tuple's arity.
-Furthermore, the type of those groups corresponds to the type of the tuple elements.
-% TODO L196: "Furthermore, the type of those groups corresponds to the type of the tuple elements." This part is a bit hard to understand at a first reading, because only later on L236, the reader learns that matched values can only be of type String or Option String, and there's a singular/plural mismatch ("the type" is singular but applies to each of "those groups"). It might help to rephrase this sentence and already mention "String or Option String".
-This allows us to enrich the results of Java's regex engine by wrapping nullable values into options.
-Our implementation performs this wrapping via the |transform| method, which is our runtime processing component.
+\begin{diff}
+The |P| type is composed of |String| and |Option[String]| types, depending on the nullability of the correspond capturing group.
+Our implementation enriches the results of Java's regex engine by wrapping nullable values into options, and packaging the overall result into a tuple of type P.
+We perform this operation in the |transform| method, which is the runtime component of our library.
+\end{diff}
 As a result, our implementation never returns null values and removes the null-checking burden from the user.
 
 For instance, in the following example usage of our library, we use a regular expression with an optional capturing group to extract the integral and fractional parts of a rational number:

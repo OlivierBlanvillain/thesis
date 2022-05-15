@@ -47,7 +47,6 @@ publish: FORCE
 	make
 	cp thesis.pdf docs
 	cp slides.pdf docs
-	cp sigplan.pdf docs
 	rm -rf docs/benchmarks.zip
 	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py)
 	rm -rf docs/sources.zip

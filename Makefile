@@ -1,6 +1,6 @@
 .ONESHELL:
 .PHONY: FORCE
-all: thesis.pdf sigplan.pdf slides.pdf
+all: thesis.pdf sigplan.pdf public.pdf private.pdf
 
 deps := proofs/structure.pdf
 deps += scala/code-sections.tex
@@ -13,10 +13,15 @@ deps += figures/regex-compiletime.eps
 deps += figures/regex-runtime.eps
 deps += figures/symposium-figures.tex
 
-slides.pdf: FORCE $(deps)
-	latexmk -shell-escape -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out slides.tex
-	cp latex.out/slides.pdf slides.pdf
-	echo && ./pplatex -b -i latex.out/slides.log
+public.pdf: FORCE $(deps)
+	latexmk -shell-escape -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out public.tex
+	cp latex.out/public.pdf public.pdf
+	echo && ./pplatex -b -i latex.out/public.log
+
+private.pdf: FORCE $(deps)
+	latexmk -shell-escape -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out private.tex
+	cp latex.out/private.pdf private.pdf
+	echo && ./pplatex -b -i latex.out/private.log
 
 sigplan.pdf: FORCE $(deps)
 	latexmk -xelatex -time -f -interaction=nonstopmode -outdir=latex.out -auxdir=latex.out sigplan.tex
@@ -41,12 +46,13 @@ watch: FORCE
 	git ls-files | entr make
 
 watchs: FORCE
-	git ls-files | entr make sigplan.pdf
+	git ls-files | entr make public.pdf
 
 publish: FORCE
 	make
 	cp thesis.pdf docs
-	cp slides.pdf docs
+	cp private.pdf docs
+	cp public.pdf docs
 	rm -rf docs/benchmarks.zip
 	zip docs/benchmarks.zip -- run-benchmarks.sh $$(git ls-files scala | grep -v .py)
 	rm -rf docs/sources.zip

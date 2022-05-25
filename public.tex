@@ -243,6 +243,23 @@ A way to \emph{customize} the spell checker.
 \begin{center}
 \hspace{20pt}
 \begin{minipage}{0.45\textwidth}%
+\phantom{-- en alexandrin}\\
+Roses are red,\\
+violets are blue,\\
+so are you. \checkmark
+\end{minipage}
+\end{center}
+\end{slide}
+
+\begin{slide}{Type-level programming: poetry example}
+\Large
+What do I mean by Type-Level Programming?
+
+A way to \emph{customize} the spell checker.
+
+\begin{center}
+\hspace{20pt}
+\begin{minipage}{0.45\textwidth}%
 \textcolor{blue}{"En alexandrin"}\\
 Roses are red,\\
 violets are blue,\\
@@ -366,6 +383,8 @@ A regular expression is a simple tool to validate and extract data from text.
 |"25.05.2022"| & |"(\d+).(\d+).(\d+)"| & |"25"| & |"05"| & |"2022"| \\
 \bottomrule
 \end{tabular}
+
+\phantom{\includegraphics[width=0.92\textwidth]{figures/error2.png}}
 \end{center}
 \end{slide}
 
@@ -380,6 +399,24 @@ A regular expression is a simple tool to validate and extract data from text.
 |"25.05.2022"| & |"(\d+).(\d+).(\d+)"| & |"25"| & |"05"| & |"2022"| \\
 \bottomrule
 \end{tabular}
+
+\phantom{\includegraphics[width=0.92\textwidth]{figures/error2.png}}
+\end{center}
+\end{slide}
+
+\begin{slide}{Type-level programming: regular expression example}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+|input| & |pattern| & |out[0]| & |out[1]| & |out[2]| \\
+\midrule
+|"17:00"| & |"(\d+)[.:h](\d+)"| & |"17"| & |"00"|  & \cross \\
+|"25.05.2022"| & |"(\d+).(\d+).(\d+)"| & |"25"| & |"05"| & |"2022"| \\
+\bottomrule
+\end{tabular}
+
+\includegraphics[width=0.92\textwidth]{figures/error2.png}
 \end{center}
 \end{slide}
 
@@ -412,18 +449,11 @@ I also presented a few example to illustate my contribution:
 
 \begin{slide}{Martin}
 \begin{center}
-\includegraphics[width=0.4\textwidth]{figures/martin.jpg}
+\includegraphics[width=0.8\textwidth]{figures/martin.jpg}
 \end{center}
 \end{slide}
 
-\begin{slide}{My thesis committee}
-\includegraphics[width=0.3\textwidth]{figures/martin.jpg}
-\includegraphics[width=0.3\textwidth]{figures/richard-eisenberg.jpg}\\
-\includegraphics[width=0.3\textwidth]{figures/viktor.jpg}
-\includegraphics[width=0.3\textwidth]{figures/paolo.jpg}
-\end{slide}
-
-\begin{slide}{My (extended) lab}
+\begin{slide}{LAMP, LARA \& Scala Center}
 \begin{center}
 \includegraphics[width=\textwidth]{figures/ski-trip.jpg}
 \end{center}
@@ -435,25 +465,19 @@ I also presented a few example to illustate my contribution:
 \end{center}
 \end{slide}
 
-\begin{slide}{Alicia}
-\begin{center}
-\includegraphics[width=0.7\textwidth]{figures/alicia-1.png}
-\end{center}
-\end{slide}
-
-\begin{slide}{Leila}
+\begin{slide}{Alicia \& Leila}
 \begin{center}
 \includegraphics[width=0.7\textwidth]{figures/alicia-2.png}
 \end{center}
 \end{slide}
 
-\begin{slide}{My parents}
+\begin{slide}{Sol, Christian \& Leila}
 \begin{center}
 \includegraphics[width=0.9\textwidth]{figures/parents.jpg}
 \end{center}
 \end{slide}
 
-\begin{slide}{Dragana}
+\begin{slide}{Dragana \& Leila}
 \begin{center}
 \includegraphics[width=0.75\textwidth]{figures/dragana.jpg}
 \end{center}
